@@ -1,63 +1,76 @@
 # Gestão de Materiais — versão 2.0
 
-Contabilidade de custos por clientes e projetos.
+Contabilidade gerencial de custos por clientes e projetos.
 
-Sistema em um único `index.html`: estoque de produtos comprados com NF-e, organizado por **cliente → projeto → produto**, com compras coletivas, saídas e pedidos de orçamento. Os dados ficam no IndexedDB do navegador. Publicado em https://marceloclr.gitlab.io/tcs/.
+Sistema em um único `index.html` para os custos de **materiais** (NF-e, com estoque) e de **serviços** (NFS-e, custo direto), organizados por **cliente → projeto**, com compras e contratações coletivas, saídas de estoque e pedidos de orçamento. Os dados ficam na nuvem (Firebase), com uma cópia no navegador. Publicado em https://marceloclr.gitlab.io/tcs/.
+
+A versão aparece no canto inferior esquerdo, no formato `V-DDMMAAAA-HHMM`. Ela vem do título da página e é atualizada a cada commit.
 
 ## Telas
 | Menu | O que faz |
 |---|---|
-| Visão geral | Clientes, valor em estoque, notas a vincular e uma barra por cliente com a parte de cada projeto. |
-| Clientes | Cadastro de clientes, com o valor pago e o valor em estoque de cada um. |
-| Projetos | Projetos de cada cliente. Cada projeto tem uma cor e uma situação (ativo ou encerrado). |
-| Fornecedores | Busca por fornecedor, com notas e itens (igual à 1.5). |
-| Estoque › Saldo | Grid hierárquica: cliente → projeto → produto. |
-| Estoque › Notas fiscais | Notas a vincular, notas em distribuição e notas vinculadas. |
-| Estoque › Importar notas | XML de NF-e, PDF textual e OCR (igual à 1.5). |
+| Visão geral | Indicadores e gráficos, com filtro por cliente.<br>• Indicadores: custo total, materiais, serviços, valor em estoque, clientes e projetos.<br>• Custo por cliente e por projeto (materiais em estoque, materiais consumidos e serviços).<br>• Composição do custo e linha do tempo de entradas e saídas em R$.<br>• Resumo cliente → projeto. |
+| Clientes | Cadastro de clientes, com materiais, serviços, custo total e valor em estoque de cada um. |
+| Projetos | Projetos de cada cliente, com uma cor, uma situação (ativo ou encerrado) e os mesmos totais. |
+| Fornecedores | Busca por fornecedor ou prestador, com notas e itens. |
+| Estoque › Saldo | Grid hierárquica cliente → projeto → produto. Só materiais. |
+| Estoque › Notas fiscais | Notas a vincular, em distribuição e vinculadas, com filtro Materiais/Serviços. |
+| Estoque › Importar notas | Duas caixas:<br>• **materiais:** XML de NF-e ou PDF do DANFE;<br>• **serviços:** XML de NFS-e, PDF ou digitação. |
 | Solicitar orçamento | Pedido de orçamento, histórico dos pedidos e catálogo de produtos. |
-| Dados e segurança | Backup, restauração e limpeza da base. |
+| Dados e segurança | Nuvem, backup, restauração e limpeza da cópia local. |
 
-## Regras
+## Notas de serviço
+- **Formatos aceitos:**
+  - **XML:** padrão nacional (`infNFSe`, chave de 50 dígitos) e ABRASF das prefeituras (`InfNfse`, v1 e v2).
+  - **PDF:** é lido (texto ou OCR) e preenche o formulário para conferência, porque os layouts mudam de prefeitura para prefeitura.
+  - **Digitação:** prestador, número, data, descrição, valor, desconto incondicionado e retenções.
+- **Tipo:** na conferência, cada nota mostra a escolha **Materiais** ou **Serviços**, já marcada conforme a caixa de origem. A NFS-e é sempre serviço. Uma NF-e pode ser marcada como serviço; nesse caso, não entra no estoque.
+- **Custo:** segue as mesmas regras dos materiais. O total da NFS-e é o valor dos serviços menos o desconto incondicionado. As retenções (ISS retido, IR, INSS, PIS, COFINS e CSLL) e o valor líquido ao prestador ficam registrados como informação.
+- **Vínculo:** a nota de serviço também começa "a vincular".
+  - **Uma nota para um projeto:** o vínculo simples manda a nota inteira para um projeto.
+  - **Contratação coletiva:** divide o valor **em R$** entre projetos, de um ou mais clientes. A soma não passa do total, e os valores fecham no centavo.
+
+## Regras dos materiais
 - **Nota importada.** Fica "a vincular" e não soma em cliente nem em projeto até ser vinculada.
-- **Vínculo simples.** No painel da nota, escolha cliente · projeto e clique em "Vincular". A nota inteira, ou o que restar dela, vai para o projeto.
-- **Compra coletiva.** No mesmo painel, a matriz item × projeto recebe as unidades de cada projeto, que podem ser de clientes diferentes.
-  - A soma por item nunca pode passar da quantidade da nota: o item fica em vermelho e o salvamento é bloqueado.
-  - A barra colorida mostra a parte de cada projeto e a parte livre, que fica hachurada.
-  - A distribuição pode ser salva parcial. O restante continua "a vincular".
-- **Valor pago por item.** É o valor bruto menos o desconto, mais o rateio de frete, seguro, outras despesas e impostos, proporcional ao valor líquido do item. Assim, a soma dos itens fecha com o total da nota (vNF).
-- **Saída.** Fica em Estoque › Saldo, no botão "Registrar saída" da linha do produto. A quantidade é limitada ao saldo do produto naquele projeto.
-- **Integridade.** Desvincular ou redistribuir uma nota fica bloqueado se o projeto ficar com menos entrada do que já consumiu. Projeto com notas não pode ser excluído; use a situação "Encerrado".
+- **Compra coletiva.** A matriz item × projeto recebe as unidades de cada projeto. A soma por item nunca passa da quantidade da nota. A distribuição pode ser salva parcial.
+- **Valor pago por item.** É o valor bruto menos o desconto, mais o rateio de frete, seguro, outras despesas e impostos. A soma dos itens fecha com o total da nota (vNF).
+- **Saída.** Fica em Estoque › Saldo, no botão "Registrar saída", e é limitada ao saldo do produto no projeto.
+- **Integridade.** Desvincular ou redistribuir uma nota fica bloqueado se o projeto ficar com menos entrada do que já consumiu.
 
-## Grid do estoque
-- **Colunas:** quantidade de entrada, quantidade de saída, saldo, valor pago e valor em estoque. O valor em estoque é o saldo × o custo médio pago no projeto.
-- **Abertura:** clientes e projetos carregam abertos; os produtos começam recolhidos. Clique no cliente para recolher ou abrir os projetos, e no projeto para abrir os produtos.
-- **Totais:** a linha "Total do estoque" soma tudo o que está vinculado. A linha "Aguardando vínculo" aparece separada, fora do total.
-- **Exportação:** o CSV segue a mesma hierarquia.
+## Linha do tempo (Visão geral)
+- **Séries:** um gráfico de linhas em R$, com um único eixo:
+  - **Entradas de materiais** e **Serviços contratados**, pela data da nota e só com o que está vinculado;
+  - **Saídas de materiais**, pela data da saída (quantidade × custo médio).
+- **Período:** por mês, ou por dia quando o intervalo é de até 45 dias. Respeita o filtro por cliente.
+- **Leitura:** passar o mouse mostra os valores do período, e "Ver os valores em tabela" abre a tabela.
 
 ## Pedido de orçamento
-- **Fornecedor:** sugerido pelo histórico de notas; o CNPJ é preenchido sozinho.
-- **Itens:** vêm do catálogo (com o último custo pago) ou são digitados, com especificação e quantidade. Os itens digitados podem entrar no catálogo com a origem "Digitado".
-- **Gerar pedido:** grava o pedido como `ORC-AAAA-NNN` e abre a impressão, onde é possível "Salvar como PDF". Também há exportação em CSV, reimpressão e a opção "Usar como modelo".
+- **Fornecedor:** sugerido pelo histórico de notas, com o CNPJ preenchido sozinho.
+- **Itens:** vêm do catálogo (com o último custo pago) ou são digitados.
+- **Gerar pedido:** grava `ORC-AAAA-NNN` e abre a impressão, que também salva em PDF. A marca da Engenharia aparece no topo. Também há CSV, reimpressão e "Usar como modelo".
 
 ## Nuvem
-- Com login Google, os dados são sincronizados com o Firestore do projeto `thiago-17d18`, um documento por registro e em tempo real entre os usuários liberados.
-- Sem login, o sistema funciona só no navegador.
-- Configuração, liberação de e-mails e limitações: [docs/nuvem-firebase.md](docs/nuvem-firebase.md).
-- Regras de acesso: [firestore.rules](firestore.rules).
+- **Acesso:** o sistema abre numa tela de login Google. Só entram os e-mails liberados em [firestore.rules](firestore.rules).
+- **Sincronização:** cada alteração vai para o Firestore do projeto `thiago-17d18` na hora, e as dos outros usuários aparecem ao vivo. O que é feito offline sobe sozinho no próximo login.
+- **Configuração e limitações:** [docs/nuvem-firebase.md](docs/nuvem-firebase.md).
 
 ## Dados
-- **Base.** IndexedDB `estoque_nfe_erp_v1`, versão 3. As stores são `products`, `invoices`, `movements`, `clients`, `projects`, `allocations` e `quotes`.
-- **Migração.** A base da 1.5 é aberta sem perda: as notas existentes ficam "a vincular".
-- **Backup.** O backup JSON usa `schema: 3`. A restauração também aceita backups da 1.5, que não têm clientes, projetos nem pedidos.
+- **Base local:** IndexedDB `estoque_nfe_erp_v1`, versão 3. As stores são `products`, `invoices` (com `tipo`: `material` ou `servico`), `movements`, `clients`, `projects`, `allocations` e `quotes`.
+- **Notas antigas:** as notas sem `tipo` valem como materiais.
+- **Backup:** o backup JSON usa `schema: 3`. A restauração também aceita backups da 1.5.
 
-## Testes feitos (16/10/2026, Edge headless)
-- **Migração.** A base da 1.5 com a NF de exemplo foi aberta na 2.0, e os produtos foram ligados aos itens.
-- **Restauração.** Um backup da 1.5 foi restaurado numa base vazia.
-- **Importação.** Um XML válido foi aceito. Foram rejeitados um XML duplicado, um XML sem NF-e e um PDF inválido.
-- **Vínculo e distribuição.** Uma nota foi vinculada inteira. Uma nota com frete foi distribuída entre dois clientes. A tentativa de passar da quantidade da nota foi bloqueada.
-- **Saída.** Foi registrada uma saída e bloqueada outra acima do saldo. Também foi bloqueado desvincular uma nota de um projeto que já tinha saída.
-- **Conferência dos totais.** O valor pago vinculado (R$ 831,91) é igual à soma das notas. O valor em estoque cai exatamente o valor das saídas.
-- **Orçamento.** Foi gerado um pedido com um item do catálogo e um item digitado. O documento de impressão foi conferido em captura.
-- **Backup.** O backup em `schema 3` contém as sete stores.
+## Testes feitos (16/10/2026, Edge headless, com um Firebase simulado)
+- **Materiais:**
+  - migração da base da 1.5 e restauração de um backup da 1.5;
+  - importação, com notas duplicadas e XML inválido recusados;
+  - vínculo, compra coletiva com bloqueio de excesso e saídas;
+  - totais conferidos: R$ 831,91 pagos = soma das notas;
+  - pedido de orçamento e backup.
+- **Serviços:**
+  - **XML:** NFS-e no padrão nacional (R$ 3.000, com IR) e no ABRASF v2 (R$ 1.250 com desconto de R$ 50 e ISS e INSS retidos), com número, data, prestador, total e líquido conferidos.
+  - **PDF e digitação:** um PDF de NFS-e preencheu todos os campos do formulário; uma nota digitada calculou as retenções; a edição de uma nota da conferência funcionou.
+  - **Gravação:** a NFS-e entra sem criar produto nem movimentação de estoque.
+  - **Divisão em R$:** R$ 1.234,56 + R$ 1.765,44 = R$ 3.000,00. O excesso foi bloqueado, e a divisão igual deu R$ 600 + R$ 600.
+- **Visão geral:** custo total, materiais, serviços, estoque e cada mês da linha do tempo conferidos com valores calculados à mão.
 
-O OCR de PDF digitalizado não foi testado nesta versão, e o código dele não mudou desde a 1.5.
+Não foram testados o OCR de PDF digitalizado nem PDFs reais de NFS-e de cada prefeitura. A leitura de PDF é aproximada e sempre passa pelo formulário.

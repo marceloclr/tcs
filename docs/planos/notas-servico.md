@@ -30,3 +30,5 @@ Pedido de 16/10/2026: incluir notas específicas para a contratação de serviç
 3. **S3 — Notas fiscais:** tipo de cada nota, filtro Materiais/Serviços, e distribuição de serviços em R$ (matriz e vínculo simples).
 4. **S4 — Visão geral, Clientes e Projetos:** custo total, materiais e serviços por cliente e projeto, gráficos e resumo. Também entra o slogan novo.
 5. **S5 — LEIA-ME e teste completo.**
+
+Pedido acrescentado durante o S4: linha do tempo na visão geral, com as entradas e as saídas em valor (gráfico de linhas). Entrou no S4.
