@@ -37,6 +37,12 @@ Sistema em um único `index.html`: estoque de produtos comprados com NF-e, organ
 - **Itens:** vêm do catálogo (com o último custo pago) ou são digitados, com especificação e quantidade. Os itens digitados podem entrar no catálogo com a origem "Digitado".
 - **Gerar pedido:** grava o pedido como `ORC-AAAA-NNN` e abre a impressão, onde é possível "Salvar como PDF". Também há exportação em CSV, reimpressão e a opção "Usar como modelo".
 
+## Nuvem
+- Com login Google, os dados são sincronizados com o Firestore do projeto `thiago-17d18`, um documento por registro e em tempo real entre os usuários liberados.
+- Sem login, o sistema funciona só no navegador.
+- Configuração, liberação de e-mails e limitações: [docs/nuvem-firebase.md](docs/nuvem-firebase.md).
+- Regras de acesso: [firestore.rules](firestore.rules).
+
 ## Dados
 - **Base.** IndexedDB `estoque_nfe_erp_v1`, versão 3. As stores são `products`, `invoices`, `movements`, `clients`, `projects`, `allocations` e `quotes`.
 - **Migração.** A base da 1.5 é aberta sem perda: as notas existentes ficam "a vincular".

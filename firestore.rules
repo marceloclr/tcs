@@ -1,0 +1,20 @@
+rules_version = '2';
+// Regras do Firestore do TCS (projeto thiago-17d18).
+// Publicar em: console do Firebase › Firestore Database › Regras › colar › Publicar.
+// Para liberar uma pessoa, acrescente o e-mail dela na lista e publique de novo.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function liberado() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+             'marceloclr2@gmail.com'
+           ];
+    }
+    match /{colecao}/{id} {
+      allow read, write: if liberado()
+        && colecao in ['products', 'invoices', 'movements', 'clients',
+                       'projects', 'allocations', 'quotes'];
+    }
+  }
+}
