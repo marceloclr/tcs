@@ -1,4 +1,4 @@
-Bibliotecas locais opcionais do Estoque NF-e v1.5
+Bibliotecas locais opcionais do Gestão de Materiais
 
 A aplicação procura primeiro as bibliotecas nestes caminhos e recorre à CDN se não estiverem instaladas:
 

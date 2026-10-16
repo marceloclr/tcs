@@ -1,4 +1,6 @@
-# Estoque NF-e — versão 2.0
+# Gestão de Materiais — versão 2.0
+
+Contabilidade de custos por clientes e projetos.
 
 Sistema em um único `index.html`: estoque de produtos comprados com NF-e, organizado por **cliente → projeto → produto**, com compras coletivas, saídas e pedidos de orçamento. Os dados ficam no IndexedDB do navegador. Publicado em https://marceloclr.gitlab.io/tcs/.
 
