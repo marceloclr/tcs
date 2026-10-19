@@ -173,6 +173,15 @@ test('administração: auditoria obrigatória e último administrador protegido'
   await assertFails(deleteDoc(doc(db, 'usuarios/' + ADM)));
   await assertFails(setDoc(doc(ctx(ESC), 'auditoria/y'), { por: ESC }));
 });
+test('pedidos de orçamento: consulta por cliente e pedido sem projeto', async () => {
+  await env.withSecurityRulesDisabled(async c => { const db = c.firestore();
+    await setDoc(doc(db, 'quotes/q1'), { projectId: 'A1', clientId: 'A', criadoPor: ADM });
+    await setDoc(doc(db, 'quotes/q2'), { projectId: '', clientId: '', criadoPor: ADM }); });
+  await assertSucceeds(getDocs(query(collection(ctx(CLI), 'quotes'), where('clientId', 'in', ['A']))));
+  await assertSucceeds(getDocs(query(collection(ctx(ESC), 'quotes'), where('projectId', 'in', ['A1']))));
+  await assertFails(getDoc(doc(ctx(ESC), 'quotes/q2')));
+  await assertFails(getDocs(query(collection(ctx(LEI), 'quotes'), where('clientId', 'in', ['A']))));
+});
 test('validade vencida corta o acesso', async () => {
   await env.withSecurityRulesDisabled(c => updateDoc(doc(c.firestore(), 'usuarios/' + LEI), { 'acessos.p:A1': { n: 'L', ate: new Date(Date.now() - 1000) } }));
   await assertFails(getDoc(doc(ctx(LEI), 'allocations/a1')));

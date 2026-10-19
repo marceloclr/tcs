@@ -144,14 +144,15 @@ service cloud.firestore {
       allow delete: if admin() || (resource.data.type == 'SAIDA' && grava(resource.data.projectId, resource.data.clientId));
     }
     match /quotes/{id} {
+      // Pedido sem projeto (projectId e clientId vazios) só é visto por administradores e por quem o criou: le('', '') é falso.
       allow read: if admin() || (escritorio() && resource.data.get('criadoPor', '') == eu())
-        || (resource.data.get('projectId', '') != '' && le(resource.data.projectId, resource.data.clientId));
+        || le(resource.data.get('projectId', ''), resource.data.get('clientId', ''));
       allow create: if escritorio() && request.resource.data.criadoPor == eu()
         && (request.resource.data.get('projectId', '') == ''
             || (grava(request.resource.data.projectId, request.resource.data.clientId)
                 && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId)));
       allow update, delete: if admin() || (escritorio() && resource.data.get('criadoPor', '') == eu())
-        || (resource.data.get('projectId', '') != '' && grava(resource.data.projectId, resource.data.clientId));
+        || grava(resource.data.get('projectId', ''), resource.data.get('clientId', ''));
     }
     // Notas completas: administradores; quem tem escrita, enquanto a nota está aberta; e quem tem acesso a todos os projetos dela.
     match /invoices/{id} {

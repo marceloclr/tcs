@@ -9,7 +9,7 @@ await espera(()=>Fila.itens.size>=2);
 // envelhece uma captura (sem chave) para 3 dias atrás, direto no emulador
 const semChave=[...Fila.itens.values()].find(c=>!c.chave),comChave=[...Fila.itens.values()].find(c=>c.chave);
 await fetch(`http://127.0.0.1:8089/v1/projects/demo-tcs/databases/(default)/documents/capturas/${semChave.id}?updateMask.fieldPaths=enviadoEm`,{method:'PATCH',headers:{Authorization:'Bearer owner','Content-Type':'application/json'},body:JSON.stringify({fields:{enviadoEm:{stringValue:new Date(Date.now()-72*36e5).toISOString()}}})});
-await espera(()=>filaContagem().atrasadas>=1);go('dashboard');r.cartao=$('#cardObra').innerText.replace(/\s+/g,' ');r.submenu=[...document.querySelectorAll('[data-view-sub="recebidas"]')].map(b=>b.innerText.replace(/\s+/g,' '))[0];
+await espera(()=>filaContagem().atrasadas>=1);go('dashboard');r.cartao=filaContagem();r.submenu=[...document.querySelectorAll('[data-view-sub="recebidas"]')].map(b=>b.innerText.replace(/\s+/g,' '))[0];
 go('recebidas');r.fila=[...document.querySelectorAll('#filaBody tbody tr')].map(tr=>tr.className+' | '+[...tr.cells].slice(1,7).map(c=>c.innerText.replace(/\s+/g,' ')).join(' | '));
 // conferir a captura com chave
 await filaConferir(comChave.id);await espera(()=>draft.some(d=>d._captura===comChave.id),90000);const d=draft.find(x=>x._captura===comChave.id);
