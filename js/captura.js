@@ -1,6 +1,6 @@
 // ==== #JS-CAPTURA: START ====
 // Tela "Notas da obra" (captura.html), para o papel Obra (e administradores, para teste).
-// Fluxo: Fotografar nota → Qual obra? → Enviar. A foto é comprimida no celular (JPEG, lado maior 1800 px, qualidade 0,8),
+// Fluxo: Fotografar nota → Qual obra? → Enviar. A foto é comprimida no celular (JPEG, lado maior 2400 px, qualidade 0,85),
 // o código de barras ou o QR é lido em silêncio, e a nota vai para a fila "capturas" do escritório.
 // Sem internet, a nota fica guardada neste celular (IndexedDB 'tcs-captura') e é enviada sozinha quando a conexão voltar.
 const Cap={user:null,perfil:null,projetos:[],fotos:[],obra:'',faltou:false,avariado:false,ocupado:false,unsubs:[],enviando:false};
@@ -23,13 +23,13 @@ function comprimir(canvas,max=1800,q=0.8){const k=Math.min(1,max/Math.max(canvas
  return new Promise(res=>c.toBlob(b=>res({blob:b,largura:c.width,altura:c.height}),'image/jpeg',q))}
 const comPrazo=(p,ms,padrao)=>Promise.race([p,new Promise(r=>setTimeout(()=>r(padrao),ms))]);
 async function fotoPreparar(file,origem){const img=await imagemCarregar(file,3000);const q=fotoQualidade(img.canvas);
- const cod=codigosResumo(await comPrazo(codigosLer(img.canvas),8000,[]));let jpg=await comprimir(img.canvas,1800,0.8);if(jpg.blob.size>1100000)jpg=await comprimir(img.canvas,1600,0.7);URL.revokeObjectURL(img.url);
- return {id:uid(),blob:jpg.blob,largura:jpg.largura,altura:jpg.altura,url:URL.createObjectURL(jpg.blob),escura:q.escura,borrada:q.borrada,aceita:!(q.escura||q.borrada),chave:cod.chave||'',consultaUrl:cod.url||'',origem}}
+ const cod=codigosResumo(await comPrazo(codigosLer(img.canvas),8000,[]));let jpg=await comprimir(img.canvas,2400,0.85);if(jpg.blob.size>1600000)jpg=await comprimir(img.canvas,2000,0.8);URL.revokeObjectURL(img.url);
+ return {id:uid(),blob:jpg.blob,largura:jpg.largura,altura:jpg.altura,url:URL.createObjectURL(jpg.blob),escura:q.escura,borrada:q.borrada,pequena:q.pequena,aceita:!(q.escura||q.borrada||q.pequena),chave:cod.chave||'',consultaUrl:cod.url||'',origem}}
 async function fotosReceber(files,origem){if(!files.length)return;Cap.ocupado=true;mostrar('telaCarregando');$('#telaCarregando p').textContent=files.length>1?'Preparando as fotos…':'Preparando a foto…';
  for(const f of files){try{Cap.fotos.push(await fotoPreparar(f,origem))}catch(e){alert(e.message||'Não deu para abrir esta foto. Tente de novo.')}}
  Cap.ocupado=false;if(!Cap.fotos.length){mostrar('telaFoto');return}if(Cap.projetos.length===1)Cap.obra=Cap.projetos[0].id;conferirRender();mostrar('telaConferir')}
 function conferirRender(){$('#fotos').innerHTML=Cap.fotos.map((f,i)=>`<div><div class="foto"><img src="${f.url}" alt="Foto ${i+1} da nota"><div class="moldura"></div><button class="botao secundario tirar" data-tirar="${i}" title="Apaga esta foto">Apagar</button></div>
-  ${f.aceita?'':`<div class="alerta-foto">${f.escura?'A foto ficou escura.':'A foto ficou tremida.'}<div class="botoes"><label class="botao principal" title="Abre a câmera para fotografar de novo">Tirar de novo<input type="file" accept="image/*" capture="environment" data-refazer="${i}" hidden></label><button class="botao secundario" data-usar="${i}" title="Envia esta foto mesmo assim">Usar assim mesmo</button></div></div>`}</div>`).join('');
+  ${f.aceita?'':`<div class="alerta-foto">${f.pequena?'A foto veio pequena (do WhatsApp?) e o escritório não vai conseguir ler. Fotografe a nota aqui pelo Notas TCS.':f.escura?'A foto ficou escura.':'A foto ficou tremida.'}<div class="botoes"><label class="botao principal" title="Abre a câmera para fotografar de novo">Tirar de novo<input type="file" accept="image/*" capture="environment" data-refazer="${i}" hidden></label><button class="botao secundario" data-usar="${i}" title="Envia esta foto mesmo assim">Usar assim mesmo</button></div></div>`}</div>`).join('');
  $('#obras').innerHTML=Cap.projetos.length?Cap.projetos.map(p=>`<button class="botao obra" data-obra="${esc(p.id)}" aria-pressed="${Cap.obra===p.id}" title="Escolhe esta obra">${esc(p.name)}</button>`).join(''):'<p class="erro">Nenhuma obra liberada para você. Fale com o escritório.</p>';
  $('#faltou').setAttribute('aria-pressed',Cap.faltou);$('#avariado').setAttribute('aria-pressed',Cap.avariado);
  $('#enviar').disabled=!Cap.obra||!Cap.fotos.length||Cap.fotos.some(f=>!f.aceita)}

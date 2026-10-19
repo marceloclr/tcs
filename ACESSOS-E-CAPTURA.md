@@ -66,7 +66,8 @@ A aba **Usuários e acessos** aparece só para administradores.
 > - **Faltou material** ou **veio quebrado:** antes de enviar, toque em **Faltou material** ou **Veio avariado**.
 > - **Foto escura ou tremida:** o celular avisa. Toque em **Tirar de novo**.
 > - **Sem internet:** pode enviar assim mesmo. A nota fica guardada no celular e vai sozinha quando a internet voltar. Aparece a faixa amarela **"Aguardando internet para enviar"**.
-> - **Recebeu a foto pelo WhatsApp:** abra a foto, toque em **Compartilhar** e escolha **Notas TCS**.
+> - **O melhor é sempre fotografar pelo Notas TCS.** O WhatsApp diminui a foto e o escritório não consegue ler.
+> - **Recebeu a foto pelo WhatsApp:** peça para mandarem **como documento** ou em **HD**. Depois abra a foto, toque em **Compartilhar** e escolha **Notas TCS**. Se o celular avisar "foto pequena", fotografe a nota de novo pelo Notas TCS.
 >
 > Dúvida? Ligue para o escritório.
 
@@ -127,6 +128,7 @@ No painel **A partir do link de consulta**, em Importar notas, ou pelo botão **
 
 ## 10. Riscos que continuam
 
+- **Fotos do WhatsApp:** o WhatsApp reduz a foto para cerca de 720 × 1280; numa folha A4 inteira a leitura automática não funciona (teste de 19/10 com a NF 20.643: confiança de 44%, sem chave). O sistema avisa no celular e na conferência; o caminho é fotografar pelo Notas TCS (2400 px) ou enviar como documento.
 - **Fotos reais:** os testes usaram imagens geradas pelo sistema. Fotos amassadas, com sombra ou de impressora térmica gasta vão ter leitura pior; os selos de confiança orientam a conferência.
 - **Celular real:** instalação do atalho, câmera e menu Compartilhar não foram testados num Android de verdade (o compartilhamento foi simulado com a mesma requisição).
 - **Leitor da consulta da SEFAZ-CE:** escrito sobre o padrão da SVRS; precisa ser confirmado com uma consulta real copiada inteira.

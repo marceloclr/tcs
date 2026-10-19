@@ -21,7 +21,7 @@ function ocrPreparar(src,alvo=2400){const lado=Math.max(src.width,src.height);co
 // Qualidade da foto: brilho médio (0–255) e nitidez pela variância do Laplaciano numa cópia de 500 px.
 function fotoQualidade(src){const k=Math.min(1,500/Math.max(src.width,src.height));const w=Math.max(3,Math.round(src.width*k)),h=Math.max(3,Math.round(src.height*k));const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(src,0,0,w,h);const d=x.getImageData(0,0,w,h).data;const g=new Float32Array(w*h);let soma=0;for(let i=0;i<w*h;i++){g[i]=(d[i*4]*299+d[i*4+1]*587+d[i*4+2]*114)/1000;soma+=g[i]}
  let m=0,m2=0,q=0;for(let y=1;y<h-1;y++)for(let xx=1;xx<w-1;xx++){const i=y*w+xx,l=4*g[i]-g[i-1]-g[i+1]-g[i-w]-g[i+w];m+=l;m2+=l*l;q++}const nitidez=q?m2/q-(m/q)**2:0,brilho=soma/(w*h);
- return {brilho,nitidez,escura:brilho<70,borrada:nitidez<60}}
+ const lado=Math.max(src.width,src.height);return {brilho,nitidez,escura:brilho<70,borrada:nitidez<60,lado,pequena:lado<1500}}
 function recorte(src,rx,ry,rw,rh,rot,max){const sw=Math.round(src.width*rw),sh=Math.round(src.height*rh),k=Math.min(1,max/Math.max(sw,sh));const w=Math.round(sw*k),h=Math.round(sh*k);const c=document.createElement('canvas');const x=c.getContext('2d');
  if(rot){c.width=h;c.height=w;x.translate(h/2,w/2);x.rotate(rot*Math.PI/180);x.drawImage(src,Math.round(src.width*rx),Math.round(src.height*ry),sw,sh,-w/2,-h/2,w,h)}else{c.width=w;c.height=h;x.drawImage(src,Math.round(src.width*rx),Math.round(src.height*ry),sw,sh,0,0,w,h)}return c}
 
@@ -72,7 +72,10 @@ function ehBoleto(texto){const t=String(texto||'');const linha=/\d{5}\.\d{5}\s+\
 function nfceDeLinhas(linhas){const T=linhas.join('\n');const o={items:[]};
  const i0=linhas.findIndex(l=>/CNPJ[:\s]*\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}/i.test(l));
  if(i0>=0){const m=linhas[i0].match(/CNPJ[:\s]*(\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2})\s*(.*)$/i);o.issuerDoc=m[1].replace(/\D/g,'');const partes=[m[2].trim()];
-  for(let k=i0+1;k<Math.min(linhas.length,i0+4);k++){const l=linhas[k].trim();if(!l||/^(AV|AVENIDA|RUA|R\.|ROD|AL|ALAMEDA|TRAV|EST|PRA[ÇC]A|BR)\b/i.test(l)||/Documento Auxiliar|\d{5}-?\d{3}|,\s*\d/.test(l))break;partes.push(l)}o.issuer=partes.filter(Boolean).join(' ').replace(/\s+/g,' ').trim()}
+  // o nome vem depois do CNPJ ("CNPJ: ... NOME", como na Linx) ou na linha de cima (cupom comum)
+  if(partes[0])for(let k=i0+1;k<Math.min(linhas.length,i0+4);k++){const l=linhas[k].trim();if(!l||/^(AV|AVENIDA|RUA|R\.|ROD|AL|ALAMEDA|TRAV|EST|PRA[ÇC]A|BR)\b/i.test(l)||/Documento Auxiliar|Consumidor|\d{5}-?\d{3}|,\s*\d/i.test(l))break;partes.push(l)}
+  else if(i0>0&&/[A-Za-zÀ-ú]{3,}/.test(linhas[i0-1])&&!/Documento Auxiliar|Consumidor|DANFE/i.test(linhas[i0-1]))partes[0]=linhas[i0-1].trim();
+  o.issuer=partes.filter(Boolean).join(' ').replace(/\s+/g,' ').trim()}
  if(!o.issuer){const l=linhas.find(x=>/LTDA|EIRELI|S\.?A\.?\b|\bME\b|COMERCIO|COM[ÉE]RCIO/i.test(x));if(l)o.issuer=l.replace(/CNPJ.*$/i,'').trim()}
  const nn=T.match(/NFC-?e\s*n[ºo°.]?\s*(\d+)\s*S[ée]rie[:\s]*(\d+)\s*(\d{2})\/(\d{2})\/(\d{4})/i);if(nn){o.number=String(+nn[1]);o.series=String(+nn[2]);o.date=`${nn[5]}-${nn[4]}-${nn[3]}`}
  if(!o.date){const d=T.match(/Emiss[ãa]o[:\s]*(\d{2})\/(\d{2})\/(\d{4})/i);if(d)o.date=`${d[3]}-${d[2]}-${d[1]}`}
@@ -113,11 +116,13 @@ function confiancaDe(lido,valor){const v=norm(valor).replace(/ /g,'');if(!v)retu
 async function notaDaFoto(file,lido,tipo){const inv=await parsePDF(file,lido.linhas,{chave:lido.cod.chave||'',tolerante:true});inv.tipo=tipo;
  if(chaveDecompor(lido.cod.chave)?.modelo===65||/Consumidor Eletr/i.test(lido.ocr.texto)){const n=nfceDeLinhas(lido.linhas);if(!inv.items.length&&n.items.length)inv.items=n.items;['issuer','date','total'].forEach(k=>{if(!inv[k]&&n[k])inv[k]=n[k]});if(!inv.number&&n.number)inv.number=n.number;if(!inv.series&&n.series)inv.series=n.series}
  if(!inv.items.length){inv.items=itensCupom(lido.linhas);if(inv.items.length)inv.totalProducts=Math.round(inv.items.reduce((s,it)=>s+it.lineTotal,0)*100)/100}
- if(!inv.issuer)inv.issuer=emitenteCupom(lido.linhas);
+ const cupom=chaveDecompor(lido.cod.chave)?.modelo===65||/Consumidor Eletr/i.test(lido.ocr.texto);if(!inv.issuer&&cupom){const e=emitenteCupom(lido.linhas);if(e&&confiancaDe(lido,e)>=70)inv.issuer=e}
  const fontes={};['number','series','date','issuer','issuerDoc','total'].forEach(k=>{fontes[k]=inv[k]?{f:'ocr',c:confiancaDe(lido,k==='total'?String(inv[k]).replace('.',','):k==='date'?inv[k].split('-').reverse().join('/'):inv[k])}:{f:'vazio'}});
  const dk=chaveDecompor(inv.key);if(dk?.valida){inv.number=dk.numero;inv.series=dk.serie;inv.issuerDoc=dk.cnpj;['number','series','issuerDoc'].forEach(k=>fontes[k]={f:'chave'});fontes.key={f:'chave',origem:lido.cod.fonte};
   if(inv.date&&(+inv.date.slice(0,4)!==dk.ano||+inv.date.slice(5,7)!==dk.mes))(inv._avisos=inv._avisos||[]).push(`A data lida (${inv.date.split('-').reverse().join('/')}) não cai no mês da chave (${String(dk.mes).padStart(2,'0')}/${dk.ano}). Confira a data de emissão.`)}
  else fontes.key={f:inv.key?'ocr':'vazio'};
+ if(lido.q.pequena)(inv._avisos=inv._avisos||[]).unshift(`Foto pequena (${lido.img.canvas.width} × ${lido.img.canvas.height} pixels), provavelmente reduzida pelo WhatsApp: as letras e o código de barras ficam sem detalhe e a leitura automática não funciona. Peça a foto tirada pelo Notas TCS, ou enviada pelo WhatsApp como documento (ou em HD), ou importe o XML. Até lá, preencha olhando a foto.`);
+ else if(lido.ocr.confianca<60&&!lido.cod.chave)(inv._avisos=inv._avisos||[]).unshift(`Não foi possível ler a nota nesta foto (confiança ${Math.round(lido.ocr.confianca)}%). Confira se a nota está inteira, reta e com boa luz; preencha olhando a foto ou importe o XML.`);
  inv._foto={url:lido.img.url,nome:file.name};inv._fontes=fontes;inv._conf=Math.round(lido.ocr.confianca);inv._codigos=lido.cod;inv._avisos=(inv._avisos||[]).concat(lido.cod.avisos);if(lido.q.escura||lido.q.borrada)inv._avisos.push('A foto parece '+(lido.q.escura?'escura':'desfocada')+': a leitura pode ter falhas. Se possível, fotografe de novo em lugar claro, com a nota inteira e o celular firme.');
  if(dk?.valida&&dk.modelo!==55&&dk.modelo!==65)inv._avisos.push(`A chave é de ${dk.modeloNome}, não de nota de materiais. Confira se o documento certo foi enviado.`);
  inv.items=inv.items.map(it=>({...it}));inv.format='Foto/OCR';return inv}
