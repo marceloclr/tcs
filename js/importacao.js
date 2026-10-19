@@ -106,13 +106,13 @@ async function postDraft(){
  if(!draft.length)return;
  const keys=draft.map(x=>x.key).filter(Boolean);if(new Set(keys).size!==keys.length){alert('Há chaves repetidas na seleção.');return}
  for(const inv of draft){if(!inv.key||(!isServico(inv)&&!/^\d{44}$/.test(inv.key))){alert('Uma nota não possui chave de acesso válida.');return}if(!inv.items.length||inv.items.some(it=>!it.description.trim()||!Number.isFinite(Number(it.quantity))||!(Number(it.quantity)>0)||!Number.isFinite(Number(it.unitPrice))||Number(it.unitPrice)<0)){alert('Revise descrição, quantidade e valor unitário dos itens.');return}if(state.invoices.some(x=>x.key===inv.key)){alert('Uma nota já consta na base local. Atualize a tela e confira a chave de acesso.');return}}
- const now=new Date().toISOString();const stores=['products','invoices','movements'];
+ const now=new Date().toISOString();const stores=['products','invoices','movements','chaves'];
  try{
   await txWrite(stores,os=>{const ps=os.products,is=os.invoices,ms=os.movements;
    const productCache=new Map(state.products.map(p=>[p.key,{...p}]));
-   for(const inv0 of draft){const invoice={...inv0,tipo:inv0.tipo||'material',items:inv0.items.map(it=>({...it})),postedAt:now};delete invoice.tipoFixo;
+   for(const inv0 of draft){const invoice={...inv0,tipo:inv0.tipo||'material',items:inv0.items.map(it=>({...it})),postedAt:now,escopo:'aberta',projetos:[],clientes:[]};delete invoice.tipoFixo;os.chaves.add({id:invoice.key,notaId:invoice.id,criadoEm:now});
     if(isServico(invoice)){invoice.items.forEach(it=>delete it.productId);is.add(invoice);continue}
-    invoice.items.forEach((it,itemIndex)=>{const key=productKey(it);let p=productCache.get(key);if(!p){p={id:uid(),key,code:it.code||'',barcode:it.barcode||'',name:it.description,unit:it.unit||'UN',stock:0,createdAt:now};productCache.set(key,p)}p.stock=Number(p.stock||0)+Number(it.quantity);p.name=p.name||it.description;ps.put(p);it.productId=p.id;ms.add({id:uid(),productId:p.id,invoiceId:invoice.id,invoiceKey:invoice.key,itemIndex,date:invoice.date,type:'ENTRADA',quantity:Number(it.quantity),unitCost:Number(it.unitPrice),description:it.description,source:invoice.source,createdAt:now});
+    invoice.items.forEach((it,itemIndex)=>{const key=productKey(it);let p=productCache.get(key);if(!p){p={id:uid(),key,code:it.code||'',barcode:it.barcode||'',name:it.description,unit:it.unit||'UN',stock:0,createdAt:now};productCache.set(key,p)}p.stock=Number(p.stock||0)+Number(it.quantity);p.name=p.name||it.description;ps.put(p);it.productId=p.id;ms.add({id:uid(),productId:p.id,invoiceId:invoice.id,invoiceKey:invoice.key,itemIndex,date:invoice.date,type:'ENTRADA',escopo:'aberta',quantity:Number(it.quantity),unitCost:Number(it.unitPrice),description:it.description,source:invoice.source,createdAt:now});
     });
     is.add(invoice);
    }

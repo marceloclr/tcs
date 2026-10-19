@@ -1,22 +1,198 @@
 rules_version = '2';
 // Regras do Firestore do TCS (projeto thiago-17d18).
 // Publicar em: console do Firebase › Firestore Database › Regras › colar › Publicar.
-// Para liberar uma pessoa, acrescente o e-mail dela na lista e publique de novo.
+//
+// Quem pode o quê é definido pelo documento usuarios/{email}, editado na aba "Usuários e acessos":
+//   papel   'admin' | 'escritorio' | 'obra'
+//   ativo   true | false
+//   acessos { 'c:<clienteId>': {n: 'L'|'E', ate: data|null}, 'p:<projetoId>': {...} }
+//           L = leitura, E = leitura e escrita; ate = validade (opcional).
+//           A concessão por cliente vale para todos os projetos dele, inclusive os criados depois.
+//   Campos derivados, recalculados pelo sistema a cada gravação do usuário:
+//   clv     clientes visíveis (com concessão no cliente ou em algum projeto dele)
+//   pl, cl  projetos e clientes concedidos (decidem quem vê a nota de compra coletiva inteira)
+//   esc     true se tem escrita em algum projeto; escAte = validade mais longa dessas escritas
+//
+// A interface também filtra, mas quem protege os dados são estas regras.
 service cloud.firestore {
   match /databases/{database}/documents {
-    function liberado() {
-      return request.auth != null
-        && request.auth.token.email_verified == true
-        && request.auth.token.email in [
-             'marceloclr@gmail.com',
-             'marceloclr2@gmail.com',
-             'thiagocsampaio@gmail.com'
-           ];
+
+    // ==== #REGRAS-FUNCOES: START ====
+    function caminho(c, id) { return /databases/$(database)/documents/$(c)/$(id); }
+    function logado() { return request.auth != null && request.auth.token.email_verified == true; }
+    function eu() { return request.auth.token.email.lower(); }
+    function cadastrado() { return logado() && exists(caminho('usuarios', eu())); }
+    function perfil() { return get(caminho('usuarios', eu())).data; }
+    function ativo() { return cadastrado() && perfil().ativo == true; }
+    function admin() { return ativo() && perfil().papel == 'admin'; }
+    function escritorio() { return ativo() && perfil().papel in ['admin', 'escritorio']; }
+    function obra() { return ativo() && perfil().papel == 'obra'; }
+    // Implantação inicial: estas contas podem se cadastrar como administradoras uma única vez.
+    // Depois que os administradores estiverem cadastrados, esvazie a lista e publique de novo.
+    function implantacao() { return logado() && eu() in ['marceloclr@gmail.com', 'thiagocsampaio@gmail.com']; }
+
+    function vale(a) { return a != null && (a.get('ate', null) == null || request.time < a.ate); }
+    function nivel(k) { let a = perfil().acessos.get(k, null); return vale(a) ? a.n : ''; }
+    // Concessão no projeto ou no cliente dele; quando há as duas, vale a mais ampla.
+    function concedido(pid, cid) { return nivel('p:' + pid) != '' || nivel('c:' + cid) != ''; }
+    function le(pid, cid) { return admin() || (escritorio() && concedido(pid, cid)); }
+    function grava(pid, cid) { return admin() || (escritorio() && (nivel('p:' + pid) == 'E' || nivel('c:' + cid) == 'E')); }
+    function gravaCliente(cid) { return admin() || (escritorio() && nivel('c:' + cid) == 'E'); }
+    // Escrita em pelo menos um projeto: importa notas, vê as notas abertas e edita o catálogo.
+    function escritor() { return admin() || (escritorio() && perfil().get('esc', false) == true
+      && (perfil().get('escAte', null) == null || request.time < perfil().escAte)); }
+    // O clientId gravado tem de ser o do projeto (evita gravar em nome de outro cliente).
+    function clienteDoProjeto(pid, cid) { return admin() || getAfter(caminho('projects', pid)).data.clientId == cid; }
+    // Nota inteira: todos os projetos dela concedidos, ou todos os clientes dela concedidos,
+    // ou a configuração 'inteira' com algum projeto ou cliente concedido.
+    function notaInteira(d) {
+      return escritorio() && d.get('escopo', '') == 'fechada' && (
+        d.projetos.hasOnly(perfil().get('pl', [])) || d.clientes.hasOnly(perfil().get('cl', []))
+        || (get(caminho('config', 'geral')).data.get('notaColetiva', 'rateio') == 'inteira'
+            && (d.projetos.hasAny(perfil().get('pl', [])) || d.clientes.hasAny(perfil().get('cl', [])))));
     }
-    match /{colecao}/{id} {
-      allow read, write: if liberado()
-        && colecao in ['products', 'invoices', 'movements', 'clients',
-                       'projects', 'allocations', 'quotes'];
+    // ==== #REGRAS-FUNCOES: END ====
+
+    // ==== #REGRAS-ACESSOS: START ====
+    match /usuarios/{email} {
+      allow get: if (logado() && eu() == email) || admin();
+      allow list: if admin();
+      // O documento traz _auditoria: o id do registro de auditoria gravado no mesmo lote.
+      allow create, update: if admin() && existsAfter(caminho('auditoria', request.resource.data._auditoria))
+        && adminsCoerentes(email)
+        || (implantacao() && eu() == email && request.resource.data.papel == 'admin'
+            && request.resource.data.ativo == true && !exists(caminho('usuarios', email)));
+      allow delete: if admin() && email != eu() && !(email in get(caminho('config', 'admins')).data.lista);
     }
+    // A lista de administradores ativos fica em config/admins e nunca pode ficar vazia.
+    function adminsCoerentes(email) {
+      let lista = getAfter(caminho('config', 'admins')).data.lista;
+      let d = request.resource.data;
+      return lista.size() > 0 && ((d.papel == 'admin' && d.ativo == true) == (email in lista));
+    }
+    match /config/admins {
+      allow get: if ativo();
+      allow create: if implantacao() && request.resource.data.lista == [eu()];
+      allow update: if request.resource.data.lista.size() > 0 && (admin()
+        || (implantacao() && request.resource.data.lista.toSet() == resource.data.lista.toSet().union([eu()].toSet())));
+    }
+    match /config/geral {
+      allow get: if ativo();
+      allow write: if admin();
+    }
+    match /solicitacoes/{email} {
+      allow get: if (logado() && eu() == email) || admin();
+      allow list, delete: if admin();
+      allow create, update: if logado() && eu() == email && !cadastrado()
+        && request.resource.data.email == email
+        && request.resource.data.keys().hasOnly(['email', 'nome', 'pedidoEm']);
+    }
+    match /auditoria/{id} {
+      allow get, list: if admin();
+      allow create: if admin() && request.resource.data.por == eu();
+    }
+    // ==== #REGRAS-ACESSOS: END ====
+
+    // ==== #REGRAS-DADOS: START ====
+    match /clients/{id} {
+      allow read: if admin() || (escritorio() && (nivel('c:' + id) != '' || id in perfil().get('clv', [])));
+      allow create, delete: if admin();
+      allow update: if gravaCliente(id);
+    }
+    match /projects/{id} {
+      allow read: if le(id, resource.data.clientId) || (obra() && concedido(id, resource.data.clientId));
+      allow create: if gravaCliente(request.resource.data.clientId);
+      allow update: if grava(id, resource.data.clientId) && request.resource.data.clientId == resource.data.clientId;
+      allow delete: if gravaCliente(resource.data.clientId) || admin();
+    }
+    // Rateio das notas (allocations), saídas (movements SAIDA) e projeções de nota por projeto.
+    // Os rateios de notas ainda abertas (escopo 'aberta') ficam visíveis a quem tem escrita, para distribuir o restante.
+    match /allocations/{id} {
+      allow read: if le(resource.data.projectId, resource.data.clientId)
+        || (escritor() && resource.data.get('escopo', '') == 'aberta');
+      allow create: if grava(request.resource.data.projectId, request.resource.data.clientId)
+        && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId);
+      allow update: if (grava(resource.data.projectId, resource.data.clientId)
+          && request.resource.data.projectId == resource.data.projectId
+          && request.resource.data.clientId == resource.data.clientId)
+        || (escritor() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['escopo', '_atualizadoEm', '_atualizadoPor']));
+      allow delete: if grava(resource.data.projectId, resource.data.clientId);
+    }
+    match /notas_projeto/{id} {
+      allow read: if le(resource.data.projectId, resource.data.clientId);
+      allow create, update: if grava(request.resource.data.projectId, request.resource.data.clientId)
+        && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId);
+      allow delete: if grava(resource.data.projectId, resource.data.clientId);
+    }
+    match /movements/{id} {
+      allow read: if admin()
+        || (resource.data.type == 'SAIDA' && le(resource.data.projectId, resource.data.clientId))
+        || (resource.data.type == 'ENTRADA' && escritor() && resource.data.get('escopo', '') == 'aberta');
+      allow create: if (request.resource.data.type == 'SAIDA'
+          && grava(request.resource.data.projectId, request.resource.data.clientId)
+          && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId))
+        || (request.resource.data.type == 'ENTRADA' && escritor());
+      allow update: if admin()
+        || (resource.data.type == 'SAIDA' && grava(resource.data.projectId, resource.data.clientId)
+            && request.resource.data.projectId == resource.data.projectId)
+        || (resource.data.type == 'ENTRADA' && escritor()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['escopo', '_atualizadoEm', '_atualizadoPor']));
+      allow delete: if admin() || (resource.data.type == 'SAIDA' && grava(resource.data.projectId, resource.data.clientId));
+    }
+    match /quotes/{id} {
+      allow read: if admin() || (escritorio() && resource.data.get('criadoPor', '') == eu())
+        || (resource.data.get('projectId', '') != '' && le(resource.data.projectId, resource.data.clientId));
+      allow create: if escritorio() && request.resource.data.criadoPor == eu()
+        && (request.resource.data.get('projectId', '') == ''
+            || (grava(request.resource.data.projectId, request.resource.data.clientId)
+                && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId)));
+      allow update, delete: if admin() || (escritorio() && resource.data.get('criadoPor', '') == eu())
+        || (resource.data.get('projectId', '') != '' && grava(resource.data.projectId, resource.data.clientId));
+    }
+    // Notas completas: administradores; quem tem escrita, enquanto a nota está aberta; e quem tem acesso a todos os projetos dela.
+    match /invoices/{id} {
+      allow read: if admin() || (escritor() && resource.data.get('escopo', '') == 'aberta') || notaInteira(resource.data);
+      allow create: if escritor() && request.resource.data.escopo == 'aberta'
+        && existsAfter(caminho('chaves', request.resource.data.key));
+      allow update: if admin() || (escritor() && (resource.data.get('escopo', '') == 'aberta' || notaInteira(resource.data)));
+      allow delete: if admin();
+    }
+    // Índice de chaves: só confirma se a nota existe, sem revelar a nota. Não pode ser listado.
+    match /chaves/{chave} {
+      allow get: if escritorio();
+      allow list: if admin();
+      allow create: if escritor() && !exists(caminho('chaves', chave)) && request.resource.data.keys().hasOnly(['id', 'notaId', 'criadoEm', '_atualizadoEm', '_atualizadoPor']);
+      allow delete: if admin();
+    }
+    match /products/{id} {
+      allow read: if escritorio();
+      allow create, update: if escritor();
+      allow delete: if admin();
+    }
+    // ==== #REGRAS-DADOS: END ====
+
+    // ==== #REGRAS-CAPTURAS: START ====
+    // Capturas da obra: o mestre cria para os projetos concedidos; o escritório com escrita no projeto confere.
+    match /capturas/{id} {
+      allow create: if (obra() || admin()) && request.resource.data.autor == eu()
+        && (admin() || concedido(request.resource.data.projectId, request.resource.data.clientId))
+        && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId)
+        && request.resource.data.status == 'pendente';
+      allow read: if (ativo() && resource.data.autor == eu()) || grava(resource.data.projectId, resource.data.clientId);
+      allow update: if grava(resource.data.projectId, resource.data.clientId)
+        && request.resource.data.autor == resource.data.autor;
+      allow delete: if admin();
+    }
+    // Fotos fatiadas em partes de até 700 KB (texto base64), ligadas à captura.
+    match /capturas_fotos/{id} {
+      allow create: if (obra() || admin() || escritor()) && request.resource.data.autor == eu()
+        && (admin() || concedido(request.resource.data.projectId, request.resource.data.clientId))
+        && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId)
+        && request.resource.data.dados is string && request.resource.data.dados.size() <= 716800
+        && request.resource.data.tipo in ['image/jpeg', 'image/webp', 'image/png'];
+      allow read: if (ativo() && resource.data.autor == eu()) || grava(resource.data.projectId, resource.data.clientId);
+      allow delete: if admin();
+    }
+    // ==== #REGRAS-CAPTURAS: END ====
   }
 }

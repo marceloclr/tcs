@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gestão de Materiais - V-19102026-0842</title>
+<title>Gestão de Materiais - V-19102026-0854</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox=%220 0 250 250%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cdefs%3E%3ClinearGradient id=%22fN%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22#173B68%22/%3E%3Cstop offset=%221%22 stop-color=%22#102746%22/%3E%3C/linearGradient%3E%3ClinearGradient id=%22fT%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22#35C8B0%22/%3E%3Cstop offset=%221%22 stop-color=%22#128C83%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x=%220%22 y=%220%22 width=%22250%22 height=%22250%22 rx=%2242%22 fill=%22#F1F6FB%22/%3E%3Cpath d=%22M42 100L125 35L208 100%22 fill=%22none%22 stroke=%22url(#fN)%22 stroke-width=%2215%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3Cpath d=%22M58 104V202H192V104%22 fill=%22none%22 stroke=%22url(#fN)%22 stroke-width=%2213%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3Cpath d=%22M86 202V145H119V202M139 202V119H172V202%22 fill=%22none%22 stroke=%22url(#fT)%22 stroke-width=%2212%22 stroke-linejoin=%22round%22/%3E%3Cpath d=%22M43 218H207%22 stroke=%22#173B68%22 stroke-width=%229%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%22190%22 cy=%2262%22 r=%2217%22 fill=%22url(#fT)%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="css/tcs.css">
 </head>
@@ -70,6 +70,7 @@
 <section class="view" id="settings">
 <div class="heading"><div><h2>Dados e segurança</h2><p>Nuvem, cópia de segurança e restauração.</p></div></div>
 <div class="grid"><div class="card"><h3>Onde ficam os dados</h3><p>Na nuvem (Firebase), gravados automaticamente a cada alteração e compartilhados ao vivo com os usuários liberados.</p><p class="hint">Uma cópia fica neste navegador para o sistema abrir rápido e funcionar sem internet; o que for feito offline sobe sozinho no próximo login.</p><span class="tag-muted">Nuvem + cópia local</span></div><div class="card" style="border-color:#bfdbfe;background:#f8fbff"><h3>Backup e restauração</h3><p>Exporte periodicamente um arquivo JSON e guarde-o em local seguro. A restauração substitui a base atual.</p><button class="btn primary" id="exportBtn2">Baixar backup JSON</button></div><div class="card"><h3>Leitura de PDF / OCR</h3><p>PDF.js extrai texto; Tesseract.js pode reconhecer páginas digitalizadas como imagem.</p><p class="hint">A aplicação tenta carregar as bibliotecas locais em <code>./libs/</code> e, se ausentes, recorre à CDN. OCR é mais lento e requer revisão humana.</p><span class="tag-muted">PDF textual + OCR</span></div><div class="card" style="border-color:#bbf7d0"><h3>Nuvem (Firebase)</h3><div id="cloudPanel"><p class="hint">Carregando…</p></div></div></div>
+<div class="panel" id="escopoPanel" style="margin-bottom:16px"></div>
 <div class="panel"><h3>Importação de backup</h3><input type="file" id="backupFile" accept=".json,application/json"><button class="btn" id="restoreBtn">Validar e restaurar backup</button><p class="hint">Conectado à nuvem, os registros do backup são enviados e juntados aos que já existem (nada é apagado). Faça um backup atual antes de continuar.</p><div id="restoreMsg"></div><hr style="border:0;border-top:1px solid var(--line);margin:22px 0"><div class="danger-zone"><h3>Zona de perigo — apagar a cópia deste navegador</h3><p class="hint">Remove a cópia local dos dados e encerra a sessão. A base na nuvem não é apagada: ao entrar de novo, os dados voltam. Alterações ainda não enviadas (feitas offline) serão perdidas.</p><button class="btn" id="wipeBtn" style="background:#fee2e2;color:#991b1b;border-color:#fecaca">Apagar cópia deste navegador</button><div id="wipeMsg"></div></div></div>
 </section>
 </main><p class="versao-canto" id="versaoCanto" aria-label="Versão do sistema"></p><div class="footer">Gestão de Materiais · versão 2.0 • Materiais e serviços por cliente e projeto, compras e contratações coletivas, saídas e pedidos de orçamento • NF-e, NFS-e, PDF e OCR</div>
@@ -80,6 +81,7 @@
 <script src="js/cadastros.js"></script>
 <script src="js/importacao.js"></script>
 <script src="js/paineis.js"></script>
+<script src="js/escopo.js"></script>
 <script src="js/orcamento.js"></script>
 <script src="js/inicio.js"></script>
 </body></html>

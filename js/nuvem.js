@@ -53,12 +53,16 @@ function nuvemRender(){gateRender();const st=$('#dbStatus'),bt=$('#cloudBtn'),pn
 function put(store,obj){return txWrite(store,os=>os[store].put(obj))}
 function del(store,id){return txWrite(store,os=>os[store].delete(id))}
 function clearStore(store,opts){return txWrite(store,os=>os[store].clear(),opts)}
-async function refresh(){for(const s of STORES)state[s]=await all(s);await linkItemProducts();render()}
+async function refresh(){for(const s of STORES)state[s]=await all(s);
+ // notas que este usuário não lê inteiras: montadas a partir das projeções dos projetos dele (js/escopo.js)
+ state.invoices=state.invoices.concat(notasDasProjecoes(state.notas_projeto,new Set(state.invoices.map(i=>i.id))));
+ await linkItemProducts();render()}
 // Cada item de nota guarda o productId do produto em que entrou. Notas da v1 não tinham esse vínculo: ele é deduzido pela chave do produto ou pela movimentação de entrada da nota.
-async function linkItemProducts(){const byKey=new Map(state.products.map(p=>[p.key,p]));for(const inv of state.invoices){if(isServico(inv))continue;let mudou=false;(inv.items||[]).forEach((it,j)=>{if(it.productId&&state.products.some(p=>p.id===it.productId))return;const m=state.movements.find(m=>m.type==='ENTRADA'&&m.invoiceId===inv.id&&(m.itemIndex===j||(m.itemIndex==null&&m.description===it.description)));const p=(m&&state.products.find(p=>p.id===m.productId))||byKey.get(productKey(it));if(p){it.productId=p.id;mudou=true}});if(mudou)await put('invoices',inv)}}
+async function linkItemProducts(){const byKey=new Map(state.products.map(p=>[p.key,p]));for(const inv of state.invoices){if(isServico(inv)||inv._parcial)continue;let mudou=false;(inv.items||[]).forEach((it,j)=>{if(it.productId&&state.products.some(p=>p.id===it.productId))return;const m=state.movements.find(m=>m.type==='ENTRADA'&&m.invoiceId===inv.id&&(m.itemIndex===j||(m.itemIndex==null&&m.description===it.description)));const p=(m&&state.products.find(p=>p.id===m.productId))||byKey.get(productKey(it));if(p){it.productId=p.id;mudou=true}});if(mudou)await put('invoices',inv)}}
 // Valor pago por item: valor bruto − desconto, mais o rateio de frete, seguro, outras despesas e impostos, de modo que a soma dos itens feche com o total da nota.
 function itemNet(it){return Math.max(0,Number(it.lineTotal||0)-Number(it.discount||0))}
-function itemPaid(inv,j){const items=inv.items||[],soma=items.reduce((a,it)=>a+itemNet(it),0),total=Number(inv.total)||soma;return soma>0?itemNet(items[j])*total/soma:0}
+// Nota parcial (montada das projeções): cada item já traz o custo unitário pago (_custoUnit), calculado sobre a nota inteira.
+function itemPaid(inv,j){if(inv._parcial){const it=inv.items[j];return Number(it?.quantity||0)*Number(it?._custoUnit||0)}const items=inv.items||[],soma=items.reduce((a,it)=>a+itemNet(it),0),total=Number(inv.total)||soma;return soma>0?itemNet(items[j])*total/soma:0}
 function itemUnitCost(inv,j){const q=Number(inv.items[j]?.quantity||0);return q>0?itemPaid(inv,j)/q:0}
 function allocatedQty(invId,j,ignorar){return state.allocations.filter(a=>a.invoiceId===invId&&a.itemIndex===j&&a!==ignorar).reduce((s,a)=>s+Number(a.quantity||0),0)}
 function invoiceStatus(inv){const items=inv.items||[];const tot=items.reduce((a,it)=>a+Number(it.quantity||0),0),alo=items.reduce((a,it,j)=>a+allocatedQty(inv.id,j),0);if(alo<=1e-9)return 'a_vincular';return alo+1e-9>=tot?'vinculada':'parcial'}
