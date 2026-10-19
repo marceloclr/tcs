@@ -43,6 +43,10 @@ async function codigosLer(canvas){const achados=[];const add=(formato,texto)=>{t
   const regioes=[[0,0,1,1],[0,0,1,.5],[0,.5,1,.5],[0,0,1,.34],[0,.33,1,.34],[0,.66,1,.34],[.4,0,.6,.4]];
   for(const rot of [0,90])for(const [rx,ry,rw,rh] of regioes){if(completo())break;const c=recorte(canvas,rx,ry,rw,rh,rot,1800);try{const r=leitor.decodeWithState(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.HTMLCanvasElementLuminanceSource(c))));add(Z.BarcodeFormat[r.getBarcodeFormat()],r.getText())}catch(e){}if(leitor.reset)leitor.reset()}}catch(e){console.warn('ZXing indisponível:',e.message)}}
  return achados}
+// Leitor nativo do navegador (Chrome no Android) na foto em resolução cheia, antes de reduzir: no DANFE fotografado inteiro,
+// as barras do código ficam finas demais depois da redução. Devolve os códigos achados (vazio se não houver o leitor nativo).
+async function codigosAltaResolucao(file){if(!('BarcodeDetector' in window))return [];let bmp;try{bmp=await createImageBitmap(file,{imageOrientation:'from-image'})}catch(e){const b=await jpegPrincipal(file).catch(()=>null);if(!b)return [];try{bmp=await createImageBitmap(b,{imageOrientation:'from-image'})}catch(e2){return []}}
+ try{const fmts=await BarcodeDetector.getSupportedFormats();const quer=['code_128','qr_code','itf'].filter(f=>fmts.includes(f));if(!quer.length)return [];const det=new BarcodeDetector({formats:quer});return (await det.detect(bmp)).map(x=>({formato:String(x.format).replace(/[^a-z0-9]/gi,'').toLowerCase(),texto:String(x.rawValue||'').trim()})).filter(x=>x.texto)}catch(e){console.warn('Leitor nativo falhou:',e);return []}finally{if(bmp.close)bmp.close()}}
 // Chave de acesso de 44 dígitos (NF-e 55, NFC-e 65, CT-e 57/67, MDF-e 58): UF, ano e mês, CNPJ do emitente, modelo, série, número, tipo de emissão, código numérico e DV.
 const UF_SIGLA={11:'RO',12:'AC',13:'AM',14:'RR',15:'PA',16:'AP',17:'TO',21:'MA',22:'PI',23:'CE',24:'RN',25:'PB',26:'PE',27:'AL',28:'SE',29:'BA',31:'MG',32:'ES',33:'RJ',35:'SP',41:'PR',42:'SC',43:'RS',50:'MS',51:'MT',52:'GO',53:'DF'};
 const MODELO_NOME={55:'NF-e',65:'NFC-e',57:'CT-e',67:'CT-e OS',58:'MDF-e'};
@@ -116,7 +120,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-abrir-nota
 // ---------- Foto → nota em conferência ----------
 // Lê a foto: códigos primeiro (exatos), depois OCR. Devolve o texto em linhas, como o PDF, para o mesmo parser.
 async function fotoLer(file,aviso){aviso('Abrindo a foto '+file.name+'…');const img=await imagemCarregar(file);const q=fotoQualidade(img.canvas);
- aviso('Procurando código de barras e QR Code em '+file.name+'…');const cod=codigosResumo(await codigosLer(img.canvas));
+ aviso('Procurando código de barras e QR Code em '+file.name+'…');let cod=codigosResumo(await codigosAltaResolucao(file));if(!cod.chave)cod=codigosResumo(await codigosLer(img.canvas));
  aviso('Lendo o texto de '+file.name+' (OCR em português). Pode levar até um minuto…');const ocr=await ocrCanvas(ocrPreparar(img.canvas));
  if(!cod.chave){const t=chavesDoTexto(ocr.texto)[0];if(t){cod.chave=t;cod.fonte='texto (OCR)'}}
  return {img,q,cod,ocr,linhas:ocr.linhas.map(l=>l.texto)}}

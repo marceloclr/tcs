@@ -23,7 +23,7 @@ function comprimir(canvas,max=1800,q=0.8){const k=Math.min(1,max/Math.max(canvas
  return new Promise(res=>c.toBlob(b=>res({blob:b,largura:c.width,altura:c.height}),'image/jpeg',q))}
 const comPrazo=(p,ms,padrao)=>Promise.race([p,new Promise(r=>setTimeout(()=>r(padrao),ms))]);
 async function fotoPreparar(file,origem){const img=await imagemCarregar(file,3000);const q=fotoQualidade(img.canvas);
- const cod=codigosResumo(await comPrazo(codigosLer(img.canvas),8000,[]));let jpg=await comprimir(img.canvas,2400,0.85);if(jpg.blob.size>1600000)jpg=await comprimir(img.canvas,2000,0.8);URL.revokeObjectURL(img.url);
+ let cod=codigosResumo(await comPrazo(codigosAltaResolucao(file),6000,[]));if(!cod.chave)cod=codigosResumo(await comPrazo(codigosLer(img.canvas),8000,[]));let jpg=await comprimir(img.canvas,2400,0.85);if(jpg.blob.size>1600000)jpg=await comprimir(img.canvas,2000,0.8);URL.revokeObjectURL(img.url);
  return {id:uid(),blob:jpg.blob,largura:jpg.largura,altura:jpg.altura,url:URL.createObjectURL(jpg.blob),escura:q.escura,borrada:q.borrada,pequena:q.pequena,aceita:!(q.escura||q.borrada||q.pequena),chave:cod.chave||'',consultaUrl:cod.url||'',origem}}
 async function fotosReceber(files,origem){if(!files.length)return;Cap.ocupado=true;mostrar('telaCarregando');$('#telaCarregando p').textContent=files.length>1?'Preparando as fotos…':'Preparando a foto…';
  for(const f of files){try{Cap.fotos.push(await fotoPreparar(f,origem))}catch(e){alert(e.message||'Não deu para abrir esta foto. Tente de novo.')}}
