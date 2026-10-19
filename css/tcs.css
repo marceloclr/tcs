@@ -47,4 +47,9 @@ nav .nav-usuarios{color:#e9ddf2}nav .nav-usuarios.active{background:#655070!impo
 .erro-txt{color:#b91c1c}.calc{border-bottom:1px dotted currentColor;cursor:help}
 .prev-foto input{padding:6px;border:1px solid #ccd5e1;border-radius:6px}
 /* ==== #CSS-IMAGEM: END ==== */
+/* ==== #CSS-CONSULTA: START ==== */
+.consulta-painel{margin:12px 0}.consulta-painel summary{cursor:pointer}.consulta-grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))!important;gap:12px;margin-top:10px}
+.consulta-painel textarea{width:100%;font:13px/1.4 ui-monospace,Consolas,monospace;padding:8px;border:1px solid #ccd5e1;border-radius:6px}
+.foto-grid.sem-foto{grid-template-columns:1fr}.selo-fonte.consulta{color:#5b21b6;border-color:#c4b5fd;background:#f5f3ff}
+/* ==== #CSS-CONSULTA: END ==== */
 
