@@ -48,6 +48,14 @@ async function escopoRecalcular(){let n=0;await txWrite([...STORES_DIST,'chaves'
   state.notas_projeto.filter(p=>!comNota.has(p.invoiceId)).forEach(p=>{os.notas_projeto.delete(p.id);n++});
   state.quotes.forEach(q=>{const cid=q.projectId?projectById(q.projectId)?.clientId||'':'';if((q.clientId||'')!==cid||!q.criadoPor){os.quotes.put({...q,clientId:cid,criadoPor:q.criadoPor||Nuvem.user?.email||''});n++}})});
  await refresh();return n}
+// Prepara um conjunto completo de registros (backup a restaurar ou nota de exemplo) antes de gravar: escopo das notas,
+// dos rateios e das entradas, projeções, índice de chaves e cliente dos pedidos. Assim o lote já chega à nuvem como as regras exigem.
+function escopoNormalizar(b){const projCli=new Map((b.projects||[]).concat(state.projects).map(p=>[p.id,p.clientId]));
+ b.allocations=(b.allocations||[]).map(a=>({...a,clientId:a.clientId||projCli.get(a.projectId)||''}));b.notas_projeto=[];const chaves=new Map((b.chaves||[]).map(c=>[c.id,c]));
+ b.invoices=(b.invoices||[]).map(inv0=>{const al=b.allocations.filter(a=>a.invoiceId===inv0.id);const inv={...inv0,...notaEscopo(inv0,al)};
+  al.forEach(a=>a.escopo=inv.escopo);(b.movements||[]).forEach(m=>{if(m.type==='ENTRADA'&&m.invoiceId===inv.id)m.escopo=inv.escopo});
+  inv.projetos.forEach(pid=>b.notas_projeto.push(notaProjecao(inv,al,pid)));if(!chaves.has(inv.key))chaves.set(inv.key,{id:inv.key,notaId:inv.id,criadoEm:inv.postedAt||new Date().toISOString()});return inv});
+ b.chaves=[...chaves.values()];b.quotes=(b.quotes||[]).map(q=>({...q,clientId:q.projectId?projCli.get(q.projectId)||'':'',criadoPor:q.criadoPor||Nuvem.user?.email||''}));return b}
 // Totais por projeto como os vê quem lê só as projeções; devem bater com os da base completa.
 function escopoTotais(usarProjecoes){const salvo=state.invoices;try{if(usarProjecoes){const proj=state.projects.map(p=>p.id);state.invoices=notasDasProjecoes(state.notas_projeto.filter(p=>proj.includes(p.projectId)))}const {clientes}=stockTree();const m=new Map();clientes.forEach(c=>{m.set('c:'+c.c.id,c.tot);c.projetos.forEach(x=>m.set('p:'+x.p.id,x.tot))});return m}finally{state.invoices=salvo}}
 function escopoConferir(){const a=escopoTotais(false),b=escopoTotais(true);const linhas=[];let ok=true;

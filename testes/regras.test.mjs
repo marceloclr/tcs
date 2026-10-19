@@ -16,7 +16,7 @@ const usuarios = {
   [OBRA]: { papel: 'obra', ativo: true, acessos: { 'p:A1': { n: 'L', ate: null } }, clv: ['A'], pl: ['A1'], cl: [] },
 };
 before(async () => {
-  env = await initializeTestEnvironment({ projectId: 'demo-tcs', firestore: { rules: fs.readFileSync('../firestore.rules', 'utf8'), host: '127.0.0.1', port: 8089 } });
+  env = await initializeTestEnvironment({ projectId: 'demo-tcs', firestore: { rules: fs.readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8'), host: '127.0.0.1', port: 8089 } });
 });
 after(async () => { await env?.cleanup(); });
 beforeEach(async () => {

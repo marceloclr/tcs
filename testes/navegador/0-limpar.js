@@ -1,0 +1,1 @@
+(async()=>{await new Promise(r=>setTimeout(r,1500));try{await window.__fb.logout()}catch(e){}try{await window.__fb.limparCache()}catch(e){}for(const s of STORES)await clearStore(s,{local:true});localStorage.clear();return 'limpo'})()

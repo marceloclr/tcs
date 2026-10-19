@@ -63,6 +63,8 @@ service cloud.firestore {
         || (implantacao() && eu() == email && request.resource.data.papel == 'admin'
             && request.resource.data.ativo == true && !exists(caminho('usuarios', email)));
       allow delete: if admin() && email != eu() && !(email in get(caminho('config', 'admins')).data.lista);
+      // Cada pessoa registra a data do próprio último acesso, e nada mais.
+      allow update: if logado() && eu() == email && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ultimoAcesso']);
     }
     // A lista de administradores ativos fica em config/admins e nunca pode ficar vazia.
     function adminsCoerentes(email) {
@@ -71,7 +73,7 @@ service cloud.firestore {
       return lista.size() > 0 && ((d.papel == 'admin' && d.ativo == true) == (email in lista));
     }
     match /config/admins {
-      allow get: if ativo();
+      allow get: if ativo() || implantacao();
       allow create: if implantacao() && request.resource.data.lista == [eu()];
       allow update: if request.resource.data.lista.size() > 0 && (admin()
         || (implantacao() && request.resource.data.lista.toSet() == resource.data.lista.toSet().union([eu()].toSet())));
@@ -152,15 +154,15 @@ service cloud.firestore {
     // Notas completas: administradores; quem tem escrita, enquanto a nota está aberta; e quem tem acesso a todos os projetos dela.
     match /invoices/{id} {
       allow read: if admin() || (escritor() && resource.data.get('escopo', '') == 'aberta') || notaInteira(resource.data);
-      allow create: if escritor() && request.resource.data.escopo == 'aberta'
-        && existsAfter(caminho('chaves', request.resource.data.key));
+      allow create: if admin() || (escritor() && request.resource.data.escopo == 'aberta'
+        && existsAfter(caminho('chaves', request.resource.data.key)));
       allow update: if admin() || (escritor() && (resource.data.get('escopo', '') == 'aberta' || notaInteira(resource.data)));
       allow delete: if admin();
     }
     // Índice de chaves: só confirma se a nota existe, sem revelar a nota. Não pode ser listado.
     match /chaves/{chave} {
       allow get: if escritorio();
-      allow list: if admin();
+      allow list, update: if admin();
       allow create: if escritor() && !exists(caminho('chaves', chave)) && request.resource.data.keys().hasOnly(['id', 'notaId', 'criadoEm', '_atualizadoEm', '_atualizadoPor']);
       allow delete: if admin();
     }

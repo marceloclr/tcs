@@ -25,14 +25,18 @@ Acesse https://console.firebase.google.com › projeto **thiago-17d18**.
 
 O plano gratuito (Spark) basta.
 
-## Liberar ou retirar uma pessoa
-1. Edite a lista de e-mails em `firestore.rules`, aqui no repositório, para manter o registro.
-2. Cole o arquivo no console (Firestore › Regras) e clique em **Publicar**.
+## Quem tem acesso
+O acesso é por pessoa, cliente e projeto, administrado na aba **Usuários e acessos** (só administradores). Detalhes em [`ACESSOS-E-CAPTURA.md`](../ACESSOS-E-CAPTURA.md) e no plano [`planos/acessos-e-captura.md`](planos/acessos-e-captura.md).
 
-Não é preciso mudar o sistema.
+- **Papéis:** Administrador (tudo), Escritório (lê ou altera os clientes e projetos concedidos) e Obra (só envia fotos de notas).
+- **Concessões:** por cliente (vale para todos os projetos dele, inclusive os futuros) ou por projeto, com nível Leitura ou Leitura e escrita e validade opcional.
+- **Quem protege os dados são as regras** em [`firestore.rules`](../firestore.rules): elas leem o cadastro `usuarios/{email}` a cada leitura e gravação. A interface só esconde o que a pessoa não pode usar.
+- **Implantação:** as contas em `TCS_ADMINS_INICIAIS` (`js/config.js`) e na função `implantacao()` das regras viram administradoras no primeiro login. Depois que entrarem, esvazie as duas listas e publique as regras de novo.
+- **Publicar as regras:** console do Firebase › Firestore Database › Regras › colar o arquivo › Publicar (ou `firebase deploy --only firestore:rules --project thiago-17d18`, na raiz).
+- **Testes das regras:** ver [`testes/LEIA-ME.md`](../testes/LEIA-ME.md).
 
 ## Sobre a `apiKey`
-O bloco `TCS_FIREBASE_CONFIG` do `index.html` identifica o projeto e não é segredo: qualquer site com Firebase o expõe. Quem protege os dados são as regras, que só liberam os e-mails da lista.
+O bloco `TCS_FIREBASE_CONFIG` do `index.html` identifica o projeto e não é segredo: qualquer site com Firebase o expõe. Quem protege os dados são as regras, que só liberam as contas cadastradas, conforme o papel e os acessos de cada uma.
 
 ## Limitações
 - O login com Google não funciona com o `index.html` aberto direto do disco (`file://`). Use o site publicado ou um servidor local (`localhost`).

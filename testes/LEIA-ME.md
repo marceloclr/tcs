@@ -1,0 +1,26 @@
+# Testes do TCS
+
+Instalação, uma vez: `cd testes && npm install` (precisa de Java 11+ para os emuladores).
+
+## 1. Verificação estática
+Na raiz do repositório: `node testes/verificar.mjs`. Confere a sintaxe de todo o JavaScript (`node --check`, inclusive scripts embutidos em HTML) e o balanceamento das tags dos HTML.
+
+## 2. Regras do Firestore
+`cd testes && npm test`. Sobe o emulador do Firestore, aplica `firestore.rules` e roda `regras.test.mjs`: consultas por projeto e por cliente, leitura e escrita negadas fora do acesso, nota coletiva inteira ou só o rateio, duplicidade pela chave, papel Obra, solicitação de acesso, implantação, auditoria obrigatória, último administrador e validade vencida.
+
+## 3. Ponta a ponta no navegador
+O app real, ligado aos emuladores (`?emulador=1`, só funciona em localhost), com um usuário de cada papel.
+
+1. `cd testes && npm run emuladores` (Firestore 8089 e Auth 9099, projeto `demo-tcs`).
+2. Dois servidores na raiz, para simular dois navegadores (origens diferentes): `python -m http.server 8767` e `python -m http.server 8768`.
+3. Edge sem janela: `msedge --headless=new --remote-debugging-port=9446 --user-data-dir=<pasta temporária>`.
+4. Em `testes/navegador/`, rodar `node cdp.mjs "<url>?emulador=1" <script> [captura.png]`:
+   - `0-limpar.js` (em cada origem) e, antes, apagar os dados dos emuladores:
+     `curl -X DELETE "http://127.0.0.1:8089/emulator/v1/projects/demo-tcs/databases/(default)/documents"` e
+     `curl -X DELETE "http://127.0.0.1:9099/emulator/v1/projects/demo-tcs/accounts"`;
+   - `1-admin.js` em 8767: implantação do administrador, clientes, projetos, nota de exemplo distribuída entre dois clientes, preparação da base e três cadastros (Escritório com escrita na Obra 1, Leitor do Cliente B e Obra);
+   - `2-escritorio.js` em 8768: vê só o Cliente A e a Obra 1, a nota coletiva só pelo rateio, e as leituras e gravações diretas fora do acesso são negadas (defina `window.RATEIO_P3` com o id de um rateio da Obra 3 para testar a leitura direta);
+   - `3-leitor-obra-novo.js` em 8768: troca de conta no mesmo navegador (a cópia local é apagada), leitor sem escrita, conta da obra e conta sem cadastro (solicitação de acesso);
+   - `4-revogacao-entrar.js` com `FIM=15000`, retirar os acessos do usuário pelo REST do emulador enquanto a página está aberta, e `4-revogacao-conferir.js`: a cópia local fica vazia.
+
+Variáveis do `cdp.mjs`: `CDP_PORTA` (9446), `ESPERA` (ms antes de rodar o script), `FIM` (ms antes de fechar), `INIT` (script injetado antes da página).
