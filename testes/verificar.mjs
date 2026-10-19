@@ -11,6 +11,10 @@ const checar = (arquivo, rotulo) => {
   try { execFileSync(process.execPath, ['--check', arquivo], { stdio: 'pipe' }); }
   catch (e) { falhas++; console.log('ERRO de sintaxe em ' + rotulo + ':\n' + String(e.stderr)); }
 };
+// Arquivo essencial vazio (por exemplo, truncado por um script) é falha, antes de qualquer outra conferência.
+for (const f of ['index.html', 'captura.html', 'sw.js', 'manifest.webmanifest', 'firestore.rules', ...fs.readdirSync('js').map(x => 'js/' + x), ...fs.readdirSync('css').map(x => 'css/' + x)]) {
+  if (fs.existsSync(f) && fs.statSync(f).size === 0) { falhas++; console.log('ARQUIVO VAZIO: ' + f); }
+}
 const js = fs.readdirSync('js').filter(f => f.endsWith('.js')).map(f => 'js/' + f).concat(fs.existsSync('sw.js') ? ['sw.js'] : []);
 for (const f of js) {
   const modulo = /^\s*(import|export)\s|await import\(|^const cfg=window/m.test(fs.readFileSync(f, 'utf8'));
