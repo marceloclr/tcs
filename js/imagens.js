@@ -60,6 +60,40 @@ function chavesDoTexto(t){const s=String(t||''),out=[];const ok=d=>{if(chaveVali
  for(const m of s.matchAll(/(?<!\d)(?:\d[ .]?){43}\d(?!\d)/g))ok(m[0].replace(/\D/g,''));
  if(!out.length){const i=s.search(/CHAVE\s+DE\s+ACESSO/i);if(i>=0){const dig=s.slice(i,i+260).replace(/\D/g,'');for(let k=0;k+44<=dig.length;k++)ok(dig.slice(k,k+44))}}
  return out}
+// ==== #JS-CHAVE-TEXTO: START ====
+// Chave reconstruída do texto, para navegadores sem leitor nativo de código de barras (Firefox, Brave).
+// O OCR da faixa de cima da foto lê os 11 grupos da chave com poucos erros (3↔8, 2↔5, 0↔6, dígito a mais).
+// A correção usa o que a própria nota diz, sem adivinhar: número e série lidos em letra grande no cabeçalho, mês e ano da
+// emissão, os dígitos verificadores do CNPJ e o dígito verificador da chave. Só aceita um resultado sem ambiguidade.
+const CONFUSAO={0:'689',1:'74',2:'57',3:'89',4:'19',5:'263',6:'058',7:'12',8:'3609',9:'843'};
+function cnpjValido(c){if(!/^\d{14}$/.test(c)||/^(\d)\1+$/.test(c))return false;const dv=(n,p)=>{let s=0;for(let i=0;i<p.length;i++)s+=Number(n[i])*p[i];const r=s%11;return r<2?0:11-r};const p1=[5,4,3,2,9,8,7,6,5,4,3,2],p2=[6,5,4,3,2,9,8,7,6,5,4,3,2];return dv(c,p1)===+c[12]&&dv(c,p2)===+c[13]}
+// variações de uma sequência trocando até `max` dígitos por confusões comuns, nas posições dadas
+function variacoes(seq,posicoes,max){const out=[];const passo=(s,ini,n)=>{out.push({s,n});if(n>=max)return;for(let k=ini;k<posicoes.length;k++){const i=posicoes[k];for(const c of CONFUSAO[s[i]]||'')passo(s.slice(0,i)+c+s.slice(i+1),k+1,n+1)}};passo(seq,0,0);return out}
+function chaveReconstruir(grupos,texto){const g=grupos.map(x=>x.replace(/\D/g,'')).filter(Boolean);if(g.length<10||g.length>12)return null;
+ // grupos de 5 dígitos: um deles sobra (testa tirar cada um); grupos de 4 ficam como estão
+ let bases=[''];for(const x of g){const op=x.length===4?[x]:x.length===5?[...new Set([...x].map((_,i)=>x.slice(0,i)+x.slice(i+1)))]:x.length===3?[x]:[x];const nb=[];for(const b of bases)for(const o of op)nb.push(b+o);bases=nb.slice(0,64)}
+ const T=String(texto||'');const nn=T.match(/N[º°o.]?\s*(\d{3})\.(\d{3})\.(\d{3})/);const se=T.match(/S[ÉE]RIE\s*(\d{1,3})/i);
+ const resultados=new Map();
+ for(let b of bases){if(b.length!==44)continue;
+  if(nn)b=b.slice(0,25)+(nn[1]+nn[2]+nn[3]).padStart(9,'0')+b.slice(34);if(se)b=b.slice(0,22)+se[1].padStart(3,'0')+b.slice(25);
+  const mes=(T.match(/(\d{2})\/(\d{2})\/(20\d{2})/g)||[]).map(d=>d.slice(8,10)+d.slice(3,5));if(mes.length&&!mes.includes(b.slice(2,6))){const m=mes.find(x=>x===b.slice(2,6))||mes[0];b=b.slice(0,2)+m+b.slice(6)}
+  if(/DANFE|NF-?e/i.test(T)&&b.slice(20,22)!=='55')b=b.slice(0,20)+'55'+b.slice(22);
+  // CNPJ (posições 6 a 19) com os próprios dígitos verificadores
+  const cnpjs=cnpjValido(b.slice(6,20))?[{s:b.slice(6,20),n:0}]:variacoes(b.slice(6,20),[...Array(14).keys()],2).filter(v=>cnpjValido(v.s));
+  for(const c of cnpjs){const b2=b.slice(0,6)+c.s+b.slice(20);
+   // resto: UF, tipo de emissão, código numérico e DV
+   for(const v of variacoes(b2,[0,1,34,35,36,37,38,39,40,41,42,43],1)){if(chaveValida(v.s)){const custo=c.n+v.n;const ant=resultados.get(v.s);if(ant==null||custo<ant)resultados.set(v.s,custo)}}}}
+ const lista=[...resultados.entries()].sort((a,b)=>a[1]-b[1]);if(!lista.length)return null;
+ // ambiguidade: duas chaves diferentes com o mesmo custo mínimo → não decide
+ if(lista.length>1&&lista[1][1]===lista[0][1])return null;return {chave:lista[0][0],correcoes:lista[0][1]}}
+// OCR da faixa de cima da foto (onde o DANFE traz a chave) e reconstrução a partir dos grupos de 4 dígitos.
+async function chaveDoTextoFocado(file,textoPagina){let bmp;try{bmp=await createImageBitmap(file,{imageOrientation:'from-image'})}catch(e){const b=await jpegPrincipal(file).catch(()=>null);if(!b)return null;try{bmp=await createImageBitmap(b,{imageOrientation:'from-image'})}catch(e2){return null}}
+ try{const W=bmp.width,H=bmp.height,larg=Math.min(3000,W),k=larg/W;const c=document.createElement('canvas');c.width=larg;c.height=Math.round(H*0.35*k);c.getContext('2d').drawImage(bmp,0,0,W,H*0.35,0,0,c.width,c.height);
+  const w=await getOcrWorker();const o=await w.recognize(ocrPreparar(c,larg));const texto=(o.data.text||'')+'\n'+(textoPagina||'');
+  const direta=chavesDoTexto(o.data.text)[0];if(direta)return {chave:direta,correcoes:0};
+  for(const l of (o.data.lines||[])){const grupos=(String(l.text).match(/\d{3,5}/g)||[]);if(grupos.length<10)continue;const ini=grupos.length>11?grupos.length-11:0;const r=chaveReconstruir(grupos.slice(ini),texto)||chaveReconstruir(grupos,texto);if(r)return r}
+  return null}catch(e){console.warn('Leitura focada da chave falhou:',e);return null}finally{if(bmp.close)bmp.close()}}
+// ==== #JS-CHAVE-TEXTO: END ====
 // O que cada código lido significa. Boleto (ITF ou 44 dígitos que não fecham como chave) e PIX (conteúdo 000201...) são descartados.
 function codigoInterpretar(c){const t=c.texto;
  if(/^000201/.test(t))return {tipo:'pix',descricao:'QR Code de PIX (ignorado)'};
@@ -123,6 +157,7 @@ async function fotoLer(file,aviso){aviso('Abrindo a foto '+file.name+'…');cons
  aviso('Procurando código de barras e QR Code em '+file.name+'…');let cod=codigosResumo(await codigosAltaResolucao(file));if(!cod.chave)cod=codigosResumo(await codigosLer(img.canvas));
  aviso('Lendo o texto de '+file.name+' (OCR em português). Pode levar até um minuto…');const ocr=await ocrCanvas(ocrPreparar(img.canvas));
  if(!cod.chave){const t=chavesDoTexto(ocr.texto)[0];if(t){cod.chave=t;cod.fonte='texto (OCR)'}}
+ if(!cod.chave){aviso('Procurando a chave impressa em '+file.name+'…');const f=await chaveDoTextoFocado(file,ocr.texto);if(f){cod.chave=f.chave;cod.fonte=f.correcoes?'texto da chave, com '+f.correcoes+' dígito(s) corrigido(s)':'texto da chave';cod.reconstruida=f.correcoes>0}}
  return {img,q,cod,ocr,linhas:ocr.linhas.map(l=>l.texto)}}
 // Confiança do OCR para um valor extraído: a da linha em que ele aparece (0 se não foi achado).
 function confiancaDe(lido,valor){const v=norm(valor).replace(/ /g,'');if(!v)return 0;const l=lido.ocr.linhas.find(x=>norm(x.texto).replace(/ /g,'').includes(v.slice(0,24)));return l?Math.round(l.confianca):0}
