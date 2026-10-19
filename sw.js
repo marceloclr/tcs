@@ -4,7 +4,7 @@
 // - Bibliotecas de CDN com versão fixa (Firebase, ZXing, heic2any): cache primeiro.
 // - Compartilhar com "Notas TCS" (Web Share Target): o Android envia as fotos por POST para captura.html?compartilhado=1;
 //   este service worker guarda as fotos no IndexedDB 'tcs-captura' e redireciona para a tela de captura, que as recebe.
-const VERSAO='tcs-V-19102026-1055';
+const VERSAO='tcs-V-19102026-1109';
 const CASCA=['captura.html','index.html','manifest.webmanifest','css/tcs.css','css/captura.css','icones/notas-tcs.svg','icones/notas-tcs-192.png','icones/notas-tcs-512.png',
  'js/config.js','js/nuvem-firebase.js','js/base.js','js/importacao.js','js/imagens.js','js/captura.js','js/nuvem.js','js/cadastros.js','js/paineis.js','js/escopo.js','js/acessos.js','js/consulta.js','js/fila.js','js/orcamento.js','js/inicio.js'];
 const CDN=/^https:\/\/(www\.gstatic\.com\/firebasejs\/|cdn\.jsdelivr\.net\/npm\/|cdnjs\.cloudflare\.com\/ajax\/libs\/)/;

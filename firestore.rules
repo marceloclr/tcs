@@ -65,8 +65,8 @@ service cloud.firestore {
         || (implantacao() && eu() == email && request.resource.data.papel == 'admin'
             && request.resource.data.ativo == true && !exists(caminho('usuarios', email)));
       allow delete: if admin() && email != eu() && !(email in get(caminho('config', 'admins')).data.lista);
-      // Cada pessoa registra a data do próprio último acesso, e nada mais.
-      allow update: if logado() && eu() == email && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ultimoAcesso']);
+      // Cada pessoa registra a data do próprio último acesso e o próprio telefone, e nada mais.
+      allow update: if logado() && eu() == email && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ultimoAcesso', 'telefone']);
     }
     // A lista de administradores ativos fica em config/admins e nunca pode ficar vazia.
     function adminsCoerentes(email) {

@@ -65,10 +65,7 @@ tr.atrasada td{background:#fffbeb}.atraso-txt{color:#92400e;font-weight:700}.aco
 /* ==== #CSS-CUSTODIA: START ==== */
 .kpis .kpi-estoque{border-top:4px solid #1d4ed8;background:#f5f8ff}.kpis .kpi-estoque strong{font-size:30px}
 .kpis .kpi-apropriado{border-top:4px solid #0f766e}.kpis .kpi-apropriado strong{color:#0f766e}
-.vivo-grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
-.vivo{border:1px solid #e2e8f0;border-left:4px solid #94a3b8;border-radius:10px;padding:12px;background:#fff}
-.vivo.ok{border-left-color:#16a34a}.vivo.atencao{border-left-color:#2563eb}.vivo.alerta{border-left-color:#d97706;background:#fffbeb}
-.vivo-t{font-size:13px;color:#475569;font-weight:600}.vivo-v{font-size:22px;font-weight:700;margin:4px 0 6px}
-.vivo ul{margin:0 0 8px;padding-left:18px;font-size:13px}.vivo li{margin:3px 0}
+.graf{width:100%;height:auto;display:block}.graf-base{stroke:#cbd5e1;stroke-width:1}.graf-valor{font:600 12px system-ui,sans-serif;fill:#0f172a}.graf-eixo{font:12px system-ui,sans-serif;fill:#475569}.graf-eixo2{font:11px system-ui,sans-serif;fill:#64748b}.graf-dentro{font:600 12px system-ui,sans-serif;fill:#fff}
+.barra-hit{cursor:help}.barra-hit:hover path,.barra-hit:hover rect[fill]:not([fill="transparent"]){opacity:.85}
 /* ==== #CSS-CUSTODIA: END ==== */
 

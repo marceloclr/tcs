@@ -139,6 +139,9 @@ test('cadastro: aguardando autorização, desativado e implantação', async () 
   await assertSucceeds(getDoc(doc(novo, 'usuarios/' + NOVO)));
   await assertFails(getDocs(query(collection(novo, 'projects'), where(documentId(), 'in', ['A1']))));
   await assertSucceeds(setDoc(doc(novo, 'solicitacoes/' + NOVO), { email: NOVO, nome: 'Novo', pedidoEm: 'x' }));
+  // cada pessoa pode gravar o próprio telefone (pedidos de orçamento), mas não o papel
+  await assertSucceeds(updateDoc(doc(ctx(ESC), 'usuarios/' + ESC), { telefone: '(85) 98888-7777' }));
+  await assertFails(updateDoc(doc(ctx(ESC), 'usuarios/' + ESC), { papel: 'admin' }));
   await assertFails(setDoc(doc(novo, 'solicitacoes/outro@x.com'), { email: 'outro@x.com', nome: 'x', pedidoEm: 'x' }));
   await assertSucceeds(getDocs(collection(ctx(ADM), 'solicitacoes')));
   await env.withSecurityRulesDisabled(c => updateDoc(doc(c.firestore(), 'usuarios/' + ESC), { ativo: false }));
