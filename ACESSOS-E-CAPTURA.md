@@ -12,7 +12,7 @@ Guia de uso do controle de acesso por cliente e projeto e, nas próximas etapas,
    2. clique em **Preparar e conferir totais**. O sistema calcula, para as notas existentes, o escopo, as projeções por projeto e o índice de chaves, e mostra os totais de cada cliente e projeto antes e depois. A conferência precisa terminar com "os totais batem".
    Para desfazer, restaure o backup em **Importação de backup**.
 5. Cadastre as demais pessoas em **Usuários e acessos** (seção 2).
-6. Quando os dois administradores já tiverem entrado, retire a implantação automática: esvazie a lista em `js/config.js` (`TCS_ADMINS_INICIAIS=[]`) e na função `implantacao()` de `firestore.rules`, faça o push e publique as regras de novo.
+6. Implantação automática retirada em 19/10/2026 (listas vazias em `js/config.js` e em `implantacao()` de `firestore.rules`). Para reabri-la, por exemplo se o único administrador perder o acesso, inclua o e-mail nas duas listas, faça o push e publique as regras de novo.
 
 ## 2. Administrar usuários e acessos
 

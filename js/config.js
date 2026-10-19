@@ -4,4 +4,5 @@ window.TCS_FIREBASE_CONFIG={apiKey:"AIzaSyDb5XrbCVCwdGfS95_uOPgEJaMemAAvytU",aut
 // Implantação inicial: no primeiro login, estas contas viram administradoras (se ainda não tiverem cadastro).
 // As regras do Firestore (função implantacao) têm a mesma lista. Depois que os administradores tiverem entrado uma vez,
 // esvazie as duas listas ([]) e publique as regras de novo: a partir daí, só um administrador cadastra pessoas.
-window.TCS_ADMINS_INICIAIS=['marceloclr@gmail.com','thiagocsampaio@gmail.com'];
+// Implantação concluída em 19/10/2026 (administrador: marceloclr@gmail.com). Lista vazia: só um administrador cadastra pessoas.
+window.TCS_ADMINS_INICIAIS=[];

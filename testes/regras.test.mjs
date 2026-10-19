@@ -136,11 +136,11 @@ test('cadastro: aguardando autorização, desativado e implantação', async () 
   await assertSucceeds(getDocs(collection(ctx(ADM), 'solicitacoes')));
   await env.withSecurityRulesDisabled(c => updateDoc(doc(c.firestore(), 'usuarios/' + ESC), { ativo: false }));
   await assertFails(getDoc(doc(ctx(ESC), 'allocations/a1')));
-  // implantação: thiago se cadastra como administrador e entra na lista
+  // implantação encerrada (lista vazia nas regras): ninguém se cadastra como administrador sozinho
   const th = ctx('thiagocsampaio@gmail.com'); const b = writeBatch(th);
   b.set(doc(th, 'usuarios/thiagocsampaio@gmail.com'), { email: 'thiagocsampaio@gmail.com', papel: 'admin', ativo: true, acessos: {} });
   b.update(doc(th, 'config/admins'), { lista: [ADM, 'thiagocsampaio@gmail.com'] });
-  await assertSucceeds(b.commit());
+  await assertFails(b.commit());
   await assertFails(setDoc(doc(novo, 'usuarios/' + NOVO), { email: NOVO, papel: 'admin', ativo: true, acessos: {} }));
 });
 test('administração: auditoria obrigatória e último administrador protegido', async () => {

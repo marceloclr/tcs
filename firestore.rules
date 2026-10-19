@@ -29,7 +29,9 @@ service cloud.firestore {
     function obra() { return ativo() && perfil().papel == 'obra'; }
     // Implantação inicial: estas contas podem se cadastrar como administradoras uma única vez.
     // Depois que os administradores estiverem cadastrados, esvazie a lista e publique de novo.
-    function implantacao() { return logado() && eu() in ['marceloclr@gmail.com', 'thiagocsampaio@gmail.com']; }
+    // Implantação concluída em 19/10/2026: lista vazia. Para reabrir (por exemplo, se todos os administradores perderem o acesso),
+    // inclua o e-mail aqui e em TCS_ADMINS_INICIAIS (js/config.js) e publique de novo.
+    function implantacao() { return logado() && eu() in []; }
 
     function vale(a) { return a != null && (a.get('ate', null) == null || request.time < a.ate); }
     function nivel(k) { let a = perfil().acessos.get(k, null); return vale(a) ? a.n : ''; }
