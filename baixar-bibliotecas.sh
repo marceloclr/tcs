@@ -7,4 +7,6 @@ fetch https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js libs
 fetch https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js libs/tesseract/worker.min.js
 for f in tesseract-core.wasm.js tesseract-core-simd.wasm.js tesseract-core-lstm.wasm.js tesseract-core-simd-lstm.wasm.js tesseract-core.wasm tesseract-core-simd.wasm tesseract-core-lstm.wasm tesseract-core-simd-lstm.wasm; do fetch "https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1/$f" "libs/tesseract/core/$f"; done
 fetch https://tessdata.projectnaptha.com/4.0.0/por.traineddata.gz libs/tesseract/tessdata/por.traineddata.gz
+fetch https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js libs/zxing/index.min.js
+fetch https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js libs/heic2any/heic2any.min.js
 echo 'Concluído. Mantenha a estrutura libs/ ao publicar.'
