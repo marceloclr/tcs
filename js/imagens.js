@@ -65,27 +65,29 @@ function chavesDoTexto(t){const s=String(t||''),out=[];const ok=d=>{if(chaveVali
 // O OCR da faixa de cima da foto lê os 11 grupos da chave com poucos erros (3↔8, 2↔5, 0↔6, dígito a mais).
 // A correção usa o que a própria nota diz, sem adivinhar: número e série lidos em letra grande no cabeçalho, mês e ano da
 // emissão, os dígitos verificadores do CNPJ e o dígito verificador da chave. Só aceita um resultado sem ambiguidade.
-const CONFUSAO={0:'689',1:'74',2:'57',3:'89',4:'19',5:'263',6:'058',7:'12',8:'3609',9:'843'};
+const CONFUSAO={0:'6895',1:'74',2:'573',3:'8924',4:'1390',5:'2638',6:'0589',7:'124',8:'36095',9:'8430'};
 function cnpjValido(c){if(!/^\d{14}$/.test(c)||/^(\d)\1+$/.test(c))return false;const dv=(n,p)=>{let s=0;for(let i=0;i<p.length;i++)s+=Number(n[i])*p[i];const r=s%11;return r<2?0:11-r};const p1=[5,4,3,2,9,8,7,6,5,4,3,2],p2=[6,5,4,3,2,9,8,7,6,5,4,3,2];return dv(c,p1)===+c[12]&&dv(c,p2)===+c[13]}
 // variações de uma sequência trocando até `max` dígitos por confusões comuns, nas posições dadas
 function variacoes(seq,posicoes,max){const out=[];const passo=(s,ini,n)=>{out.push({s,n});if(n>=max)return;for(let k=ini;k<posicoes.length;k++){const i=posicoes[k];for(const c of CONFUSAO[s[i]]||'')passo(s.slice(0,i)+c+s.slice(i+1),k+1,n+1)}};passo(seq,0,0);return out}
-function chaveReconstruir(grupos,texto){const g=grupos.map(x=>x.replace(/\D/g,'')).filter(Boolean);if(g.length<10||g.length>12)return null;
+function chaveReconstruir(grupos,texto,diag){const g=grupos.map(x=>x.replace(/\D/g,'')).filter(Boolean);if(g.length<10||g.length>12)return null;
  // grupos de 5 dígitos: um deles sobra (testa tirar cada um); grupos de 4 ficam como estão
  let bases=[''];for(const x of g){const op=x.length===4?[x]:x.length===5?[...new Set([...x].map((_,i)=>x.slice(0,i)+x.slice(i+1)))]:x.length===3?[x]:[x];const nb=[];for(const b of bases)for(const o of op)nb.push(b+o);bases=nb.slice(0,64)}
- const T=String(texto||'');const nn=T.match(/N[º°o.]?\s*(\d{3})\.(\d{3})\.(\d{3})/);const se=T.match(/S[ÉE]RIE\s*(\d{1,3})/i);
+ const T=String(texto||'');const sigla=(T.match(/-\s*(AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SP|SE|TO)\b/)||[])[1];const ufTexto=sigla?Object.keys(UF_SIGLA).find(c=>UF_SIGLA[c]===sigla):'';const nn=T.match(/N[º°o.]?\s*(\d{3})\.(\d{3})\.(\d{3})/);const se=T.match(/S[ÉE]RIE\s*(\d{1,3})/i);
  const resultados=new Map();
  for(let b of bases){if(b.length!==44)continue;
   if(nn)b=b.slice(0,25)+(nn[1]+nn[2]+nn[3]).padStart(9,'0')+b.slice(34);if(se)b=b.slice(0,22)+se[1].padStart(3,'0')+b.slice(25);
   const mes=(T.match(/(\d{2})\/(\d{2})\/(20\d{2})/g)||[]).map(d=>d.slice(8,10)+d.slice(3,5));if(mes.length&&!mes.includes(b.slice(2,6))){const m=mes.find(x=>x===b.slice(2,6))||mes[0];b=b.slice(0,2)+m+b.slice(6)}
   if(/DANFE|NF-?e/i.test(T)&&b.slice(20,22)!=='55')b=b.slice(0,20)+'55'+b.slice(22);
+  if(ufTexto&&b.slice(0,2)!==ufTexto)b=ufTexto+b.slice(2);
   // CNPJ (posições 6 a 19) com os próprios dígitos verificadores
   const cnpjs=cnpjValido(b.slice(6,20))?[{s:b.slice(6,20),n:0}]:variacoes(b.slice(6,20),[...Array(14).keys()],2).filter(v=>cnpjValido(v.s));
   for(const c of cnpjs){const b2=b.slice(0,6)+c.s+b.slice(20);
    // resto: UF, tipo de emissão, código numérico e DV
    for(const v of variacoes(b2,[0,1,34,35,36,37,38,39,40,41,42,43],1)){if(chaveValida(v.s)){const custo=c.n+v.n;const ant=resultados.get(v.s);if(ant==null||custo<ant)resultados.set(v.s,custo)}}}}
- const lista=[...resultados.entries()].sort((a,b)=>a[1]-b[1]);if(!lista.length)return null;
- // ambiguidade: duas chaves diferentes com o mesmo custo mínimo → não decide
- if(lista.length>1&&lista[1][1]===lista[0][1])return null;return {chave:lista[0][0],correcoes:lista[0][1]}}
+ const lista=[...resultados.entries()].sort((a,b)=>a[1]-b[1]);if(diag)return lista.slice(0,8);if(!lista.length)return null;
+ // Com 2 ou mais dígitos errados, dezenas de chaves diferentes também fecham os dígitos verificadores (teste de 19/10 com foto real):
+ // só aceita no máximo 1 correção e sem empate; senão não decide. diag=true devolve as candidatas, para análise.
+ if(lista[0][1]>1)return null;if(lista.length>1&&lista[1][1]===lista[0][1])return null;return {chave:lista[0][0],correcoes:lista[0][1]}}
 // OCR da faixa de cima da foto (onde o DANFE traz a chave) e reconstrução a partir dos grupos de 4 dígitos.
 async function chaveDoTextoFocado(file,textoPagina){let bmp;try{bmp=await createImageBitmap(file,{imageOrientation:'from-image'})}catch(e){const b=await jpegPrincipal(file).catch(()=>null);if(!b)return null;try{bmp=await createImageBitmap(b,{imageOrientation:'from-image'})}catch(e2){return null}}
  try{const W=bmp.width,H=bmp.height,larg=Math.min(3000,W),k=larg/W;const c=document.createElement('canvas');c.width=larg;c.height=Math.round(H*0.35*k);c.getContext('2d').drawImage(bmp,0,0,W,H*0.35,0,0,c.width,c.height);
@@ -166,14 +168,18 @@ async function notaDaFoto(file,lido,tipo){const inv=await parsePDF(file,lido.lin
  if(!inv.items.length){inv.items=itensCupom(lido.linhas);if(inv.items.length)inv.totalProducts=Math.round(inv.items.reduce((s,it)=>s+it.lineTotal,0)*100)/100}
  const cupom=chaveDecompor(lido.cod.chave)?.modelo===65||/Consumidor Eletr/i.test(lido.ocr.texto);if(!inv.issuer&&cupom){const e=emitenteCupom(lido.linhas);if(e&&confiancaDe(lido,e)>=70)inv.issuer=e}
  const fontes={};['number','series','date','issuer','issuerDoc','total'].forEach(k=>{fontes[k]=inv[k]?{f:'ocr',c:confiancaDe(lido,k==='total'?String(inv[k]).replace('.',','):k==='date'?inv[k].split('-').reverse().join('/'):inv[k])}:{f:'vazio'}});
- const dk=chaveDecompor(inv.key);if(dk?.valida){inv.number=dk.numero;inv.series=dk.serie;inv.issuerDoc=dk.cnpj;['number','series','issuerDoc'].forEach(k=>fontes[k]={f:'chave'});fontes.key={f:'chave',origem:lido.cod.fonte};
+ const dk=chaveDecompor(inv.key);if(dk?.valida){inv.number=dk.numero;inv.series=dk.serie;inv.issuerDoc=dk.cnpj;const rec=lido.cod.reconstruida;['number','series','issuerDoc'].forEach(k=>fontes[k]=rec?{f:'ocr',c:60}:{f:'chave'});fontes.key=rec?{f:'ocr',c:60}:{f:'chave',origem:lido.cod.fonte};
+  if(rec)(inv._avisos=inv._avisos||[]).push('A chave foi reconstruída do texto impresso na foto, com '+(lido.cod.fonte.match(/\d+/)||['1'])[0]+' dígito corrigido. Ela fecha os dígitos verificadores, mas confira com a nota antes de confirmar (ou use o botão do portal da NF-e).');
   // DANFE fotografado: a chave dá o mês e o ano da emissão; a primeira data desse mês no texto é a da emissão.
   const mm=String(dk.mes).padStart(2,'0');if(!inv.date){const m=lido.ocr.texto.match(new RegExp('(?<!\\d)(\\d{2})[/.]'+mm+'[/.]'+dk.ano));if(m){inv.date=`${dk.ano}-${mm}-${m[1]}`;fontes.date={f:'ocr',c:Math.min(70,confiancaDe(lido,m[0]))}}}
   // Total: no bloco "Cálculo do imposto", a segunda linha de valores termina no valor total da nota; a primeira, no total dos produtos.
   if(!inv.total&&dk.modelo===55){const L=lido.linhas,i=L.findIndex(l=>/C[AÁ]LCULO\s+DO\s+IMPOSTO/i.test(l));if(i>=0){const vals=L.slice(i+1,i+7).map(l=>l.match(/\d{1,3}(?:\.\d{3})*,\d{1,2}(?!\d)/g)||[]).filter(v=>v.length>=4);
    if(vals.length>=2){inv.total=brNumber(vals[1][vals[1].length-1]);fontes.total={f:'ocr',c:50};if(!inv.totalProducts)inv.totalProducts=brNumber(vals[0][vals[0].length-1])}}}
   if(inv.date&&(+inv.date.slice(0,4)!==dk.ano||+inv.date.slice(5,7)!==dk.mes))(inv._avisos=inv._avisos||[]).push(`A data lida (${inv.date.split('-').reverse().join('/')}) não cai no mês da chave (${String(dk.mes).padStart(2,'0')}/${dk.ano}). Confira a data de emissão.`)}
- else fontes.key={f:inv.key?'ocr':'vazio'};
+ else{fontes.key={f:inv.key?'ocr':'vazio'};
+  // Sem chave válida: número no formato do DANFE ("Nº 000.020.643"); o CNPJ achado no texto pode ser o do destinatário ou da transportadora.
+  const nn=lido.ocr.texto.match(/N[º°o]\.?\s*(\d{3}\.\d{3}\.\d{3})/);if(nn&&!inv.number){inv.number=String(+nn[1].replace(/\D/g,''));fontes.number={f:'ocr',c:confiancaDe(lido,nn[1])}}
+  if(inv.issuerDoc)fontes.issuerDoc={f:'ocr',c:40}}
  if(lido.q.pequena)(inv._avisos=inv._avisos||[]).unshift(`Foto pequena (${lido.img.canvas.width} × ${lido.img.canvas.height} pixels), provavelmente reduzida pelo WhatsApp: as letras e o código de barras ficam sem detalhe e a leitura automática não funciona. Peça a foto tirada pelo Notas TCS, ou enviada pelo WhatsApp como documento (ou em HD), ou importe o XML. Até lá, preencha olhando a foto.`);
  else if(lido.ocr.confianca<60&&!lido.cod.chave)(inv._avisos=inv._avisos||[]).unshift(`Não foi possível ler a nota nesta foto (confiança ${Math.round(lido.ocr.confianca)}%). Confira se a nota está inteira, reta e com boa luz; preencha olhando a foto ou importe o XML.`);
  inv._foto={url:lido.img.url,nome:file.name};inv._fontes=fontes;inv._conf=Math.round(lido.ocr.confianca);inv._codigos=lido.cod;inv._avisos=(inv._avisos||[]).concat(lido.cod.avisos);if(lido.q.escura||lido.q.borrada)inv._avisos.push('A foto parece '+(lido.q.escura?'escura':'desfocada')+': a leitura pode ter falhas. Se possível, fotografe de novo em lugar claro, com a nota inteira e o celular firme.');
