@@ -33,6 +33,7 @@ nav .nav-usuarios{color:#e9ddf2}nav .nav-usuarios.active{background:#655070!impo
 .secao-usuarios h2{color:#655070}.secao-usuarios .tabs button.active{background:#655070;border-color:#655070;color:#fff}.secao-usuarios .radio-linha{min-height:42px}
 .adm-editor{border-left:4px solid #655070}.radio-linha{display:flex;gap:8px;align-items:center;margin:6px 0;cursor:pointer}
 .secao-usuarios select,.secao-usuarios input[type=date]{min-height:34px}
+.secao-usuarios .proj-concedidos{max-width:340px;white-space:normal}
 /* ==== #CSS-ACESSO: END ==== */
 /* ==== #CSS-IMAGEM: START ==== */
 .foto-grid{display:grid;grid-template-columns:minmax(260px,1fr) minmax(320px,1.3fr);gap:16px;margin-top:12px;align-items:start}

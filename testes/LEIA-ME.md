@@ -18,16 +18,15 @@ O app real, ligado aos emuladores (`?emulador=1`, só funciona em localhost), co
    - `0-limpar.js` (em cada origem) e, antes, apagar os dados dos emuladores:
      `curl -X DELETE "http://127.0.0.1:8089/emulator/v1/projects/demo-tcs/databases/(default)/documents"` e
      `curl -X DELETE "http://127.0.0.1:9099/emulator/v1/projects/demo-tcs/accounts"`;
-   - `1-admin.js` em 8767: implantação do administrador, clientes, projetos, nota de exemplo distribuída entre dois clientes, preparação da base e três cadastros (Escritório com escrita na Obra 1, Leitor do Cliente B e Obra);
+   - `1-admin.js` em 8767: cria o administrador direto no emulador (a implantação automática foi encerrada) e cadastra clientes, projetos, nota de exemplo distribuída entre dois clientes, preparação da base e três cadastros (Escritório com escrita na Obra 1, Leitor do Cliente B e Obra);
    - `2-escritorio.js` em 8768: vê só o Cliente A e a Obra 1, a nota coletiva só pelo rateio, e as leituras e gravações diretas fora do acesso são negadas (defina `window.RATEIO_P3` com o id de um rateio da Obra 3 para testar a leitura direta);
    - `3-leitor-obra-novo.js` em 8768: troca de conta no mesmo navegador (a cópia local é apagada), leitor sem escrita, conta da obra e conta sem cadastro (solicitação de acesso);
    - `4-revogacao-entrar.js` com `FIM=15000`, retirar os acessos do usuário pelo REST do emulador enquanto a página está aberta, e `4-revogacao-conferir.js`: a cópia local fica vazia.
 
-Variáveis do `cdp.mjs`: `CDP_PORTA` (9446), `ESPERA` (ms antes de rodar o script), `FIM` (ms antes de fechar), `INIT` (script injetado antes da página).
    - `5-fotos.js` e `6-consulta.js` (modo local, sem emuladores): fotos sintéticas com código de barras e QR, e texto de consulta colado;
    - `7-captura.js` em `captura.html?emulador=1` (porta 8768, depois do `1-admin.js`): conta da obra, envio com internet, foto escura, envio sem internet pela fila e reenvio automático;
    - `8-compartilhar.js` e, em seguida, `8-compartilhar-conferir.js` em `captura.html?compartilhado=1&emulador=1`: foto recebida pelo menu Compartilhar (service worker);
    - `9-captura-escritorio.js`: conta do Escritório na tela da obra vai para o sistema principal.
 
-Variáveis do `cdp.mjs`: `TEMA=claro|escuro` força o tema; o script pode chamar `console.log('__cdp_offline__')` e `console.log('__cdp_online__')` para derrubar e religar a rede da página.
+Variáveis do `cdp.mjs`: `CDP_PORTA` (9446), `ESPERA` (ms antes de rodar o script), `FIM` (ms antes de fechar), `INIT` (script injetado antes da página) e `TEMA=claro|escuro` força o tema; o script pode chamar `console.log('__cdp_offline__')` e `console.log('__cdp_online__')` para derrubar e religar a rede da página.
 
