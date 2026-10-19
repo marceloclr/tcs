@@ -62,4 +62,13 @@ tr.atrasada td{background:#fffbeb}.atraso-txt{color:#92400e;font-weight:700}.aco
 .fotos-obra-grade,.fotos-extra{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}.fotos-obra-grade img{height:220px;border:1px solid #e2e8f0;border-radius:8px}.fotos-extra img{height:110px;border:1px solid #e2e8f0;border-radius:6px}
 .fila-projeto{max-width:520px;margin-bottom:10px;padding:10px;border:1px solid #99c2c3;border-radius:8px;background:#f0f7f7}
 /* ==== #CSS-FILA: END ==== */
+/* ==== #CSS-CUSTODIA: START ==== */
+.kpis .kpi-estoque{border-top:4px solid #1d4ed8;background:#f5f8ff}.kpis .kpi-estoque strong{font-size:30px}
+.kpis .kpi-apropriado{border-top:4px solid #0f766e}.kpis .kpi-apropriado strong{color:#0f766e}
+.vivo-grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.vivo{border:1px solid #e2e8f0;border-left:4px solid #94a3b8;border-radius:10px;padding:12px;background:#fff}
+.vivo.ok{border-left-color:#16a34a}.vivo.atencao{border-left-color:#2563eb}.vivo.alerta{border-left-color:#d97706;background:#fffbeb}
+.vivo-t{font-size:13px;color:#475569;font-weight:600}.vivo-v{font-size:22px;font-weight:700;margin:4px 0 6px}
+.vivo ul{margin:0 0 8px;padding-left:18px;font-size:13px}.vivo li{margin:3px 0}
+/* ==== #CSS-CUSTODIA: END ==== */
 

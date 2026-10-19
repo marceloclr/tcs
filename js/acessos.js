@@ -16,7 +16,7 @@ function aplicarPermissoes(){const p=Nuvem.perfil,admin=ehAdmin(),escr=podeEscre
  const sel=$('#newProjectClient');if(sel)[...sel.options].forEach(o=>{if(o.value)o.disabled=!podeGravarCliente(o.value)});
  // Totais: deixa claro que consideram só os projetos liberados.
  const nota=p&&!admin?'Considerando apenas os clientes e projetos aos quais você tem acesso.':'';
- ['#mCusto','#mMat','#mServ','#mStock','#mClients','#stockTable','#dashBody'].forEach(s=>{const el=$(s);if(!el)return;const card=el.closest('.metric,.card,.panel')||el;if(nota)card.title=nota;else if(card.title===nota)card.removeAttribute('title')});
+ ['#mCusto','#mMat','#mServ','#mStock','#mClients','#stockTable','#dashBody'].forEach(s=>{const el=$(s);if(!el)return;const card=el.closest('.metric,.card,.panel')||el;const t=[card.dataset.formula||'',nota].filter(Boolean).join('\n');if(t)card.title=t;else card.removeAttribute('title')});
  const aviso=$('#avisoEscopo');if(aviso)aviso.hidden=!nota}
 
 // ---------- Área "Usuários e acessos" (administradores) ----------
