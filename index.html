@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gestão de Materiais - V-19102026-1035</title>
+<title>Gestão de Materiais - V-19102026-1040</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox=%220 0 250 250%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cdefs%3E%3ClinearGradient id=%22fN%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22#173B68%22/%3E%3Cstop offset=%221%22 stop-color=%22#102746%22/%3E%3C/linearGradient%3E%3ClinearGradient id=%22fT%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22#35C8B0%22/%3E%3Cstop offset=%221%22 stop-color=%22#128C83%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x=%220%22 y=%220%22 width=%22250%22 height=%22250%22 rx=%2242%22 fill=%22#F1F6FB%22/%3E%3Cpath d=%22M42 100L125 35L208 100%22 fill=%22none%22 stroke=%22url(#fN)%22 stroke-width=%2215%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3Cpath d=%22M58 104V202H192V104%22 fill=%22none%22 stroke=%22url(#fN)%22 stroke-width=%2213%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3Cpath d=%22M86 202V145H119V202M139 202V119H172V202%22 fill=%22none%22 stroke=%22url(#fT)%22 stroke-width=%2212%22 stroke-linejoin=%22round%22/%3E%3Cpath d=%22M43 218H207%22 stroke=%22#173B68%22 stroke-width=%229%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%22190%22 cy=%2262%22 r=%2217%22 fill=%22url(#fT)%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="css/tcs.css">
 </head>
@@ -16,7 +16,7 @@
 <section class="view active" id="dashboard">
 <div class="heading"><div><h2>Visão geral</h2><p>Custos de materiais e de serviços por cliente e projeto.</p></div><div class="row"><button class="btn" id="demoBtn">Carregar exemplo da NF enviada</button><button class="btn primary" data-go="import">＋ Importar nota fiscal</button></div></div>
 <div class="grid kpis"><div class="card metric"><label>Custo total</label><strong id="mCusto">R$ 0,00</strong><small id="mCustoSub"></small></div><div class="card metric kpi-mat"><label>Materiais</label><strong id="mMat">R$ 0,00</strong><small id="mMatSub"></small></div><div class="card metric kpi-serv"><label>Serviços</label><strong id="mServ">R$ 0,00</strong><small id="mServSub"></small></div><div class="card metric"><label>Valor em estoque</label><strong id="mStock" class="accent">R$ 0,00</strong><small id="mStockSub"></small></div><div class="card metric"><label>Clientes · projetos ativos</label><strong id="mClients">0</strong><small id="mClientsSub"></small></div></div>
-<div class="row dash-filter"><label for="dashClient" class="muted">Cliente</label><select id="dashClient" class="inline-input"></select><span class="hint">Clique num cliente nos gráficos para filtrar os projetos.</span></div>
+<div id="cardObra"></div><div class="row dash-filter"><label for="dashClient" class="muted">Cliente</label><select id="dashClient" class="inline-input"></select><span class="hint">Clique num cliente nos gráficos para filtrar os projetos.</span></div>
 <div id="dashBody"></div>
 <div class="dash-more">
 <details class="panel" id="dashPending"><summary><strong>Notas a vincular</strong> <span id="dashPendingSum" class="muted"></span></summary><div id="dashPendingList" style="margin-top:12px"></div></details>
@@ -41,6 +41,10 @@
 <section class="view" id="stock">
 <div class="subnav" data-subnav></div><div class="heading"><div><h2>Estoque por cliente e projeto</h2><p>Valores pagos pelos produtos de cada projeto e de cada cliente. Clique num cliente para recolher ou abrir os projetos e num projeto para ver os produtos.</p></div><button class="btn" id="stockCsv">Exportar estoque CSV</button></div>
 <div class="row" style="margin-bottom:14px"><input class="search" id="stockSearch" placeholder="Buscar cliente, projeto, produto ou EAN…"><button class="btn sm" id="stockExpand">Abrir todos os produtos</button><button class="btn sm" id="stockCollapse">Recolher produtos</button><span class="muted right" id="stockCount"></span></div><div class="panel"><div id="stockTable"></div></div>
+</section>
+<section class="view secao-obra" id="recebidas">
+<div class="subnav" data-subnav></div><div class="heading"><div><h2>Notas recebidas da obra</h2><p>Fotos de notas enviadas pelo celular da obra. Confira cada uma: o sistema lê a foto, abre a conferência com o projeto indicado e, ao confirmar, lança a nota e guarda as fotos como comprovante de recebimento.</p></div></div>
+<div id="filaBody"></div>
 </section>
 <section class="view" id="invoices">
 <div class="subnav" data-subnav></div><div class="heading"><div><h2>Notas fiscais</h2><p>As notas importadas ficam separadas até serem vinculadas a um cliente e projeto. Uma compra coletiva pode ser distribuída entre vários projetos.</p></div><button class="btn" id="invoiceCsv">Exportar notas CSV</button></div>
@@ -96,6 +100,7 @@
 <script src="js/paineis.js"></script>
 <script src="js/escopo.js"></script>
 <script src="js/acessos.js"></script>
+<script src="js/fila.js"></script>
 <script src="js/orcamento.js"></script>
 <script src="js/inicio.js"></script>
 </body></html>

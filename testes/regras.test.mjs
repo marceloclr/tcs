@@ -128,7 +128,11 @@ test('obra: só nomes dos projetos concedidos e criação de capturas', async ()
   // o escritório com escrita no projeto lê a fila e confere
   await assertSucceeds(getDocs(query(collection(ctx(ESC), 'capturas'), where('projectId', 'in', ['A1']))));
   await assertSucceeds(updateDoc(doc(ctx(ESC), 'capturas/c1'), { status: 'em_conferencia' }));
-  await assertFails(getDoc(doc(ctx(LEI), 'capturas/c1')));
+  // quem só lê o projeto vê a captura (comprovante), mas não a altera
+  await assertSucceeds(getDoc(doc(ctx(LEI), 'capturas/c1')));
+  await assertFails(updateDoc(doc(ctx(LEI), 'capturas/c1'), { status: 'lancada' }));
+  await assertSucceeds(getDocs(query(collection(ctx(LEI), 'capturas_fotos'), where('capturaId', '==', 'c1'), where('projectId', '==', 'A1'))));
+  await assertFails(getDocs(query(collection(ctx(ESC), 'capturas'), where('projectId', 'in', ['B1']))));
 });
 test('cadastro: aguardando autorização, desativado e implantação', async () => {
   const novo = ctx(NOVO);

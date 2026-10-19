@@ -81,7 +81,8 @@ async function nuvemPerfil(d){const u=Nuvem.user;if(!u)return;
  if(d.papel==='obra'){Nuvem.estado='obra';nuvemRender();return}
  if(!Nuvem.planoChave)await nuvemEnviarFila().catch(e=>console.error('Falha ao enviar alterações offline:',e));
  nuvemEscutar();render()}
-function nuvemIniciar(){if(Nuvem.iniciada||!window.__fb||!db)return;Nuvem.iniciada=true;window.__fb.onAuth(u=>{gateAuthVisto=true;Nuvem.user=u;Nuvem.erro='';Nuvem.aviso='';Nuvem.acessoMarcado=false;if(Nuvem.unsubPerfil){Nuvem.unsubPerfil();Nuvem.unsubPerfil=null}
+function nuvemIniciar(){if(Nuvem.iniciada||!window.__fb||!db)return;Nuvem.iniciada=true;window.__fb.onAuth(u=>{gateAuthVisto=true;// troca de conta: as escutas da conta anterior (administração e fila da obra) param na hora
+  admDesligar();Adm.msg='';filaDesligar();Fila.msg='';Nuvem.user=u;Nuvem.erro='';Nuvem.aviso='';Nuvem.acessoMarcado=false;if(Nuvem.unsubPerfil){Nuvem.unsubPerfil();Nuvem.unsubPerfil=null}
   if(u){Nuvem.estado='perfil';Nuvem.unsubPerfil=window.__fb.listenDoc('usuarios',u.email,(d,meta)=>{if((meta.fromCache&&!d)||meta.pending)return;nuvemPerfil(d).catch(e=>console.error(e))},e=>{Nuvem.estado='negado';Nuvem.erro=e.message;nuvemParar();nuvemRender()})}
   else{nuvemParar();Nuvem.perfil=null;delete document.body.dataset.papel;delete document.body.dataset.escritor;Nuvem.estado='local'}nuvemRender()})}
 window.addEventListener('tcs-fb',()=>{nuvemIniciar();nuvemRender()});

@@ -5,7 +5,7 @@
 //   rateados àquele projeto, com o custo unitário pago já calculado. Quem não tem acesso a todos os projetos da nota lê só as projeções.
 // - O índice chaves/{chave} acusa nota repetida em toda a base sem revelar a nota.
 // - Os rateios e as entradas da nota carregam o mesmo escopo, para que quem tem escrita veja as notas abertas e o que já foi distribuído.
-const NOTA_CAMPOS=['id','key','number','series','date','operation','issuer','issuerDoc','recipient','tipo','format','source','postedAt','protocolStatus','servico','consultaUrl','consultaOrigem'];
+const NOTA_CAMPOS=['id','key','number','series','date','operation','issuer','issuerDoc','recipient','tipo','format','source','postedAt','protocolStatus','servico','consultaUrl','consultaOrigem','capturaId','capturaProjeto','formatoAnterior'];
 const projecaoId=(invId,pid)=>invId+'__'+pid;
 // Situação calculada sobre uma lista de rateios (a mesma conta de invoiceStatus, que usa os rateios do estado).
 function notaEscopo(inv,allocs){const items=inv.items||[];const tot=items.reduce((a,it)=>a+Number(it.quantity||0),0),alo=allocs.reduce((a,x)=>a+Number(x.quantity||0),0);

@@ -182,19 +182,19 @@ service cloud.firestore {
         && (admin() || concedido(request.resource.data.projectId, request.resource.data.clientId))
         && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId)
         && request.resource.data.status == 'pendente';
-      allow read: if (ativo() && resource.data.autor == eu()) || grava(resource.data.projectId, resource.data.clientId);
+      allow read: if (ativo() && resource.data.autor == eu()) || le(resource.data.projectId, resource.data.clientId);
       allow update: if grava(resource.data.projectId, resource.data.clientId)
         && request.resource.data.autor == resource.data.autor;
       allow delete: if admin();
     }
-    // Fotos fatiadas em partes de até 700 KB (texto base64), ligadas à captura.
+    // Fotos fatiadas em partes de até 700 KB (texto base64), ligadas à captura. Ficam como comprovante de recebimento da nota.
     match /capturas_fotos/{id} {
       allow create: if (obra() || admin() || escritor()) && request.resource.data.autor == eu()
         && (admin() || concedido(request.resource.data.projectId, request.resource.data.clientId))
         && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId)
         && request.resource.data.dados is string && request.resource.data.dados.size() <= 716800
         && request.resource.data.tipo in ['image/jpeg', 'image/webp', 'image/png'];
-      allow read: if (ativo() && resource.data.autor == eu()) || grava(resource.data.projectId, resource.data.clientId);
+      allow read: if (ativo() && resource.data.autor == eu()) || le(resource.data.projectId, resource.data.clientId);
       // reenvio da mesma parte depois de uma queda de conexão
       allow update: if ativo() && resource.data.autor == eu() && request.resource.data.autor == eu()
         && request.resource.data.capturaId == resource.data.capturaId && request.resource.data.projectId == resource.data.projectId

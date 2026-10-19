@@ -27,6 +27,7 @@ O app real, ligado aos emuladores (`?emulador=1`, só funciona em localhost), co
    - `7-captura.js` em `captura.html?emulador=1` (porta 8768, depois do `1-admin.js`): conta da obra, envio com internet, foto escura, envio sem internet pela fila e reenvio automático;
    - `8-compartilhar.js` e, em seguida, `8-compartilhar-conferir.js` em `captura.html?compartilhado=1&emulador=1`: foto recebida pelo menu Compartilhar (service worker);
    - `9-captura-escritorio.js`: conta do Escritório na tela da obra vai para o sistema principal.
+   - `10-fila.js` em 8767 (depois do `7-captura.js`): fila do escritório, cartão e destaque de 48 h, conferir com o projeto indicado, lançar, fotos como comprovante, descartar com motivo e XML da mesma chave substituindo os dados da foto.
 
 Variáveis do `cdp.mjs`: `CDP_PORTA` (9446), `ESPERA` (ms antes de rodar o script), `FIM` (ms antes de fechar), `INIT` (script injetado antes da página) e `TEMA=claro|escuro` força o tema; o script pode chamar `console.log('__cdp_offline__')` e `console.log('__cdp_online__')` para derrubar e religar a rede da página.
 

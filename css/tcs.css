@@ -53,4 +53,13 @@ nav .nav-usuarios{color:#e9ddf2}nav .nav-usuarios.active{background:#655070!impo
 .consulta-painel textarea{width:100%;font:13px/1.4 ui-monospace,Consolas,monospace;padding:8px;border:1px solid #ccd5e1;border-radius:6px}
 .foto-grid.sem-foto{grid-template-columns:1fr}.selo-fonte.consulta{color:#5b21b6;border-color:#c4b5fd;background:#f5f3ff}
 /* ==== #CSS-CONSULTA: END ==== */
+/* ==== #CSS-FILA: START ==== */
+.cartao-obra{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;border-left:4px solid #2f5f61;cursor:pointer}
+.cartao-obra label{display:block;color:#475569;font-size:13px}.cartao-obra strong{font-size:26px;color:#2f5f61;margin-right:10px}.cartao-obra small{color:#475569}
+.cartao-obra.atraso{border-left-color:#b45309;background:#fffbeb}.cartao-obra.atraso b{color:#92400e}
+.secao-obra h2{color:#2f5f61}.secao-obra .tabs button.active{background:#2f5f61;border-color:#2f5f61;color:#fff}
+tr.atrasada td{background:#fffbeb}.atraso-txt{color:#92400e;font-weight:700}.acoes-fila{white-space:nowrap}.acoes-fila .btn{margin:2px}
+.fotos-obra-grade,.fotos-extra{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}.fotos-obra-grade img{height:220px;border:1px solid #e2e8f0;border-radius:8px}.fotos-extra img{height:110px;border:1px solid #e2e8f0;border-radius:6px}
+.fila-projeto{max-width:520px;margin-bottom:10px;padding:10px;border:1px solid #99c2c3;border-radius:8px;background:#f0f7f7}
+/* ==== #CSS-FILA: END ==== */
 
