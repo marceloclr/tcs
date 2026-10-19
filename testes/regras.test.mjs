@@ -121,6 +121,9 @@ test('obra: só nomes dos projetos concedidos e criação de capturas', async ()
   await assertSucceeds(getDocs(query(collection(db, 'capturas'), where('autor', '==', OBRA))));
   await assertSucceeds(setDoc(doc(db, 'capturas_fotos/f1'), { autor: OBRA, capturaId: 'c1', projectId: 'A1', clientId: 'A', parte: 0, tipo: 'image/jpeg', dados: 'abc' }));
   await assertFails(setDoc(doc(db, 'capturas_fotos/f2'), { autor: OBRA, capturaId: 'c1', projectId: 'A1', clientId: 'A', parte: 0, tipo: 'text/html', dados: 'abc' }));
+  // reenvio da mesma parte (queda de conexão) é aceito; trocar o projeto, não
+  await assertSucceeds(setDoc(doc(db, 'capturas_fotos/f1'), { autor: OBRA, capturaId: 'c1', projectId: 'A1', clientId: 'A', parte: 0, tipo: 'image/jpeg', dados: 'abcd' }));
+  await assertFails(setDoc(doc(db, 'capturas_fotos/f1'), { autor: OBRA, capturaId: 'c1', projectId: 'A2', clientId: 'A', parte: 0, tipo: 'image/jpeg', dados: 'abcd' }));
   await assertFails(setDoc(doc(db, 'capturas_fotos/f3'), { autor: OBRA, capturaId: 'c1', projectId: 'A2', clientId: 'A', parte: 0, tipo: 'image/jpeg', dados: 'abc' }));
   // o escritório com escrita no projeto lê a fila e confere
   await assertSucceeds(getDocs(query(collection(ctx(ESC), 'capturas'), where('projectId', 'in', ['A1']))));

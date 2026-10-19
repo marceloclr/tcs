@@ -1,0 +1,2 @@
+(async()=>{const espera=(f,ms=20000)=>new Promise((res,rej)=>{const t0=Date.now();const i=setInterval(()=>{let v;try{v=f()}catch(e){}if(v){clearInterval(i);res(v)}else if(Date.now()-t0>ms){clearInterval(i);rej(new Error('tempo'))}},150)});
+ await espera(()=>window.__fb);if(Cap.user)await window.__fb.logout();await espera(()=>!Cap.user);sessionStorage.setItem('teste-redirecionou','?');await window.__fb.loginTeste('esc@x.com');await new Promise(r=>setTimeout(r,5000));return {url:location.pathname}})()

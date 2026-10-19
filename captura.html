@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Notas TCS - V-19102026-1033</title>
+<meta name="theme-color" content="#173B68">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icones/notas-tcs.svg">
+<link rel="apple-touch-icon" href="icones/notas-tcs-192.png">
+<link rel="stylesheet" href="css/captura.css">
+</head>
+<body>
+<!-- Tela do mestre de obras: só fotografar, escolher a obra e enviar. Linguagem simples, botões grandes, sem menus. -->
+<header class="topo"><img src="icones/notas-tcs.svg" alt="" class="topo-icone"><span>Notas da obra</span><span class="topo-quem" id="quem"></span></header>
+<div id="fila" class="faixa-fila" hidden></div>
+<main>
+ <section id="telaCarregando" class="tela ativa"><div class="espera"><span class="roda"></span><p>Abrindo…</p></div></section>
+
+ <section id="telaEntrar" class="tela">
+  <p class="grande">Para enviar as notas da obra, entre com a sua conta Google.</p>
+  <p>Você só precisa fazer isso uma vez neste celular.</p>
+  <button class="botao principal" id="entrar" title="Abre a tela do Google para escolher a sua conta">Entrar com Google</button>
+  <p class="erro" id="entrarErro"></p>
+ </section>
+
+ <section id="telaAviso" class="tela"><div class="aviso-grande" id="avisoTexto"></div><button class="botao secundario" id="trocarConta" title="Sai desta conta para entrar com outra">Entrar com outra conta</button></section>
+
+ <section id="telaFoto" class="tela">
+  <div class="guia" aria-hidden="true"><div class="guia-moldura"><span></span><span></span><span></span><span></span><div class="guia-nota"></div></div></div>
+  <p class="dica">Nota inteira na foto, em lugar claro.</p>
+  <label class="botao principal enorme" title="Abre a câmera para fotografar a nota">
+   <span class="icone" aria-hidden="true">📷</span> Fotografar nota
+   <input type="file" accept="image/*" capture="environment" id="camera" hidden>
+  </label>
+  <label class="botao secundario" title="Escolhe uma foto que já está no celular (por exemplo, recebida pelo WhatsApp)">
+   <span class="icone" aria-hidden="true">🖼️</span> Usar foto da galeria
+   <input type="file" accept="image/*" id="galeria" multiple hidden>
+  </label>
+ </section>
+
+ <section id="telaConferir" class="tela">
+  <div id="fotos" class="fotos"></div>
+  <label class="botao secundario" title="Abre a câmera de novo para fotografar outra parte da mesma nota (nota comprida ou verso)">
+   <span class="icone" aria-hidden="true">➕</span> Mais uma foto desta nota
+   <input type="file" accept="image/*" capture="environment" id="cameraMais" hidden>
+  </label>
+  <h2>Qual obra?</h2>
+  <div id="obras" class="obras"></div>
+  <div class="extras">
+   <button class="botao alterna" id="faltou" aria-pressed="false" title="Marque se chegou menos material do que está na nota">Faltou material</button>
+   <button class="botao alterna" id="avariado" aria-pressed="false" title="Marque se algum material chegou quebrado ou estragado">Veio avariado</button>
+  </div>
+  <button class="botao principal enorme" id="enviar" disabled title="Envia as fotos para o escritório conferir">Enviar</button>
+  <button class="botao texto" id="cancelar" title="Apaga estas fotos sem enviar">Cancelar</button>
+ </section>
+
+ <section id="telaPronto" class="tela">
+  <div class="pronto" id="prontoTexto"></div>
+  <button class="botao principal enorme" id="outra" title="Volta para fotografar a próxima nota"><span class="icone" aria-hidden="true">📷</span> Fotografar outra</button>
+ </section>
+</main>
+<p class="versao" id="versao"></p>
+<script src="js/config.js"></script>
+<script type="module" src="js/nuvem-firebase.js"></script>
+<script src="js/base.js"></script>
+<script src="js/importacao.js"></script>
+<script src="js/imagens.js"></script>
+<script src="js/captura.js"></script>
+</body>
+</html>

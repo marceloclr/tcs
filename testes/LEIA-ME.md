@@ -24,3 +24,10 @@ O app real, ligado aos emuladores (`?emulador=1`, só funciona em localhost), co
    - `4-revogacao-entrar.js` com `FIM=15000`, retirar os acessos do usuário pelo REST do emulador enquanto a página está aberta, e `4-revogacao-conferir.js`: a cópia local fica vazia.
 
 Variáveis do `cdp.mjs`: `CDP_PORTA` (9446), `ESPERA` (ms antes de rodar o script), `FIM` (ms antes de fechar), `INIT` (script injetado antes da página).
+   - `5-fotos.js` e `6-consulta.js` (modo local, sem emuladores): fotos sintéticas com código de barras e QR, e texto de consulta colado;
+   - `7-captura.js` em `captura.html?emulador=1` (porta 8768, depois do `1-admin.js`): conta da obra, envio com internet, foto escura, envio sem internet pela fila e reenvio automático;
+   - `8-compartilhar.js` e, em seguida, `8-compartilhar-conferir.js` em `captura.html?compartilhado=1&emulador=1`: foto recebida pelo menu Compartilhar (service worker);
+   - `9-captura-escritorio.js`: conta do Escritório na tela da obra vai para o sistema principal.
+
+Variáveis do `cdp.mjs`: `TEMA=claro|escuro` força o tema; o script pode chamar `console.log('__cdp_offline__')` e `console.log('__cdp_online__')` para derrubar e religar a rede da página.
+

@@ -2,6 +2,10 @@
 const espera=(f,ms=20000)=>new Promise((res,rej)=>{const t0=Date.now();const i=setInterval(()=>{let v;try{v=f()}catch(e){}if(v){clearInterval(i);res(v)}else if(Date.now()-t0>ms){clearInterval(i);rej(new Error('tempo esgotado: '+f))}},100)});
 await espera(()=>window.__fb&&db);
 for(const s of STORES)await clearStore(s,{local:true});
+// sem implantação automática: o administrador é criado direto no emulador, com o acesso de dono (Bearer owner)
+const rest=(c,id,campos)=>fetch(`http://127.0.0.1:8089/v1/projects/demo-tcs/databases/(default)/documents/${c}/${encodeURIComponent(id)}`,{method:'PATCH',headers:{'Authorization':'Bearer owner','Content-Type':'application/json'},body:JSON.stringify({fields:campos})});
+await rest('usuarios','marceloclr@gmail.com',{email:{stringValue:'marceloclr@gmail.com'},nome:{stringValue:'Marcelo'},papel:{stringValue:'admin'},ativo:{booleanValue:true},acessos:{mapValue:{fields:{}}}});
+await rest('config','admins',{lista:{arrayValue:{values:[{stringValue:'marceloclr@gmail.com'}]}}});
 await window.__fb.loginTeste('marceloclr@gmail.com');
 await espera(()=>Nuvem.perfil&&Nuvem.estado==='online');
 await txWrite(['clients','projects'],os=>{os.clients.put({id:'CA',name:'Cliente A'});os.clients.put({id:'CB',name:'Cliente B'});

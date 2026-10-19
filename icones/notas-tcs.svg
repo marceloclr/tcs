@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Notas TCS</title>
+  <!-- Fundo inteiro (ícone "maskable": o Android pode recortar em círculo; o desenho fica no centro seguro) -->
+  <rect width="512" height="512" fill="#173B68"/>
+  <!-- Nota fiscal -->
+  <path d="M140 112h168v250l-21-13-21 13-21-13-21 13-21-13-21 13-21-13-21 13z" fill="#F1F6FB"/>
+  <path d="M170 158h108M170 194h108M170 230h72" stroke="#173B68" stroke-width="16" stroke-linecap="round"/>
+  <!-- Câmera -->
+  <circle cx="322" cy="322" r="72" fill="#128C83" stroke="#173B68" stroke-width="10"/>
+  <path d="M284 304a10 10 0 0 1 10-10h12l8-12h16l8 12h12a10 10 0 0 1 10 10v40a10 10 0 0 1-10 10h-56a10 10 0 0 1-10-10z" fill="#F1F6FB"/>
+  <circle cx="322" cy="323" r="15" fill="#128C83"/>
+</svg>

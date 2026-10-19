@@ -195,6 +195,10 @@ service cloud.firestore {
         && request.resource.data.dados is string && request.resource.data.dados.size() <= 716800
         && request.resource.data.tipo in ['image/jpeg', 'image/webp', 'image/png'];
       allow read: if (ativo() && resource.data.autor == eu()) || grava(resource.data.projectId, resource.data.clientId);
+      // reenvio da mesma parte depois de uma queda de conexão
+      allow update: if ativo() && resource.data.autor == eu() && request.resource.data.autor == eu()
+        && request.resource.data.capturaId == resource.data.capturaId && request.resource.data.projectId == resource.data.projectId
+        && request.resource.data.dados is string && request.resource.data.dados.size() <= 716800;
       allow delete: if admin();
     }
     // ==== #REGRAS-CAPTURAS: END ====
