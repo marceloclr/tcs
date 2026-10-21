@@ -2,7 +2,7 @@
 import { test, before, after, beforeEach } from 'node:test';
 import fs from 'node:fs';
 import { initializeTestEnvironment, assertSucceeds, assertFails } from '@firebase/rules-unit-testing';
-import { doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, collection, query, where, writeBatch, documentId } from 'firebase/firestore';
+import { doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, collection, query, where, writeBatch, documentId, serverTimestamp } from 'firebase/firestore';
 
 let env;
 const ADM = 'marceloclr@gmail.com', ESC = 'esc@x.com', LEI = 'leitor@x.com', OBRA = 'mestre@x.com', CLI = 'cliente@x.com', NOVO = 'novo@x.com';
@@ -195,4 +195,67 @@ test('lote grande de quem tem escrita no cliente', async () => {
   const db = ctx(CLI); const b = writeBatch(db);
   for (let i = 0; i < 300; i++) b.set(doc(db, 'allocations/k' + i), { projectId: ['A1', 'A2'][i % 2], clientId: 'A', quantity: 1 });
   await assertSucceeds(b.commit());
+});
+
+// ---- Baixas de estoque: responsável, motivo, estorno e imutabilidade (21/10/2026) ----
+const baixa = (por, extra = {}) => ({ type: 'SAIDA', projectId: 'A1', clientId: 'A', productId: 'P1', quantity: 2, unitCost: 10, date: '2026-10-21', note: 'aplicado no 2º pavimento', criadoPor: por, criadoPorNome: por, ...extra });
+test('baixa: em nome de quem grava, com motivo e quantidade positiva', async () => {
+  const db = ctx(ESC);
+  await assertSucceeds(setDoc(doc(db, 'movements/b1'), baixa(ESC)));
+  await assertFails(setDoc(doc(db, 'movements/b2'), baixa(ESC, { criadoPor: '' })));
+  await assertFails(setDoc(doc(db, 'movements/b3'), baixa(CLI)));
+  await assertFails(setDoc(doc(db, 'movements/b4'), baixa(ESC, { note: '' })));
+  await assertFails(setDoc(doc(db, 'movements/b5'), baixa(ESC, { quantity: -2 })));
+  await assertFails(setDoc(doc(db, 'movements/b6'), baixa(ESC, { quantity: 0 })));
+  await assertFails(setDoc(doc(ctx(LEI), 'movements/b7'), baixa(LEI)));
+});
+test('baixa não se altera nem se apaga; o reenvio idêntico passa', async () => {
+  const db = ctx(ESC);
+  await assertSucceeds(setDoc(doc(db, 'movements/b1'), baixa(ESC)));
+  await assertFails(updateDoc(doc(db, 'movements/b1'), { quantity: 1 }));
+  await assertFails(updateDoc(doc(db, 'movements/b1'), { note: 'outro motivo' }));
+  await assertSucceeds(updateDoc(doc(db, 'movements/b1'), { _atualizadoEm: '2026-10-21T12:00:00Z', _atualizadoPor: ESC }));
+  await assertFails(deleteDoc(doc(db, 'movements/b1')));
+  await assertFails(deleteDoc(doc(ctx(ADM), 'movements/b1')));
+  await assertSucceeds(deleteDoc(doc(ctx(ADM), 'movements/nao-existe')));
+  await assertSucceeds(deleteDoc(doc(ctx(ADM), 'movements/e1'))); // entrada continua podendo ser apagada pelo administrador
+});
+test('estorno: um só por baixa, com a quantidade oposta, e nunca de um estorno', async () => {
+  const db = ctx(ESC);
+  await assertSucceeds(setDoc(doc(db, 'movements/b1'), baixa(ESC)));
+  const est = (extra = {}) => baixa(ESC, { estornoDe: 'b1', quantity: -2, note: 'lançada em duplicidade', ...extra });
+  await assertFails(setDoc(doc(db, 'movements/x1'), est()));                       // id fora do padrão
+  await assertFails(setDoc(doc(db, 'movements/est-b1'), est({ quantity: -1 })));  // estorno parcial
+  await assertFails(setDoc(doc(db, 'movements/est-b1'), est({ note: '' })));       // sem motivo
+  await assertFails(setDoc(doc(db, 'movements/est-b1'), est({ projectId: 'A2' }))); // outro projeto
+  await assertSucceeds(setDoc(doc(db, 'movements/est-b1'), est()));
+  await assertFails(setDoc(doc(db, 'movements/est-b1'), est({ note: 'de novo' }))); // segundo estorno da mesma baixa
+  await assertFails(setDoc(doc(db, 'movements/est-est-b1'), est({ estornoDe: 'est-b1', quantity: 2 }))); // estorno do estorno
+  // estorno feito por outra pessoa com escrita no projeto: em nome dela
+  await assertSucceeds(setDoc(doc(db, 'movements/b2'), baixa(ESC)));
+  await assertSucceeds(setDoc(doc(ctx(CLI), 'movements/est-b2'), baixa(CLI, { estornoDe: 'b2', quantity: -2, note: 'material devolvido' })));
+});
+
+// ---- Log de atividades ----
+const atv = (por, extra = {}) => ({ id: 'x', em: '2026-10-21T12:00:00Z', emServidor: serverTimestamp(), por, nome: por, papel: 'escritorio', cat: 'estoque', acao: 'baixa', texto: 'Baixa de estoque: 2 UN de Cimento', projetoId: 'A1', clienteId: 'A', ref: 'movements/b1', valor: 20, aparelho: 'Chrome · Linux', offline: false, ...extra });
+test('log de atividades: cada um registra só as próprias, com a hora do servidor', async () => {
+  const db = ctx(ESC);
+  await assertSucceeds(setDoc(doc(db, 'atividades/a1'), atv(ESC, { id: 'a1' })));
+  await assertFails(setDoc(doc(db, 'atividades/a2'), atv(CLI, { id: 'a2' })));                              // em nome de outra pessoa
+  await assertFails(setDoc(doc(db, 'atividades/a3'), atv(ESC, { id: 'a3', emServidor: '2020-01-01T00:00:00Z' }))); // hora inventada
+  await assertFails(setDoc(doc(db, 'atividades/a4'), atv(ESC, { id: 'a4', extra: 1 })));                    // campo fora da lista
+  await assertFails(setDoc(doc(db, 'atividades/a5'), atv(ESC, { id: 'outro' })));                           // id diferente do documento
+  await assertFails(setDoc(doc(db, 'atividades/a6'), atv(ESC, { id: 'a6', cat: 'qualquer' })));
+  await assertFails(setDoc(doc(ctx(NOVO), 'atividades/a7'), atv(NOVO, { id: 'a7' })));                      // sem cadastro
+  await assertSucceeds(setDoc(doc(ctx(OBRA), 'atividades/a8'), atv(OBRA, { id: 'a8', cat: 'obra', acao: 'obra_envio' })));
+});
+test('log de atividades: só administradores listam; ninguém altera nem apaga', async () => {
+  await assertSucceeds(setDoc(doc(ctx(ESC), 'atividades/a1'), atv(ESC, { id: 'a1' })));
+  await assertSucceeds(getDoc(doc(ctx(ESC), 'atividades/a1')));            // o autor confere um envio pelo id
+  await assertFails(getDocs(collection(ctx(ESC), 'atividades')));
+  await assertFails(getDoc(doc(ctx(CLI), 'atividades/a1')));
+  await assertSucceeds(getDocs(query(collection(ctx(ADM), 'atividades'), where('em', '>=', '2026-01-01'))));
+  await assertFails(setDoc(doc(ctx(ESC), 'atividades/a1'), atv(ESC, { id: 'a1', texto: 'alterado' })));
+  await assertFails(updateDoc(doc(ctx(ADM), 'atividades/a1'), { texto: 'alterado' }));
+  await assertFails(deleteDoc(doc(ctx(ADM), 'atividades/a1')));
 });

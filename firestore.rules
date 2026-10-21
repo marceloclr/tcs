@@ -132,16 +132,31 @@ service cloud.firestore {
       allow read: if admin()
         || (resource.data.type == 'SAIDA' && le(resource.data.projectId, resource.data.clientId))
         || (resource.data.type == 'ENTRADA' && escritor() && resource.data.get('escopo', '') == 'aberta');
+      // Baixa (SAIDA): em nome de quem grava, com motivo; o estorno é uma saída negativa ligada à baixa (ver baixaValida).
       allow create: if (request.resource.data.type == 'SAIDA'
           && grava(request.resource.data.projectId, request.resource.data.clientId)
-          && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId))
+          && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId)
+          && (baixaValida(id, request.resource.data) || admin()))  // administrador: restauração de backups antigos
         || (request.resource.data.type == 'ENTRADA' && escritor());
+      // Baixas não se alteram nem se apagam (a correção é o estorno). Só o reenvio idêntico (carimbo de envio) e o administrador
+      // (restauração de backup) regravam uma baixa.
       allow update: if admin()
         || (resource.data.type == 'SAIDA' && grava(resource.data.projectId, resource.data.clientId)
-            && request.resource.data.projectId == resource.data.projectId)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['_atualizadoEm', '_atualizadoPor']))
         || (resource.data.type == 'ENTRADA' && escritor()
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['escopo', '_atualizadoEm', '_atualizadoPor']));
-      allow delete: if admin() || (resource.data.type == 'SAIDA' && grava(resource.data.projectId, resource.data.clientId));
+      allow delete: if admin() && (resource == null || resource.data.type != 'SAIDA');
+    }
+    // Baixa: quantidade positiva, motivo e responsável (quem grava). Estorno: id 'est-' + id da baixa (um só por baixa), mesma
+    // quantidade com sinal trocado, mesmo projeto e produto, motivo e responsável; não se estorna um estorno.
+    function baixaValida(id, d) {
+      return d.get('criadoPor', '') == eu() && d.get('note', '') is string && d.get('note', '').size() >= 3
+        && (d.get('estornoDe', '') == '' ? d.quantity is number && d.quantity > 0 : estornoValido(id, d));
+    }
+    function estornoValido(id, d) {
+      let o = get(caminho('movements', d.estornoDe)).data;
+      return id == 'est-' + d.estornoDe && o.type == 'SAIDA' && o.get('estornoDe', '') == ''
+        && o.projectId == d.projectId && o.productId == d.productId && d.quantity == -o.quantity;
     }
     match /quotes/{id} {
       // Pedido sem projeto (projectId e clientId vazios) só é visto por administradores e por quem o criou: le('', '') é falso.
@@ -175,6 +190,23 @@ service cloud.firestore {
       allow delete: if admin();
     }
     // ==== #REGRAS-DADOS: END ====
+
+    // ==== #REGRAS-ATIVIDADES: START ====
+    // Log de atividades (js/atividades.js): cada pessoa ativa registra só as próprias atividades, com a hora do servidor.
+    // Só administradores listam. Ninguém altera nem apaga um registro. O autor pode ler um registro pelo id (o app confere se
+    // um envio interrompido já chegou), mas não listar.
+    match /atividades/{id} {
+      allow list: if admin();
+      allow get: if admin() || (ativo() && resource.data.por == eu());
+      allow create: if ativo() && request.resource.data.por == eu() && request.resource.data.id == id
+        && request.resource.data.emServidor == request.time
+        && request.resource.data.texto is string && request.resource.data.texto.size() <= 1500
+        && request.resource.data.cat in ['sessao', 'estoque', 'notas', 'cadastros', 'catalogo', 'orcamentos', 'obra', 'acessos', 'exportacao', 'dados']
+        && request.resource.data.keys().hasOnly(['id', 'em', 'emServidor', 'por', 'nome', 'papel', 'cat', 'acao', 'texto', 'projetoId',
+             'clienteId', 'ref', 'valor', 'aparelho', 'offline']);
+      allow update, delete: if false;
+    }
+    // ==== #REGRAS-ATIVIDADES: END ====
 
     // ==== #REGRAS-CAPTURAS: START ====
     // Capturas da obra: o mestre cria para os projetos concedidos; o escritório com escrita no projeto confere.

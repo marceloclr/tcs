@@ -19,4 +19,4 @@ let onLocalCommit=null;
 function txWrite(stores,fn,opts={}){stores=[].concat(stores);return new Promise((resolve,reject)=>{const t=db.transaction(stores,'readwrite'),os={},ops=[];
  stores.forEach(s=>{const st=t.objectStore(s);os[s]={put:o=>{st.put(o);ops.push({op:'set',store:s,id:o.id,obj:structuredClone(o)})},add:o=>{st.add(o);ops.push({op:'set',store:s,id:o.id,obj:structuredClone(o)})},delete:id=>{st.delete(id);ops.push({op:'delete',store:s,id})},clear:()=>{st.clear();ops.push({op:'clear',store:s})}}});
  try{fn(os)}catch(e){t.abort();reject(e);return}
- t.oncomplete=()=>{if(!opts.local&&onLocalCommit&&ops.length){try{onLocalCommit(ops)}catch(e){console.error('Falha ao enviar à nuvem:',e)}}resolve()};t.onerror=()=>reject(t.error);t.onabort=()=>reject(t.error||new Error('Operação cancelada; nada foi gravado.'))})}
+ t.oncomplete=()=>{if(!opts.local&&onLocalCommit&&ops.length){try{onLocalCommit(ops,opts)}catch(e){console.error('Falha ao enviar à nuvem:',e)}}resolve()};t.onerror=()=>reject(t.error);t.onabort=()=>reject(t.error||new Error('Operação cancelada; nada foi gravado.'))})}

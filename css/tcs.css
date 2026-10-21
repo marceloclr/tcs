@@ -69,3 +69,6 @@ tr.atrasada td{background:#fffbeb}.atraso-txt{color:#92400e;font-weight:700}.aco
 .barra-hit{cursor:help}.barra-hit:hover path,.barra-hit:hover rect[fill]:not([fill="transparent"]){opacity:.85}
 /* ==== #CSS-CUSTODIA: END ==== */
 
+
+/* Baixas de estoque e log de atividades */
+.bx-estornada td{color:#64748b;background:#fafafa}.bx-estornada td:first-child{border-left:3px solid #f59e0b}.atv-tabela td{font-size:13px;vertical-align:top}.atv-baixa td:first-child{border-left:3px solid #ef4444}.atv-estorno td:first-child{border-left:3px solid #f59e0b}

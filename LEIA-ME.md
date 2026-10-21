@@ -14,10 +14,12 @@ A versão aparece no canto inferior esquerdo, no formato `V-DDMMAAAA-HHMM`. Ela 
 | Projetos | Projetos de cada cliente, com uma cor, uma situação (ativo ou encerrado) e os mesmos totais. |
 | Fornecedores | Busca por fornecedor ou prestador, com notas e itens. |
 | Estoque › Saldo | Grid hierárquica cliente → projeto → produto. Só materiais. |
+| Estoque › Baixas de estoque | Cada baixa com data, produto, projeto, quantidade, valor, motivo, responsável e situação (ativa ou estornada). Filtros por período, projeto, responsável e situação; estorno com motivo; CSV. |
 | Estoque › Notas fiscais | Notas a vincular, em distribuição e vinculadas, com filtro Materiais/Serviços. |
 | Estoque › Importar notas | Duas caixas:<br>• **materiais:** XML de NF-e ou PDF do DANFE;<br>• **serviços:** XML de NFS-e, PDF ou digitação. |
 | Solicitar orçamento | Pedido de orçamento, histórico dos pedidos e catálogo de produtos. |
 | Dados e segurança | Nuvem, backup, restauração e limpeza da cópia local. |
+| Usuários e acessos › Log de atividades | Só administradores. Tudo o que cada pessoa faz no sistema, com filtros por período, pessoa e tipo, busca e CSV. |
 
 ## Notas de serviço
 - **Formatos aceitos:**
@@ -34,7 +36,8 @@ A versão aparece no canto inferior esquerdo, no formato `V-DDMMAAAA-HHMM`. Ela 
 - **Nota importada.** Fica "a vincular" e não soma em cliente nem em projeto até ser vinculada.
 - **Compra coletiva.** A matriz item × projeto recebe as unidades de cada projeto. A soma por item nunca passa da quantidade da nota. A distribuição pode ser salva parcial.
 - **Valor pago por item.** É o valor bruto menos o desconto, mais o rateio de frete, seguro, outras despesas e impostos. A soma dos itens fecha com o total da nota (vNF).
-- **Saída.** Fica em Estoque › Saldo, no botão "Registrar saída", e é limitada ao saldo do produto no projeto.
+- **Saída (baixa).** Fica em Estoque › Saldo, no botão "Registrar saída", e é limitada ao saldo do produto no projeto. O motivo ou destino é obrigatório, e a baixa guarda quem a registrou.
+- **Estorno.** Uma baixa não se altera nem se apaga. Para corrigir, Estoque › Baixas de estoque › Estornar: o estorno devolve a quantidade ao projeto, com o motivo e o nome de quem estornou. Cada baixa só pode ser estornada uma vez.
 - **Integridade.** Desvincular ou redistribuir uma nota fica bloqueado se o projeto ficar com menos entrada do que já consumiu.
 
 ## Linha do tempo (Visão geral)
@@ -82,3 +85,12 @@ Não foram testados o OCR de PDF digitalizado nem PDFs reais de NFS-e de cada pr
 - **Visão geral** separa o valor em estoque sob custódia do custo apropriado (baixas e serviços).
 - Guia completo, inclusive o passo a passo para o mestre de obras: [`ACESSOS-E-CAPTURA.md`](ACESSOS-E-CAPTURA.md). Testes: [`testes/LEIA-ME.md`](testes/LEIA-ME.md). Plano: [`docs/planos/acessos-e-captura.md`](docs/planos/acessos-e-captura.md).
 
+
+## Log de atividades e baixas de estoque (21/10/2026)
+- **O que entra no log:** entrada e saída do sistema, abertura no modo offline, notas importadas, alteradas e excluídas, vínculos e distribuições (com o valor por projeto, antes e depois), **baixas e estornos de estoque**, clientes, projetos, catálogo, pedidos de orçamento, mudanças de acesso, notas da obra (envio, conferência, lançamento e descarte), exportações em CSV, backup, restauração, impressão do pedido e limpeza da cópia local.
+- **Cada registro guarda** quem (nome, e-mail e papel), quando (hora do aparelho e hora do servidor), o tipo, a descrição, o projeto, o valor em R$ e o aparelho.
+- **Quem vê:** só administradores, na aba Usuários e acessos › Log de atividades. Ninguém altera nem apaga um registro, nem o administrador.
+- **Sem internet:** os registros esperam neste navegador e sobem no próximo login, marcados como *offline*. O que foi feito no modo offline, sem login, fica em nome de quem entrar depois neste navegador.
+- **Como funciona:** [`js/atividades.js`](js/atividades.js). Toda gravação passa por `txWrite`; o log descreve as operações comparando com os dados anteriores, então uma tela nova já entra no log sem código extra. As regras ficam na coleção `atividades` de [`firestore.rules`](firestore.rules).
+- **Baixas antigas,** anteriores a 21/10/2026, não têm o responsável gravado: o relatório mostra o e-mail de quem as enviou à nuvem, quando houver.
+- **Publicação:** as regras novas precisam ser publicadas no console do Firebase (Firestore Database › Regras). Até lá, as atividades ficam guardadas em cada navegador e sobem assim que as regras forem publicadas.

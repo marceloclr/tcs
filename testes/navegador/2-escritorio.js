@@ -10,6 +10,7 @@ await t('ler nota inteira direto',()=>window.__fb.get('invoices',state.invoices[
 await t('ler cliente B direto',()=>window.__fb.get('clients','CB'));
 await t('listar todos os rateios',()=>new Promise((res,rej)=>{const u=window.__fb.listen('allocations',[],(ch,m)=>{if(!m.fromCache){u();res()}},rej)}));
 await t('gravar rateio em P3',()=>window.__fb.commit([{op:'set',store:'allocations',id:'zz',data:{projectId:'P3',clientId:'CB',quantity:1}}]));
-await t('gravar saída em P1',()=>window.__fb.commit([{op:'set',store:'movements',id:'zz1',data:{type:'SAIDA',projectId:'P1',clientId:'CA',quantity:1}}]));
+await t('gravar saída em P1',()=>window.__fb.commit([{op:'set',store:'movements',id:'zz1',data:{type:'SAIDA',projectId:'P1',clientId:'CA',quantity:1,note:'teste de escrita',criadoPor:Nuvem.user.email}}]));
+await t('gravar saída sem responsável nem motivo',()=>window.__fb.commit([{op:'set',store:'movements',id:'zz2',data:{type:'SAIDA',projectId:'P1',clientId:'CA',quantity:1}}]));
 r.abaUsuarios=!$('[data-view="usuarios"]').hidden;r.avisoEscopo=!$('#avisoEscopo').hidden;r.dica=$('#mCusto').closest('.metric,.card,.panel')?.title||'';
 go('dashboard');return r}catch(e){return 'ERRO '+e.message+'\n'+e.stack}})()

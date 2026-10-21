@@ -3,7 +3,7 @@
 O TCS guarda os dados no navegador (IndexedDB) e, para quem entra com uma conta Google liberada, sincroniza tudo com o Firestore do projeto **`thiago-17d18`**.
 
 ## Como funciona
-- **Coleções:** cada store vira uma coleção (`products`, `invoices`, `movements`, `clients`, `projects`, `allocations` e `quotes`), e cada registro é um documento com o mesmo `id`.
+- **Coleções:** cada store vira uma coleção (`products`, `invoices`, `movements`, `clients`, `projects`, `allocations` e `quotes`), e cada registro é um documento com o mesmo `id`. O log de atividades fica na coleção `atividades`, que só existe na nuvem (ver `js/atividades.js`).
 - **Envio:** toda gravação confirmada no navegador vai para a nuvem, com `_atualizadoEm` e `_atualizadoPor`. Sem internet, a fila fica guardada e é enviada quando a conexão volta.
 - **Recebimento:** o que outros usuários alteram chega em tempo real.
 - **Conflito:** se duas pessoas editam o mesmo registro ao mesmo tempo, vale a última gravação.
