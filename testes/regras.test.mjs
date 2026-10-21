@@ -259,3 +259,15 @@ test('log de atividades: só administradores listam; ninguém altera nem apaga',
   await assertFails(updateDoc(doc(ctx(ADM), 'atividades/a1'), { texto: 'alterado' }));
   await assertFails(deleteDoc(doc(ctx(ADM), 'atividades/a1')));
 });
+
+// ---- Ajustes de quantidade e de custo (Produtos e ajustes, 21/10/2026) ----
+test('ajuste de estoque: só administradores, e não se estorna', async () => {
+  const aj = (por, extra = {}) => baixa(por, { ajuste: true, quantity: 1, ajusteValor: 0, saldoAntes: 5, saldoDepois: 4, custoAntes: 10, custoDepois: 10, note: 'inventário de 21/10', ...extra });
+  await assertFails(setDoc(doc(ctx(ESC), 'movements/aj1'), aj(ESC)));                               // quem tem escrita não ajusta
+  await assertFails(setDoc(doc(ctx(ESC), 'movements/aj2'), baixa(ESC, { ajusteValor: 50 })));       // nem mexe no custo por uma baixa
+  await assertSucceeds(setDoc(doc(ctx(ADM), 'movements/aj3'), aj(ADM)));                            // falta
+  await assertSucceeds(setDoc(doc(ctx(ADM), 'movements/aj4'), aj(ADM, { quantity: -2, saldoDepois: 7 }))); // sobra
+  await assertSucceeds(setDoc(doc(ctx(ADM), 'movements/aj5'), aj(ADM, { quantity: 0, ajusteValor: 25, custoDepois: 15 }))); // só custo
+  await assertFails(setDoc(doc(ctx(ESC), 'movements/est-aj3'), baixa(ESC, { estornoDe: 'aj3', quantity: -1, note: 'desfazer ajuste' })));
+  await assertFails(updateDoc(doc(ctx(ESC), 'movements/aj3'), { note: 'outro' }));
+});

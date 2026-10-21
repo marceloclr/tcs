@@ -148,14 +148,16 @@ service cloud.firestore {
       allow delete: if admin() && (resource == null || resource.data.type != 'SAIDA');
     }
     // Baixa: quantidade positiva, motivo e responsável (quem grava). Estorno: id 'est-' + id da baixa (um só por baixa), mesma
-    // quantidade com sinal trocado, mesmo projeto e produto, motivo e responsável; não se estorna um estorno.
+    // quantidade com sinal trocado, mesmo projeto e produto, motivo e responsável; não se estorna um estorno nem um ajuste.
+    // Ajuste de quantidade e de custo (ajuste, ajusteValor): só administradores (que passam pelo admin() da regra de criação).
     function baixaValida(id, d) {
       return d.get('criadoPor', '') == eu() && d.get('note', '') is string && d.get('note', '').size() >= 3
+        && d.get('ajuste', false) == false && d.get('ajusteValor', 0) == 0
         && (d.get('estornoDe', '') == '' ? d.quantity is number && d.quantity > 0 : estornoValido(id, d));
     }
     function estornoValido(id, d) {
       let o = get(caminho('movements', d.estornoDe)).data;
-      return id == 'est-' + d.estornoDe && o.type == 'SAIDA' && o.get('estornoDe', '') == ''
+      return id == 'est-' + d.estornoDe && o.type == 'SAIDA' && o.get('estornoDe', '') == '' && o.get('ajuste', false) == false
         && o.projectId == d.projectId && o.productId == d.productId && d.quantity == -o.quantity;
     }
     match /quotes/{id} {

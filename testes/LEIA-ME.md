@@ -31,6 +31,7 @@ O app real, ligado aos emuladores (`?emulador=1`, só funciona em localhost), co
    - `9-captura-escritorio.js`: conta do Escritório na tela da obra vai para o sistema principal.
    - `12-baixas-log.js` em 8767 (depois do `1-admin.js`): baixa pela tela sem motivo (recusada) e com motivo, responsável na baixa, relatório de baixas, estorno sem e com motivo, estorno repetido bloqueado e aba Log de atividades com baixa, estorno, entrada e exportação vindas da nuvem;
    - `13-baixas-escritorio.js` em 8768 (depois do `12-baixas-log.js`): baixa do Escritório em nome dele; listar o log, apagar ou alterar uma baixa, gravar baixa ou atividade em nome de outra pessoa: tudo negado.
+   - `14-ajustes.js` em 8767 (depois do `1-admin.js`): formulário do produto em Estoque › Produtos e ajustes e fora do Solicitar orçamento, nome alterado com registro no log, sobra com custo novo, falta, histórico, fechamento estoque + custo apropriado = total adquirido e ajustes fora do relatório de baixas.
    - `10-fila.js` em 8767 (depois do `7-captura.js`): fila do escritório, cartão e destaque de 48 h, conferir com o projeto indicado, lançar, fotos como comprovante, descartar com motivo e XML da mesma chave substituindo os dados da foto.
 
 Variáveis do `cdp.mjs`: `CDP_PORTA` (9446), `ESPERA` (ms antes de rodar o script), `FIM` (ms antes de fechar), `INIT` (script injetado antes da página) e `TEMA=claro|escuro` força o tema; o script pode chamar `console.log('__cdp_offline__')` e `console.log('__cdp_online__')` para derrubar e religar a rede da página.

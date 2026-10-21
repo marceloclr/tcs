@@ -14,10 +14,11 @@ A versão aparece no canto inferior esquerdo, no formato `V-DDMMAAAA-HHMM`. Ela 
 | Projetos | Projetos de cada cliente, com uma cor, uma situação (ativo ou encerrado) e os mesmos totais. |
 | Fornecedores | Busca por fornecedor ou prestador, com notas e itens. |
 | Estoque › Saldo | Grid hierárquica cliente → projeto → produto. Só materiais. |
+| Estoque › Produtos e ajustes | Dados do produto (nome, EAN e unidade) e, por projeto, recebido, saldo, custo médio e valor em estoque. Administradores ajustam a quantidade (pela contagem) e o custo médio, com motivo; histórico dos ajustes. |
 | Estoque › Baixas de estoque | Cada baixa com data, produto, projeto, quantidade, valor, motivo, responsável e situação (ativa ou estornada). Filtros por período, projeto, responsável e situação; estorno com motivo; CSV. |
 | Estoque › Notas fiscais | Notas a vincular, em distribuição e vinculadas, com filtro Materiais/Serviços. |
 | Estoque › Importar notas | Duas caixas:<br>• **materiais:** XML de NF-e ou PDF do DANFE;<br>• **serviços:** XML de NFS-e, PDF ou digitação. |
-| Solicitar orçamento | Pedido de orçamento, histórico dos pedidos e catálogo de produtos. |
+| Solicitar orçamento | Pedido de orçamento, histórico dos pedidos e catálogo de produtos (só para escolher itens; a edição fica em Estoque › Produtos e ajustes). |
 | Dados e segurança | Nuvem, backup, restauração e limpeza da cópia local. |
 | Usuários e acessos › Log de atividades | Só administradores. Tudo o que cada pessoa faz no sistema, com filtros por período, pessoa e tipo, busca e CSV. |
 
@@ -38,6 +39,7 @@ A versão aparece no canto inferior esquerdo, no formato `V-DDMMAAAA-HHMM`. Ela 
 - **Valor pago por item.** É o valor bruto menos o desconto, mais o rateio de frete, seguro, outras despesas e impostos. A soma dos itens fecha com o total da nota (vNF).
 - **Saída (baixa).** Fica em Estoque › Saldo, no botão "Registrar saída", e é limitada ao saldo do produto no projeto. O motivo ou destino é obrigatório, e a baixa guarda quem a registrou.
 - **Estorno.** Uma baixa não se altera nem se apaga. Para corrigir, Estoque › Baixas de estoque › Estornar: o estorno devolve a quantidade ao projeto, com o motivo e o nome de quem estornou. Cada baixa só pode ser estornada uma vez.
+- **Ajuste (só administradores).** Em Estoque › Produtos e ajustes, informe a quantidade contada e, se for o caso, o custo médio correto, com o motivo. Falta sai como baixa e vira custo do projeto; sobra entra como recebimento sem nota, ao custo médio; o custo corrigido vale para o saldo e para o já baixado. As notas não mudam, e estoque + custo apropriado continua igual ao total adquirido. Ajuste não se estorna: corrige-se com outro ajuste.
 - **Integridade.** Desvincular ou redistribuir uma nota fica bloqueado se o projeto ficar com menos entrada do que já consumiu.
 
 ## Linha do tempo (Visão geral)

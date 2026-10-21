@@ -81,7 +81,13 @@ function atvDeOps(ops){
   if(o.op === 'delete'){if(v?.type === 'SAIDA') lista.push({cat:'estoque', acao:'baixa_excluida', texto:`Excluiu a baixa de ${num(v.quantity)} de ${v.description || 'produto'} (${atvProj(v.projectId)})`, projetoId:v.projectId, clienteId:v.clientId, ref:'movements/' + o.id}); continue}
   if(m.type !== 'SAIDA' || v) continue;
   const p = state.products.find(x => x.id === m.productId), un = p?.unit || 'UN', valor = Math.abs(Number(m.quantity) * Number(m.unitCost || 0));
-  if(m.estornoDe){const orig = antigo('movements', m.estornoDe);
+  if(m.ajuste){const dq = Number(m.quantity) || 0, partes = [];
+   if(Math.abs(dq) > 1e-9) partes.push(`quantidade ${num(m.saldoAntes)} → ${num(m.saldoDepois)} ${un} (${dq > 0 ? 'falta de ' + num(dq) : 'sobra de ' + num(-dq)})`);
+   if(Math.abs(Number(m.custoDepois) - Number(m.custoAntes)) >= 0.005) partes.push(`custo médio ${money(m.custoAntes)} → ${money(m.custoDepois)}`);
+   if(m.ajusteValor) partes.push(`${m.ajusteValor > 0 ? '+' : ''}${money(m.ajusteValor)} no valor pago`);
+   lista.push({cat:'estoque', acao:'ajuste', texto:`Ajuste de estoque de ${p?.name || m.description || 'produto'} — ${atvProj(m.projectId)}: ${partes.join('; ')}. Motivo: ${m.note}`, projetoId:m.projectId, clienteId:m.clientId, ref:'movements/' + o.id,
+    valor: Math.round((Number(m.saldoDepois) * Number(m.custoDepois) - Number(m.saldoAntes) * Number(m.custoAntes)) * 100) / 100});
+  }else if(m.estornoDe){const orig = antigo('movements', m.estornoDe);
    lista.push({cat:'estoque', acao:'estorno', texto:`Estornou a baixa de ${num(-m.quantity)} ${un} de ${p?.name || m.description || 'produto'} de ${orig?.date ? orig.date.split('-').reverse().join('/') : 'data não informada'} (${atvProj(m.projectId)}), registrada por ${orig?.criadoPorNome || orig?.criadoPor || orig?._atualizadoPor || 'pessoa não identificada'}. Motivo: ${m.note}. Valor devolvido ao estoque: ${money(valor)}`, projetoId:m.projectId, clienteId:m.clientId, ref:'movements/' + m.estornoDe, valor});
   }else lista.push({cat:'estoque', acao:'baixa', texto:`Baixa de estoque: ${num(m.quantity)} ${un} de ${p?.name || m.description || 'produto'} — ${atvProj(m.projectId)}, em ${String(m.date || '').split('-').reverse().join('/')}. Motivo: ${m.note || '—'}. Valor: ${money(valor)}`, projetoId:m.projectId, clienteId:m.clientId, ref:'movements/' + o.id, valor});
  }
@@ -199,7 +205,7 @@ function atvAdmHtml(){
  atvLigar();
  const l = atvFiltradas(), MOSTRA = 500;
  const pessoas = [...new Map(AtvAdm.itens.map(a => [a.por, a.nome || a.por])).entries()].sort((a, b) => String(a[1]).localeCompare(String(b[1]), 'pt-BR'));
- const baixas = l.filter(a => a.acao === 'baixa').length, estornos = l.filter(a => a.acao === 'estorno').length;
+ const baixas = l.filter(a => a.acao === 'baixa').length, estornos = l.filter(a => a.acao === 'estorno').length, ajustes = l.filter(a => a.acao === 'ajuste').length;
  const sel = (attr, atual, ops, dica) => `<select ${attr} title="${esc(dica)}">${ops.map(([v, r]) => `<option value="${esc(v)}"${String(atual) === String(v) ? ' selected' : ''}>${esc(r)}</option>`).join('')}</select>`;
  return `<div class="row" style="margin:12px 0">${sel('data-atv-dias', AtvAdm.dias, [[1, 'Últimas 24 horas'], [7, 'Últimos 7 dias'], [30, 'Últimos 30 dias'], [90, 'Últimos 90 dias'], [365, 'Últimos 12 meses'], [0, 'Todo o período']], 'Período carregado da nuvem')}
  ${sel('data-atv-pessoa', AtvAdm.pessoa, [['', 'Todas as pessoas'], ...pessoas], 'Mostra só as atividades de uma pessoa')}
@@ -207,9 +213,9 @@ function atvAdmHtml(){
  <input class="search" data-atv-busca value="${esc(AtvAdm.busca)}" placeholder="Buscar produto, projeto, nota, pessoa…" title="Filtra pelo texto da atividade, pela pessoa ou pelo projeto">
  <button class="btn" data-atv-csv title="Baixa em CSV as atividades filtradas">Exportar CSV</button></div>
  ${AtvAdm.erro ? `<div class="notice danger">${esc(AtvAdm.erro)}</div>` : ''}
- <p class="hint" style="margin:0 0 10px">Registro somente leitura de tudo o que cada pessoa faz no sistema: entradas e saídas, notas, vínculos, baixas e estornos de estoque, cadastros, pedidos, acessos, exportações e impressões. ${l.length} atividade(s)${AtvAdm.cat || AtvAdm.pessoa || AtvAdm.busca ? ' no filtro' : ''}, ${baixas} baixa(s) e ${estornos} estorno(s) de estoque.</p>
+ <p class="hint" style="margin:0 0 10px">Registro somente leitura de tudo o que cada pessoa faz no sistema: entradas e saídas, notas, vínculos, baixas, estornos e ajustes de estoque, cadastros, pedidos, acessos, exportações e impressões. ${l.length} atividade(s)${AtvAdm.cat || AtvAdm.pessoa || AtvAdm.busca ? ' no filtro' : ''}, ${baixas} baixa(s), ${estornos} estorno(s) e ${ajustes} ajuste(s) de estoque.</p>
  <div class="tablewrap"><table class="no-sort atv-tabela"><thead><tr><th>Quando</th><th>Pessoa</th><th>Tipo</th><th>Atividade</th><th>Projeto</th></tr></thead><tbody>${
-  l.slice(0, MOSTRA).map(a => `<tr class="${a.acao === 'baixa' ? 'atv-baixa' : a.acao === 'estorno' ? 'atv-estorno' : ''}"><td style="white-space:nowrap" title="${esc('Hora do aparelho: ' + fmtData(a.em) + (a.emServidor ? '\nHora do servidor: ' + fmtData(a.emServidor) : '') + (a.offline ? '\nFeita sem conexão e enviada depois' : ''))}">${fmtData(a.em)}${a.offline ? ' <span class="pill warn" title="Feita sem conexão e enviada depois">offline</span>' : ''}</td><td><strong>${esc(a.nome || a.por)}</strong><div class="hint">${esc(a.por)}${a.aparelho ? ' · ' + esc(a.aparelho) : ''}</div></td><td><span class="pill${a.cat === 'estoque' ? ' red' : ''}">${esc(ATV_CAT[a.cat] || a.cat)}</span></td><td>${esc(a.texto)}</td><td>${a.projetoId ? esc(atvProj(a.projetoId)) : '<span class="muted">—</span>'}</td></tr>`).join('')
+  l.slice(0, MOSTRA).map(a => `<tr class="${a.acao === 'baixa' ? 'atv-baixa' : a.acao === 'estorno' || a.acao === 'ajuste' ? 'atv-estorno' : ''}"><td style="white-space:nowrap" title="${esc('Hora do aparelho: ' + fmtData(a.em) + (a.emServidor ? '\nHora do servidor: ' + fmtData(a.emServidor) : '') + (a.offline ? '\nFeita sem conexão e enviada depois' : ''))}">${fmtData(a.em)}${a.offline ? ' <span class="pill warn" title="Feita sem conexão e enviada depois">offline</span>' : ''}</td><td><strong>${esc(a.nome || a.por)}</strong><div class="hint">${esc(a.por)}${a.aparelho ? ' · ' + esc(a.aparelho) : ''}</div></td><td><span class="pill${a.cat === 'estoque' ? ' red' : ''}">${esc(ATV_CAT[a.cat] || a.cat)}</span></td><td>${esc(a.texto)}</td><td>${a.projetoId ? esc(atvProj(a.projetoId)) : '<span class="muted">—</span>'}</td></tr>`).join('')
   || '<tr><td colspan="5" class="muted">Nenhuma atividade no período.</td></tr>'}</tbody></table></div>
  ${l.length > MOSTRA ? `<p class="hint">Mostrando as ${MOSTRA} mais recentes. Use os filtros ou o CSV para ver todas.</p>` : ''}`;
 }
