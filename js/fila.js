@@ -65,6 +65,7 @@ async function filaConferir(id){const c=Fila.itens.get(id);if(!c)return;if(draft
   if(inv&&!inv.key&&chaveValida(c.chave)){const k=chaveDecompor(c.chave);Object.assign(inv,{id:k.chave,key:k.chave,number:inv.number||k.numero,series:inv.series||k.serie,issuerDoc:inv.issuerDoc||k.cnpj});['key','number','series','issuerDoc'].forEach(f=>inv._fontes[f]={f:'chave',origem:'chave da obra'})}
   if(!inv){const dup=await chaveJaLancada(c.chave);if(dup){filaMsg(duplicadaHtml(c.chave,dup,'Captura da obra')+repetida());return}inv=notaDaChave(c)}
   const outra=inv.key&&draft.find(d=>d!==inv&&d.key===inv.key);if(outra){if(inv._foto?.url)URL.revokeObjectURL(inv._foto.url);filaMsg(`A nota ${esc(inv.number||inv.key)} desta captura já está na conferência, aberta por outra captura com a mesma chave. Confira só uma delas.`+repetida());return}
+  if(!inv.issuer&&/^\d{14}$/.test(inv.issuerDoc||'')){aviso('Buscando o emitente pelo CNPJ…');const e=await emitentePorCnpj(inv.issuerDoc);if(e){inv.issuer=e.nome;inv._fontes=inv._fontes||{};inv._fontes.issuer={f:'cnpj',fantasia:e.fantasia}}}
   inv._captura=id;inv._projeto=podeGravarProjeto(c.projectId)?c.projectId:'';inv._fotosExtra=fotos.slice(1).map(f=>URL.createObjectURL(f));inv._avisos=inv._avisos||[];
   if((c.observacoes||[]).length)inv._avisos.unshift('A obra informou: '+c.observacoes.join(' e ')+'. Confira as quantidades com a nota.');
   if(fotos.length>1)inv._avisos.push(`A obra enviou ${fotos.length} fotos desta nota; a leitura usou a primeira. As outras aparecem abaixo da foto principal.`);
@@ -76,6 +77,12 @@ function notaDaChave(c){const k=chaveDecompor(c.chave);const fontes={key:{f:'cha
  const motivo=c.busca?.status==='erro'?'a busca na SEFAZ falhou ('+c.busca.motivo+')':c.busca?.status==='sem_fonte'?'a busca automática só cobre NFC-e do Ceará ou com o link do QR':!buscaCobre(c)?'a busca automática só cobre a NFC-e (cupom); para a NF-e, use o XML do fornecedor':'a busca na SEFAZ ainda não rodou (use Buscar agora na fila e confira de novo em alguns minutos)';
  return {id:k.chave,key:k.chave,number:k.numero,series:k.serie,date:'',operation:'',issuer:'',issuerDoc:k.cnpj,recipient:'',totalProducts:0,discount:0,total:0,source:'Chave enviada pela obra',format:'Chave da obra',tipo:'material',protocolStatus:'Só a chave de acesso; confira com a nota.',items:[],
   _conferir:true,_fontes:fontes,_conf:0,_codigos:c.consultaUrl?{url:c.consultaUrl,lidos:0}:{lidos:0},_avisos:[`${k.modeloNome} nº ${k.numero}, série ${k.serie}, CNPJ ${k.cnpj}. Sem itens: ${motivo}. Complete pela consulta da nota ou à mão.`]}}
+// Emitente pela razão social da Receita Federal (BrasilAPI, gratuita e sem chave), quando a nota não trouxe o nome.
+// Sem resposta em 6 s, o campo fica para preencher.
+const cnpjCache=new Map();
+async function emitentePorCnpj(cnpj){if(cnpjCache.has(cnpj))return cnpjCache.get(cnpj);
+ try{const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),6000);const r=await fetch('https://brasilapi.com.br/api/cnpj/v1/'+cnpj,{signal:ctl.signal});clearTimeout(t);if(!r.ok)return null;
+  const j=await r.json();const e=j.razao_social?{nome:j.razao_social,fantasia:j.nome_fantasia||''}:null;cnpjCache.set(cnpj,e);return e}catch(e){return null}}
 // Botão "Buscar agora": dispara o pipeline do GitLab (trigger) em vez de esperar o agendamento de hora em hora.
 // O token fica em config/busca, lido só por quem confere a fila; no GitLab, as variáveis de pipeline ficam bloqueadas (docs/busca-nfce.md).
 function filaBuscaHtml(abertas){const espera=abertas.filter(c=>buscaCobre(c)&&(!c.busca||(c.busca.status==='erro'&&(c.busca.tentativas||0)<3))).length;
