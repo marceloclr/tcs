@@ -113,3 +113,10 @@ Não foram testados o OCR de PDF digitalizado nem PDFs reais de NFS-e de cada pr
 - **Escritório:** https://marceloclr.gitlab.io/tcs/manual-escritorio ([`manual-escritorio.html`](manual-escritorio.html)), aberto pelo botão **Manual** no topo do sistema. Guia rápido em PDF: [`manuais/manual-escritorio.pdf`](manuais/manual-escritorio.pdf).
 - **Formato:** menu à esquerda, que marca a seção atual (no celular, gaveta pelo botão **Índice**), e "Voltar ao índice" em cada seção. Estilo e comportamento em [`css/manual.css`](css/manual.css) e [`js/manual.js`](js/manual.js), no padrão Papel e Tinta.
 - **Para refazer os PDFs** depois de mudar o texto, edite `manuais/cartaz-mestre.html` ou `manuais/guia-escritorio.html` e rode [`manuais/gerar-pdf.mjs`](manuais/gerar-pdf.mjs) (instruções no topo do arquivo).
+
+## Espelho no GitHub Pages (22/10/2026)
+- O sistema também abre em https://marceloclr.github.io/tcs/, como reserva do GitLab Pages, publicado da raiz da branch `main` do espelho.
+- O GitHub não lê o `_redirects`. As pastas `mestre/`, `manual/` e `manual-escritorio/` encaminham para `captura.html`, `manual-mestre.html` e `manual-escritorio.html`. Elas não vão para o GitLab Pages, onde vale a reescrita.
+- `.nojekyll` faz o GitHub publicar os arquivos sem processá-los.
+- O login com Google funciona porque `marceloclr.github.io` está entre os domínios autorizados do Firebase (Authentication › Configurações).
+- O job de busca na SEFAZ roda só no GitLab.
