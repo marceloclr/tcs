@@ -124,9 +124,18 @@ test('obra: só nomes dos projetos concedidos e criação de capturas', async ()
   await assertSucceeds(setDoc(doc(db, 'capturas/c4'), { autor: OBRA, projectId: 'A1', clientId: 'A', status: 'pendente', fotos: [], chave: '', consultaUrl: 'http://nfce.sefaz.ce.gov.br/pages/ShowNFCe.html?p=' + CH + '|2|1|1|ABC' }));
   await assertFails(setDoc(doc(db, 'capturas/c5'), { autor: OBRA, projectId: 'A1', clientId: 'A', status: 'pendente', fotos: [], chave: '123', consultaUrl: '' }));
   await assertFails(setDoc(doc(db, 'capturas/c6'), { autor: OBRA, projectId: 'A1', clientId: 'A', status: 'pendente', fotos: [], chave: CH, busca: { status: 'ok', html: '<p>falsa</p>' } }));
-  // gatilho do "Buscar agora": quem confere lê; a obra e quem só lê, não; só o administrador grava
+  // várias obras para a mesma nota: todas concedidas a quem envia, a primeira é a principal, no máximo 5
+  const ob = (p, c) => ({ projectId: p, clientId: c, nome: p });
+  await env.withSecurityRulesDisabled(c => setDoc(doc(c.firestore(), 'usuarios/' + OBRA), { email: OBRA, nome: OBRA, ...usuarios[OBRA], acessos: { 'p:A1': { n: 'L', ate: null }, 'p:B1': { n: 'L', ate: null } } }));
+  const multi = (id, obras, p = 'A1', c = 'A') => setDoc(doc(db, 'capturas/' + id), { autor: OBRA, projectId: p, clientId: c, status: 'pendente', fotos: [], chave: CH, obras });
+  await assertSucceeds(multi('m1', [ob('A1', 'A'), ob('B1', 'B')]));
+  await assertFails(multi('m2', [ob('A1', 'A'), ob('A2', 'A')]));        // A2 não concedida
+  await assertFails(multi('m3', [ob('A1', 'A'), ob('B1', 'A')]));        // cliente trocado
+  await assertFails(multi('m4', [ob('B1', 'B'), ob('A1', 'A')]));        // a primeira tem de ser a principal
+  await assertFails(multi('m5', [1, 2, 3, 4, 5, 6].map(() => ob('A1', 'A'))));
+  // gatilho do "Buscar agora": quem confere e a obra leem; quem só lê, não; só o administrador grava
   await env.withSecurityRulesDisabled(c => setDoc(doc(c.firestore(), 'config/busca'), { gatilhoToken: 'x', projeto: '1' }));
-  await assertFails(getDoc(doc(db, 'config/busca')));
+  await assertSucceeds(getDoc(doc(db, 'config/busca')));               // a obra dispara a busca ao enviar
   await assertFails(getDoc(doc(ctx(LEI), 'config/busca')));
   await assertSucceeds(getDoc(doc(ctx(ESC), 'config/busca')));
   await assertFails(setDoc(doc(ctx(ESC), 'config/busca'), { gatilhoToken: 'y' }));
@@ -147,6 +156,17 @@ test('obra: só nomes dos projetos concedidos e criação de capturas', async ()
   await assertFails(updateDoc(doc(ctx(LEI), 'capturas/c1'), { status: 'lancada' }));
   await assertSucceeds(getDocs(query(collection(ctx(LEI), 'capturas_fotos'), where('capturaId', '==', 'c1'), where('projectId', '==', 'A1'))));
   await assertFails(getDocs(query(collection(ctx(ESC), 'capturas'), where('projectId', 'in', ['B1']))));
+});
+test('entradas da nota: quem altera a nota refaz as entradas; baixas nunca se apagam', async () => {
+  await env.withSecurityRulesDisabled(async c => { const db = c.firestore();
+    await setDoc(doc(db, 'movements/e2'), { id: 'e2', type: 'ENTRADA', invoiceId: 'N2', escopo: 'fechada', quantity: 1 });
+    await setDoc(doc(db, 'movements/e3'), { id: 'e3', type: 'ENTRADA', invoiceId: 'N3', escopo: 'aberta', quantity: 1 }); });
+  await assertFails(deleteDoc(doc(ctx(LEI), 'movements/e2')));        // só leitura no projeto
+  await assertFails(deleteDoc(doc(ctx(ESC), 'movements/e1')));        // nota N1 tem projeto fora do acesso
+  await assertSucceeds(deleteDoc(doc(ctx(ESC), 'movements/e2')));     // nota N2 inteira no projeto com escrita
+  await assertSucceeds(deleteDoc(doc(ctx(ESC), 'movements/e3')));     // nota aberta (a vincular)
+  await assertFails(deleteDoc(doc(ctx(ESC), 'movements/sa1')));       // baixa: nunca
+  await assertFails(deleteDoc(doc(ctx(ADM), 'movements/sa1')));
 });
 test('cadastro: aguardando autorização, desativado e implantação', async () => {
   const novo = ctx(NOVO);

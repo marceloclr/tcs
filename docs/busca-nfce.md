@@ -18,6 +18,12 @@ O mestre de obras pode mandar só o **código da nota**: o QR Code, o código de
   - `{status:'sem_fonte'}`.
 - No navegador, `htmlParaTexto` (em `js/consulta.js`) transforma a página em texto, e os mesmos leitores do "Colar conteúdo da consulta" montam a nota.
 
+## Disparo pelo envio da obra
+Quando o celular envia uma NFC-e (com o link do QR, ou do Ceará pela chave), ele mesmo dispara o pipeline pelo token de `config/busca`. Os produtos e valores chegam em 1 a 3 minutos, e a fila mostra o selo verde **"✓ Produtos e valores importados"**.
+- Cada celular dispara no máximo uma vez a cada 2 minutos; o job busca todas as notas pendentes de uma vez.
+- Sem token, vale só a rodada de hora em hora.
+- O token também fica legível para a conta Obra. Ele só inicia o pipeline, porque as variáveis de pipeline estão bloqueadas (passo 3 abaixo).
+
 ## Implantação (uma vez)
 1. **Conta de serviço do Firebase:** console do Firebase › projeto `thiago-17d18` › ⚙ Configurações do projeto › **Contas de serviço** › **Gerar nova chave privada**. Baixa um JSON; guarde-o fora do repositório.
 2. **Variável no GitLab:** projeto `marceloclr/tcs` › Settings › CI/CD › **Variables** › Add variable:

@@ -84,9 +84,10 @@ service cloud.firestore {
       allow get: if ativo();
       allow write: if admin();
     }
-    // Gatilho do botão "Buscar agora" (token de trigger do GitLab): lido por quem confere a fila, gravado só por administradores.
+    // Gatilho da busca na SEFAZ (token de trigger do GitLab): lido por quem confere a fila (Buscar agora) e pela obra
+    // (o envio de uma nota já dispara a busca); gravado só por administradores. O token só inicia o pipeline.
     match /config/busca {
-      allow get: if escritor();
+      allow get: if escritor() || obra();
       allow write: if admin();
     }
     match /solicitacoes/{email} {
@@ -150,7 +151,12 @@ service cloud.firestore {
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['_atualizadoEm', '_atualizadoPor']))
         || (resource.data.type == 'ENTRADA' && escritor()
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['escopo', '_atualizadoEm', '_atualizadoPor']));
-      allow delete: if admin() && (resource == null || resource.data.type != 'SAIDA');
+      // Entrada (ENTRADA): o administrador, ou quem pode alterar a nota dela (a substituição pelos dados do XML refaz as entradas).
+      // Baixas (SAIDA) nunca se apagam.
+      allow delete: if (admin() && (resource == null || resource.data.type != 'SAIDA'))
+        || (resource != null && resource.data.type == 'ENTRADA' && escritor()
+            && (resource.data.get('escopo', '') == 'aberta'
+                || notaInteira(get(caminho('invoices', resource.data.get('invoiceId', '-'))).data)));
     }
     // Baixa: quantidade positiva, motivo e responsável (quem grava). Estorno: id 'est-' + id da baixa (um só por baixa), mesma
     // quantidade com sinal trocado, mesmo projeto e produto, motivo e responsável; não se estorna um estorno nem um ajuste.
@@ -224,13 +230,24 @@ service cloud.firestore {
         || (d.get('chave', '') is string && d.get('chave', '').matches('[0-9]{44}'))
         || (d.get('consultaUrl', '') is string && d.get('consultaUrl', '').matches('https?://.+'));
     }
+    // Mais de uma obra para a mesma nota (até 5): a primeira é a principal (projectId/clientId); cada uma precisa estar
+    // concedida a quem envia e pertencer ao cliente informado.
+    function obraOk(o) { return (admin() || concedido(o.projectId, o.clientId)) && clienteDoProjeto(o.projectId, o.clientId); }
+    function obrasValidas(d) {
+      let o = d.get('obras', []);
+      return o is list && o.size() <= 5
+        && (o.size() < 1 || (o[0].projectId == d.projectId && o[0].clientId == d.clientId))
+        && (o.size() < 2 || obraOk(o[1])) && (o.size() < 3 || obraOk(o[2]))
+        && (o.size() < 4 || obraOk(o[3])) && (o.size() < 5 || obraOk(o[4]));
+    }
     match /capturas/{id} {
       allow create: if (obra() || admin()) && request.resource.data.autor == eu()
         && (admin() || concedido(request.resource.data.projectId, request.resource.data.clientId))
         && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId)
         && request.resource.data.status == 'pendente'
         && !('busca' in request.resource.data)
-        && temFotoOuCodigo(request.resource.data);
+        && temFotoOuCodigo(request.resource.data)
+        && obrasValidas(request.resource.data);
       allow read: if (ativo() && resource.data.autor == eu()) || le(resource.data.projectId, resource.data.clientId);
       allow update: if grava(resource.data.projectId, resource.data.clientId)
         && request.resource.data.autor == resource.data.autor;

@@ -186,12 +186,12 @@ async function saveInvoiceAllocations(inv,novas){if(inv._parcial)throw new Error
 const podeExcluirNota=()=>!Nuvem.user||Nuvem.perfil?.papel==='admin';
 async function invoiceExcluir(inv,motivo){if(!podeExcluirNota())throw new Error('Só administradores excluem notas.');if(inv._parcial)throw new Error('Você vê só o rateio dos seus projetos nesta nota.');
  const erro=checkSaidas(inv.id,[]);if(erro)throw new Error(erro+' Estorne essas baixas antes de excluir a nota.');
- const entradas=state.movements.filter(m=>m.type==='ENTRADA'&&m.invoiceId===inv.id);const porProd=new Map();entradas.forEach(m=>porProd.set(m.productId,(porProd.get(m.productId)||0)+Number(m.quantity||0)));
+ const entradas=state.movements.filter(m=>m.type==='ENTRADA'&&m.invoiceId===inv.id);const anotadas=(inv.items||[]).map(it=>it.movementId).filter(id=>id&&!entradas.some(m=>m.id===id));const porProd=new Map();entradas.forEach(m=>porProd.set(m.productId,(porProd.get(m.productId)||0)+Number(m.quantity||0)));
 const ids=new Set(entradas.map(m=>m.id));
  // saldo recalculado dos movimentos (entradas − saídas, que incluem estornos e ajustes), sem as entradas desta nota
  const saldo=pid=>state.movements.filter(m=>m.productId===pid&&!ids.has(m.id)).reduce((s,m)=>s+(m.type==='ENTRADA'?1:m.type==='SAIDA'?-1:0)*Number(m.quantity||0),0);
  await txWrite([...STORES_DIST,'products','chaves'],os=>{state.allocations.filter(a=>a.invoiceId===inv.id).forEach(a=>os.allocations.delete(a.id));
-  state.notas_projeto.filter(p=>p.invoiceId===inv.id).forEach(p=>os.notas_projeto.delete(p.id));entradas.forEach(m=>os.movements.delete(m.id));
+  state.notas_projeto.filter(p=>p.invoiceId===inv.id).forEach(p=>os.notas_projeto.delete(p.id));entradas.forEach(m=>os.movements.delete(m.id));anotadas.forEach(id=>os.movements.delete(id));
   for(const pid of porProd.keys()){const p=state.products.find(x=>x.id===pid);if(p)os.products.put({...p,stock:Math.round(saldo(pid)*1e6)/1e6})}
   const ch=state.chaves.find(c=>c.id===inv.key);if(ch&&(!ch.notaId||ch.notaId===inv.id))os.chaves.delete(ch.id);
   os.invoices.delete(inv.id)},{motivo});

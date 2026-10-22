@@ -103,3 +103,13 @@ tr.atrasada td{background:#fffbeb}.atraso-txt{color:#92400e;font-weight:700}.aco
 .bp-legenda{margin-top:4px;font-size:11px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){.bp-pulso{animation:none}.bp-barra i{transition:none}}
 @media (max-width:760px){.busca-sefaz{grid-template-columns:1fr}}
+
+/* Fila da obra: selo de produtos importados da SEFAZ e obras da nota na conferência */
+.pill.selo-importado{background:#dcfce7;color:#14532d;font-size:12px;padding:4px 10px;border:1px solid #86efac}
+.obras-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip-obra{display:inline-flex;align-items:center;gap:6px;padding:4px 4px 4px 10px;border:1px solid #93c5fd;border-radius:99px;background:var(--blue-soft);color:#1e3a8a;font-weight:600;font-size:13px}
+.chip-obra small{font-weight:500;color:var(--muted)}
+.chip-obra button{border:0;background:transparent;color:#1e3a8a;font-size:16px;line-height:1;width:24px;height:24px;border-radius:50%;cursor:pointer}.chip-obra button:hover{background:#dbeafe}
+.obras-chips select{max-width:240px}
+.fila-dist{margin-top:12px}.fila-dist h3{margin:0 0 4px}.fila-dist input{width:90px;text-align:right}.fila-dist th .btn{margin-top:4px}
+.fila-dist tfoot td{border-top:1px solid var(--line)}

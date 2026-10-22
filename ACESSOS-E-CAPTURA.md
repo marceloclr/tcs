@@ -60,7 +60,7 @@ A aba **Usuários e acessos** aparece só para administradores.
 > 2. Toque em **🔍 Ler código da nota** e aponte a câmera para o **QR Code** (cupom) ou para o **código de barras** (nota grande). Quando o celular ler, aparece **"Código da nota lido"**.
 >    - Não leu? Toque em **⌨️ Digitar os números** e digite os 44 números que ficam embaixo do código de barras.
 > 3. Se puder, toque em **📷 Fotografar a nota também** (é o comprovante de que a nota chegou).
-> 4. Toque no nome da **obra** (se for uma só, ela já vem marcada).
+> 4. Toque no nome da **obra**. Se for uma só, ela já vem marcada. **Se a nota for de mais de uma obra, toque em todas elas**: o escritório separa os produtos entre elas.
 > 5. Toque em **Enviar**. Vai aparecer: **"Nota enviada! O escritório vai conferir."**
 >
 > **Sem código na nota?** Toque em **📷 Fotografar nota**, pegue a **nota inteira**, em **lugar claro**, e siga do passo 4.
@@ -83,6 +83,9 @@ Em **Estoque › Recebidas da obra** (o número ao lado mostra quantas aguardam)
 
 - **A conferir:** notas pendentes ou em conferência, com obra, quem enviou, fotos, observações (faltou material, veio avariado) e o tempo de espera. Acima de 48 horas, a linha fica destacada.
 - **Só código:** a obra mandou só o código da nota, sem foto (coluna Fotos).
+- **Várias obras:** a coluna Obra mostra todas as obras indicadas pela obra, com o selo "N obras".
+- **Selo verde "✓ Produtos e valores importados":** a busca na SEFAZ já trouxe os itens e o total, que aparecem abaixo do selo. Ao conferir, a nota abre preenchida.
+- **Busca disparada pelo envio:** o próprio envio pelo celular dispara a busca, sem esperar a rodada de hora em hora. Logo depois do envio, a linha mostra "Buscando na SEFAZ…". Isso exige o token configurado em **Configurar token**.
 - **Busca na SEFAZ:** situação da busca automática da NFC-e. Os selos são **na fila**, **Dados da SEFAZ prontos** e **Busca falhou** (com o motivo). A NF-e aparece como **sem busca automática**. No topo da fila, o quadro **Busca automática na SEFAZ** mostra:
   - a frequência: de hora em hora, das 7h às 18h, de segunda a sábado;
   - o cartão **Próxima busca**, ao vivo:
@@ -93,7 +96,16 @@ Em **Estoque › Recebidas da obra** (o número ao lado mostra quantas aguardam)
   - o botão **Buscar agora**, que dispara a busca na hora. O administrador grava o token em **Configurar token**. Detalhes em [`docs/busca-nfce.md`](docs/busca-nfce.md).
 - **Ver fotos:** mostra as fotos enviadas, quando houver.
 - **Conferir:** usa os dados trazidos da SEFAZ, quando a busca já rodou, e baixa as fotos (código de barras, QR Code e texto). Só com a chave e sem busca, abre a nota com número, série e CNPJ da chave, para completar pela consulta ou à mão. Em todos os casos, abre a conferência com o **projeto indicado pela obra** (pode trocar, entre os projetos em que você tem escrita) e o aviso do que a obra informou. Nada é gravado antes de você confirmar.
-- **Confirmar entrada das notas:** a nota é lançada e vinculada ao projeto; a captura passa a **Lançada**, ligada à nota. As fotos ficam como **comprovante de recebimento**: na nota, botão **Fotos da obra**.
+- **Obras da nota:** na conferência, as obras indicadas aparecem como etiquetas.
+  - **×** tira uma obra; com uma obra só, a nota inteira vai para ela.
+  - **+ Adicionar obra** acrescenta outra.
+  - Para trocar (por exemplo, a obra indicou A e B, mas era C e D), tire as erradas e adicione as certas.
+- **Separação entre as obras** (mais de uma obra), abaixo dos itens:
+  - a quantidade de cada produto para cada obra, o que ficou livre e o valor de cada obra;
+  - **Tudo aqui** põe a nota inteira numa obra;
+  - separar mais do que a nota tem bloqueia a confirmação;
+  - o que ficar livre continua a vincular.
+- **Confirmar entrada das notas:** a nota é lançada e vinculada às obras, conforme a separação; a captura passa a **Lançada**, ligada à nota. As fotos ficam como **comprovante de recebimento**: na nota, botão **Fotos da obra**.
 - **Descartar:** pede o motivo (por exemplo: foto repetida, não é nota, nota de outra obra).
 - **Nota repetida:** se a chave já foi lançada, o sistema avisa e oferece **Descartar como repetida**.
 - **XML que chega depois:** ao importar o XML de uma nota já lançada pela foto, pela consulta ou pelo PDF, o sistema oferece **Substituir os dados pelos do XML**. Fotos, captura e projeto são mantidos e as entradas no estoque são refeitas. Fica bloqueado se a nota estiver dividida entre vários projetos ou se já houver saídas desses produtos.

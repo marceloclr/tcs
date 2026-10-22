@@ -47,6 +47,13 @@ O app real, ligado aos emuladores (`?emulador=1`, só funciona em localhost), co
      - botão só para administradores;
      - exclusão bloqueada com baixa no projeto;
      - nota da obra excluída, com rateios, projeções, entradas e chave apagados, saldo recalculado, captura de volta em "A conferir" e motivo no log.
+   - `18-varias-obras.js`, em duas partes (depois do `1-admin.js`):
+     - `INIT` com `window.PARTE='obra'`, em `captura.html?emulador=1` (8768): o mestre marca Obra 1 e Obra 2 e envia só a chave;
+     - `window.PARTE='escritorio'`, em `index.html?emulador=1` (8767, administrador):
+       - selo verde de produtos importados;
+       - troca da Obra 2 pela Obra 3;
+       - separação por produto, com o excesso recusado;
+       - nota lançada vinculada conforme a separação.
    - `10-fila.js` em 8767 (depois do `7-captura.js`): fila do escritório, cartão e destaque de 48 h, conferir com o projeto indicado, lançar, fotos como comprovante, descartar com motivo e XML da mesma chave substituindo os dados da foto.
 
 Variáveis do `cdp.mjs`: `CDP_PORTA` (9446), `ESPERA` (ms antes de rodar o script), `FIM` (ms antes de fechar), `INIT` (script injetado antes da página) e `TEMA=claro|escuro` força o tema; o script pode chamar `console.log('__cdp_offline__')` e `console.log('__cdp_online__')` para derrubar e religar a rede da página.

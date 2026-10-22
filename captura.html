@@ -5,7 +5,7 @@
 <!-- endereço curto /tcs/mestre (_redirects): com barra no fim, os caminhos relativos quebrariam; volta para o endereço sem a barra -->
 <script>if(/\/mestre\/$/.test(location.pathname))location.replace(location.pathname.replace(/\/$/,'')+location.search+location.hash)</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Notas TCS - V-22102026-1158</title>
+<title>Notas TCS - V-22102026-1232</title>
 <meta name="theme-color" content="#173B68">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="icones/notas-tcs.svg">
@@ -65,7 +65,9 @@
    <input type="file" accept="image/*" capture="environment" id="cameraMais" hidden>
   </label>
   <h2>Qual obra?</h2>
+  <p class="dica-obras">Pode marcar mais de uma.</p>
   <div id="obras" class="obras"></div>
+  <p class="obras-varias" id="obrasDica" hidden>A nota é de mais de uma obra: o escritório separa os produtos entre elas.</p>
   <div class="extras">
    <button class="botao alterna" id="faltou" aria-pressed="false" title="Marque se chegou menos material do que está na nota">Faltou material</button>
    <button class="botao alterna" id="avariado" aria-pressed="false" title="Marque se algum material chegou quebrado ou estragado">Veio avariado</button>

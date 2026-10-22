@@ -4,7 +4,7 @@
 // Só com o código, o job buscar-nfce do GitLab CI busca os dados da NFC-e na SEFAZ (servidor/buscar-nfce.mjs); a foto vira opcional. A foto é comprimida no celular (JPEG, lado maior 2400 px, qualidade 0,85),
 // o código de barras ou o QR é lido em silêncio, e a nota vai para a fila "capturas" do escritório.
 // Sem internet, a nota fica guardada neste celular (IndexedDB 'tcs-captura') e é enviada sozinha quando a conexão voltar.
-const Cap={user:null,perfil:null,projetos:[],fotos:[],codigo:null,obra:'',faltou:false,avariado:false,ocupado:false,unsubs:[],enviando:false};
+const Cap={user:null,perfil:null,projetos:[],fotos:[],codigo:null,obras:[],faltou:false,avariado:false,ocupado:false,unsubs:[],enviando:false};
 const CAP_PROJ_KEY='tcs-captura-projetos';
 const Visor={stream:null,timer:0,det:null,zxing:null,ocupado:false};
 const telas=['telaCarregando','telaEntrar','telaAviso','telaFoto','telaCodigo','telaConferir','telaPronto'];
@@ -29,16 +29,16 @@ async function fotoPreparar(file,origem){const img=await imagemCarregar(file,300
  return {id:uid(),blob:jpg.blob,largura:jpg.largura,altura:jpg.altura,url:URL.createObjectURL(jpg.blob),escura:q.escura,borrada:q.borrada,pequena:q.pequena,aceita:!(q.escura||q.borrada||q.pequena),chave:cod.chave||'',consultaUrl:cod.url||'',origem}}
 async function fotosReceber(files,origem){if(!files.length)return;Cap.ocupado=true;mostrar('telaCarregando');$('#telaCarregando p').textContent=files.length>1?'Preparando as fotos…':'Preparando a foto…';
  for(const f of files){try{Cap.fotos.push(await fotoPreparar(f,origem))}catch(e){alert(e.message||'Não deu para abrir esta foto. Tente de novo.')}}
- Cap.ocupado=false;if(!Cap.fotos.length){mostrar(Cap.codigo?'telaConferir':'telaFoto');return}if(Cap.projetos.length===1)Cap.obra=Cap.projetos[0].id;conferirRender();mostrar('telaConferir')}
+ Cap.ocupado=false;if(!Cap.fotos.length){mostrar(Cap.codigo?'telaConferir':'telaFoto');return}if(Cap.projetos.length===1)Cap.obras=[Cap.projetos[0].id];conferirRender();mostrar('telaConferir')}
 function conferirRender(){const k=Cap.codigo&&chaveDecompor(Cap.codigo.chave);
  $('#codigoLido').innerHTML=Cap.codigo?`<div class="codigo-lido"><span class="icone" aria-hidden="true">✅</span><div><strong>${Cap.codigo.origem==='digitado'?'Números da nota conferidos':'Código da nota lido'}</strong>${k?`<p>Nota nº ${esc(k.numero)}, série ${esc(k.serie)}${k.modelo===65?' (cupom NFC-e)':''}</p>`:''}<p>O escritório busca os dados da nota. A foto é opcional.</p></div><button class="botao secundario" id="codigoOutro" title="Lê o código de novo, se for de outra nota">Ler de novo</button></div>`:'';
  $('#maisFotoTexto').textContent=Cap.codigo&&!Cap.fotos.length?'Fotografar a nota também (opcional)':'Mais uma foto desta nota';
  $('#fotos').innerHTML=Cap.fotos.map((f,i)=>`<div><div class="foto"><img src="${f.url}" alt="Foto ${i+1} da nota"><div class="moldura"></div><button class="botao secundario tirar" data-tirar="${i}" title="Apaga esta foto">Apagar</button></div>
   ${f.aceita?'':`<div class="alerta-foto">${f.pequena?'A foto veio pequena (do WhatsApp?) e o escritório não vai conseguir ler. Fotografe a nota aqui pelo Notas TCS.':f.escura?'A foto ficou escura.':'A foto ficou tremida.'}<div class="botoes"><label class="botao principal" title="Abre a câmera para fotografar de novo">Tirar de novo<input type="file" accept="image/*" capture="environment" data-refazer="${i}" hidden></label><button class="botao secundario" data-usar="${i}" title="Envia esta foto mesmo assim">Usar assim mesmo</button></div></div>`}</div>`).join('');
- $('#obras').innerHTML=Cap.projetos.length?Cap.projetos.map(p=>`<button class="botao obra" data-obra="${esc(p.id)}" aria-pressed="${Cap.obra===p.id}" title="Escolhe esta obra">${esc(p.name)}</button>`).join(''):'<p class="erro">Nenhuma obra liberada para você. Fale com o escritório.</p>';
+ $('#obras').innerHTML=Cap.projetos.length?Cap.projetos.map(p=>`<button class="botao obra" data-obra="${esc(p.id)}" aria-pressed="${Cap.obras.includes(p.id)}" title="Marca ou desmarca esta obra; pode marcar mais de uma">${esc(p.name)}</button>`).join(''):'<p class="erro">Nenhuma obra liberada para você. Fale com o escritório.</p>';
  $('#faltou').setAttribute('aria-pressed',Cap.faltou);$('#avariado').setAttribute('aria-pressed',Cap.avariado);
- $('#enviar').disabled=!Cap.obra||!(Cap.fotos.length||Cap.codigo)||Cap.fotos.some(f=>!f.aceita)}
-function limparCaptura(){Cap.fotos.forEach(f=>URL.revokeObjectURL(f.url));Cap.fotos=[];Cap.codigo=null;Cap.obra='';Cap.faltou=false;Cap.avariado=false}
+ $('#obrasDica').hidden=Cap.obras.length<2;$('#enviar').disabled=!Cap.obras.length||!(Cap.fotos.length||Cap.codigo)||Cap.fotos.some(f=>!f.aceita)}
+function limparCaptura(){Cap.fotos.forEach(f=>URL.revokeObjectURL(f.url));Cap.fotos=[];Cap.codigo=null;Cap.obras=[];Cap.faltou=false;Cap.avariado=false}
 
 // ---------- Código da nota: câmera ao vivo ou os 44 números ----------
 // O QR da NFC-e traz o link da consulta (com a chave); o código de barras do DANFE traz a chave. Boleto e PIX são recusados.
@@ -65,7 +65,7 @@ function digitarAbrir(motivo){visorParar();$('#visorCaixa').hidden=true;$('#digi
 function digitarConta(){const d=$('#digitar').value.replace(/\D/g,'');$('#digitarConta').textContent=`${d.length} de 44 números`;$('#digitarErro').textContent='';return d}
 function digitarUsar(){const d=digitarConta();if(d.length!==44){$('#digitarErro').textContent=d.length<44?`Faltam ${44-d.length} números.`:`Tem ${d.length-44} números a mais.`;return}
  if(!chaveValida(d)){$('#digitarErro').textContent='Algum número está errado. Confira com a nota e corrija.';return}codigoAceitar({chave:d,url:'',origem:'digitado'})}
-function codigoAceitar(c){visorParar();navigator.vibrate?.(120);Cap.codigo=c;if(Cap.projetos.length===1&&!Cap.obra)Cap.obra=Cap.projetos[0].id;conferirRender();mostrar('telaConferir')}
+function codigoAceitar(c){visorParar();navigator.vibrate?.(120);Cap.codigo=c;if(Cap.projetos.length===1&&!Cap.obras.length)Cap.obras=[Cap.projetos[0].id];conferirRender();mostrar('telaConferir')}
 
 // ---------- Envio ----------
 function base64(blob){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=()=>rej(r.error);r.readAsDataURL(blob)})}
@@ -78,14 +78,23 @@ async function capturaEnviar(item){for(const [i,f] of item.fotos.entries()){cons
  if(await window.__fb.get('capturas',item.id).catch(()=>null))return;
  const obs=[item.faltou?'Faltou material':'',item.avariado?'Veio avariado':''].filter(Boolean);
  const chave=item.codigo?.chave||item.fotos.map(f=>f.chave).find(Boolean)||'',url=item.codigo?.url||item.fotos.map(f=>f.consultaUrl).find(Boolean)||'';
- await window.__fb.commit([{op:'set',store:'capturas',id:item.id,data:{id:item.id,autor:item.autor,autorNome:item.autorNome,projectId:item.projectId,clientId:item.clientId,projetoNome:item.projetoNome,status:'pendente',capturadoEm:item.criadoEm,enviadoEm:new Date().toISOString(),faltouMaterial:!!item.faltou,veioAvariado:!!item.avariado,observacoes:obs,chave,consultaUrl:url,origem:item.origem,fotos:item.fotos.map((f,i)=>({ordem:i,largura:f.largura,altura:f.altura,bytes:f.blob.size,partes:Math.ceil(Math.ceil(f.blob.size/3)*4/PARTE)}))}},
+ await window.__fb.commit([{op:'set',store:'capturas',id:item.id,data:{id:item.id,autor:item.autor,autorNome:item.autorNome,projectId:item.projectId,clientId:item.clientId,projetoNome:item.projetoNome,obras:item.obras||[{projectId:item.projectId,clientId:item.clientId,nome:item.projetoNome}],status:'pendente',capturadoEm:item.criadoEm,enviadoEm:new Date().toISOString(),faltouMaterial:!!item.faltou,veioAvariado:!!item.avariado,observacoes:obs,chave,consultaUrl:url,origem:item.origem,fotos:item.fotos.map((f,i)=>({ordem:i,largura:f.largura,altura:f.altura,bytes:f.blob.size,partes:Math.ceil(Math.ceil(f.blob.size/3)*4/PARTE)}))}},
   // log de atividades (js/atividades.js): o envio pela obra entra no mesmo lote, com id derivado da captura
-  {op:'set',store:'atividades',id:'cap-'+item.id,data:{id:'cap-'+item.id,em:new Date().toISOString(),emServidor:window.__fb.agora(),por:item.autor,nome:item.autorNome||item.autor,papel:Cap.perfil?.papel||'obra',cat:'obra',acao:'obra_envio',texto:`Enviou pela obra ${item.codigo?'o código'+(item.fotos.length?` e ${item.fotos.length} foto(s)`:''):item.fotos.length+' foto(s)'} de nota fiscal para ${item.projetoNome||'o projeto'}${obs.length?'. '+obs.join(', '):''}`,projetoId:item.projectId,clienteId:item.clientId,ref:'capturas/'+item.id,valor:null,aparelho:'tela da obra',offline:Date.now()-new Date(item.criadoEm).getTime()>120000}}])}
+  {op:'set',store:'atividades',id:'cap-'+item.id,data:{id:'cap-'+item.id,em:new Date().toISOString(),emServidor:window.__fb.agora(),por:item.autor,nome:item.autorNome||item.autor,papel:Cap.perfil?.papel||'obra',cat:'obra',acao:'obra_envio',texto:`Enviou pela obra ${item.codigo?'o código'+(item.fotos.length?` e ${item.fotos.length} foto(s)`:''):item.fotos.length+' foto(s)'} de nota fiscal para ${(item.obras||[]).map(o=>o.nome).join(' e ')||item.projetoNome||'o projeto'}${obs.length?'. '+obs.join(', '):''}`,projetoId:item.projectId,clienteId:item.clientId,ref:'capturas/'+item.id,valor:null,aparelho:'tela da obra',offline:Date.now()-new Date(item.criadoEm).getTime()>120000}}]);buscaDisparar(chave,url)}
+// Busca na SEFAZ logo depois do envio: dispara o pipeline do GitLab (o mesmo do "Buscar agora" do escritório), sem esperar
+// a rodada de hora em hora. Só para NFC-e com link do QR ou do Ceará pela chave; no máximo uma vez a cada 2 minutos por celular
+// (o job busca todas as notas pendentes de uma vez). Sem token configurado, a rodada de hora em hora continua valendo.
+async function buscaDisparar(chave,url){const k=chaveDecompor(chave);if(!url&&!(k?.valida&&k.uf===23&&k.modelo===65))return;
+ try{const ult=+localStorage.getItem('tcs-busca-disparo')||0;if(Date.now()-ult<120000)return}catch(e){}
+ try{const g=await window.__fb.get('config','busca');if(!g?.gatilhoToken)return;const f=new FormData();f.append('token',g.gatilhoToken);f.append('ref',g.ref||'main');
+  const r=await fetch(`https://gitlab.com/api/v4/projects/${encodeURIComponent(g.projeto||'87585318')}/trigger/pipeline`,{method:'POST',body:f});if(r.ok)try{localStorage.setItem('tcs-busca-disparo',String(Date.now()))}catch(e){}}
+ catch(e){console.warn('Busca na SEFAZ não disparada (a rodada de hora em hora continua):',e.message)}}
 async function filaProcessar(){if(Cap.enviando||!navigator.onLine||!Cap.perfil||!window.__fb)return;const itens=(await filaTodos()).filter(i=>i.autor===Cap.user.email).sort((a,b)=>a.criadoEm.localeCompare(b.criadoEm));if(!itens.length){filaFaixa();return}
  Cap.enviando=true;filaFaixa();try{for(const it of itens){await capturaEnviar(it);await filaTirar(it.id)}}catch(e){console.error('Envio da nota adiado:',e)}finally{Cap.enviando=false;filaFaixa()}}
 window.addEventListener('online',()=>{filaFaixa();filaProcessar()});window.addEventListener('offline',filaFaixa);setInterval(filaProcessar,30000);
-async function enviar(){const p=Cap.projetos.find(x=>x.id===Cap.obra);if(!p)return;$('#enviar').disabled=true;
- const item={id:uid(),autor:Cap.user.email,autorNome:Cap.user.nome||'',projectId:p.id,clientId:p.clientId||'',projetoNome:p.name,criadoEm:new Date().toISOString(),faltou:Cap.faltou,avariado:Cap.avariado,origem:Cap.codigo?Cap.codigo.origem:Cap.fotos.some(f=>f.origem==='compartilhado')?'compartilhado':'camera',codigo:Cap.codigo,fotos:Cap.fotos.map(f=>({blob:f.blob,largura:f.largura,altura:f.altura,chave:f.chave,consultaUrl:f.consultaUrl}))};
+async function enviar(){const obras=Cap.obras.map(id=>Cap.projetos.find(x=>x.id===id)).filter(Boolean).slice(0,5);const p=obras[0];if(!p)return;$('#enviar').disabled=true;
+ // a primeira obra marcada é a principal; com mais de uma, o escritório separa os produtos entre elas na conferência
+ const item={id:uid(),autor:Cap.user.email,autorNome:Cap.user.nome||'',projectId:p.id,clientId:p.clientId||'',projetoNome:p.name,obras:obras.map(o=>({projectId:o.id,clientId:o.clientId||'',nome:o.name})),criadoEm:new Date().toISOString(),faltou:Cap.faltou,avariado:Cap.avariado,origem:Cap.codigo?Cap.codigo.origem:Cap.fotos.some(f=>f.origem==='compartilhado')?'compartilhado':'camera',codigo:Cap.codigo,fotos:Cap.fotos.map(f=>({blob:f.blob,largura:f.largura,altura:f.altura,chave:f.chave,consultaUrl:f.consultaUrl}))};
  await filaPor(item);limparCaptura();
  let enviado=false;if(navigator.onLine){$('#prontoTexto').innerHTML='<span class="roda"></span><p>Enviando…</p>';mostrar('telaPronto');try{Cap.enviando=true;await capturaEnviar(item);await filaTirar(item.id);enviado=true}catch(e){console.error('Envio adiado:',e)}finally{Cap.enviando=false}}
  $('#prontoTexto').innerHTML=enviado?'<span class="icone">✅</span>Nota enviada!<p>O escritório vai conferir.</p>':'<span class="icone">📦</span>Nota guardada no celular.<p>Ela vai ser enviada sozinha quando tiver internet. Pode fotografar a próxima.</p>';mostrar('telaPronto');filaFaixa()}
@@ -96,7 +105,7 @@ async function compartilhadasReceber(){const lista=await capOp('compartilhados',
 
 // ---------- Login, papel e obras ----------
 function aviso(html){$('#avisoTexto').innerHTML=html;mostrar('telaAviso')}
-function obrasEscutar(p){Cap.unsubs.forEach(u=>u());Cap.unsubs=[];const mapa=new Map();const atualizar=()=>{Cap.projetos=[...mapa.values()].filter(x=>x.status!=='encerrado').sort((a,b)=>String(a.name).localeCompare(String(b.name),'pt-BR'));try{localStorage.setItem(CAP_PROJ_KEY,JSON.stringify(Cap.projetos))}catch(e){}if(Cap.projetos.length===1&&!Cap.obra)Cap.obra=Cap.projetos[0].id;if($('#telaConferir').classList.contains('ativa'))conferirRender()};
+function obrasEscutar(p){Cap.unsubs.forEach(u=>u());Cap.unsubs=[];const mapa=new Map();const atualizar=()=>{Cap.projetos=[...mapa.values()].filter(x=>x.status!=='encerrado').sort((a,b)=>String(a.name).localeCompare(String(b.name),'pt-BR'));try{localStorage.setItem(CAP_PROJ_KEY,JSON.stringify(Cap.projetos))}catch(e){}if(Cap.projetos.length===1&&!Cap.obras.length)Cap.obras=[Cap.projetos[0].id];Cap.obras=Cap.obras.filter(id=>Cap.projetos.some(x=>x.id===id));if($('#telaConferir').classList.contains('ativa'))conferirRender()};
  const ouvir=(f)=>Cap.unsubs.push(window.__fb.listen('projects',f,ch=>{ch.forEach(c=>c.type==='removed'?mapa.delete(c.id):mapa.set(c.id,{...c.data,id:c.id}));atualizar()},e=>console.error('Obras:',e)));
  if(p.papel==='admin'){ouvir([]);return}const {pl,cl}=perfilConcessoes(p);fatias(pl).forEach(f=>ouvir([['__id__','in',f]]));fatias(cl).forEach(f=>ouvir([['clientId','in',f]]));if(!pl.length&&!cl.length)atualizar()}
 // Funções de acesso iguais às do sistema principal (js/nuvem.js), só o necessário aqui.
@@ -127,7 +136,7 @@ $('#galeria').addEventListener('change',e=>{fotosReceber([...e.target.files],'ga
 $('#cameraMais').addEventListener('change',e=>{fotosReceber([...e.target.files],'camera');e.target.value=''});
 document.addEventListener('change',async e=>{const r=e.target.closest('[data-refazer]');if(!r||!r.files[0])return;const i=+r.dataset.refazer;try{const f=await fotoPreparar(r.files[0],'camera');URL.revokeObjectURL(Cap.fotos[i].url);Cap.fotos[i]=f}catch(err){alert(err.message)}conferirRender()});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-obra],[data-tirar],[data-usar]');if(!b)return;
- if(b.dataset.obra){Cap.obra=b.dataset.obra;conferirRender();return}
+ if(b.dataset.obra){const id=b.dataset.obra;Cap.obras=Cap.obras.includes(id)?Cap.obras.filter(x=>x!==id):[...Cap.obras,id].slice(0,5);conferirRender();return}
  if(b.dataset.tirar){const i=+b.dataset.tirar;URL.revokeObjectURL(Cap.fotos[i].url);Cap.fotos.splice(i,1);if(!Cap.fotos.length){limparCaptura();mostrar('telaFoto');return}conferirRender();return}
  if(b.dataset.usar){Cap.fotos[+b.dataset.usar].aceita=true;conferirRender()}});
 $('#faltou').addEventListener('click',()=>{Cap.faltou=!Cap.faltou;conferirRender()});

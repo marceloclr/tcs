@@ -50,4 +50,6 @@ h2{font-size:22px;margin:22px 0 4px}.grande{font-size:21px;font-weight:600}.dica
 .codigo-lido{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start;background:var(--verde-claro);color:var(--tinta);border:3px solid var(--verde);border-radius:14px;padding:14px;margin-bottom:12px}
 .codigo-lido .icone{font-size:34px;line-height:1}.codigo-lido strong{display:block;color:var(--verde);font-size:20px}.codigo-lido p{margin:4px 0 0;font-size:17px}
 .codigo-lido .botao{grid-column:1/-1;min-height:52px;margin:8px 0 0;font-size:17px}
+.dica-obras{margin:0 0 4px;color:var(--tinta2);font-size:17px}
+.obras-varias{background:var(--verde-claro);color:var(--verde);border-radius:12px;padding:10px 12px;font-weight:600;margin:8px 0 0}
 /* ==== #CSS-CAPTURA: END ==== */
