@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-BR" data-tema="claro">
+<head>
+<meta charset="utf-8">
+<title>TCS - guia rápido do escritório - V-22102026-1335</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap">
+<link rel="stylesheet" href="../css/manual.css">
+<style>
+/* Página só para gerar o PDF (manuais/gerar-pdf.mjs): A4, tema claro, compacta. */
+@page{size:A4;margin:9mm}
+html,body{background:#fff}
+body{font-size:10pt;line-height:1.38;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.versao,.topo,.menu,.abre-indice{display:none}
+h1,h2,h3{font-family:var(--fonte-titulo)}
+.cab{display:flex;align-items:center;gap:4mm;border-bottom:.6mm solid var(--app);padding-bottom:3mm;margin-bottom:3mm}
+.cab img{width:12mm;height:12mm;border-radius:2.5mm}
+.cab h1{font-size:19pt;line-height:1.1}
+.cab p{margin:1mm 0 0;color:var(--tinta-2);font-size:10.5pt}
+.cab .qr{margin-left:auto;text-align:center;font-size:7.5pt;color:var(--tinta-2);line-height:1.2}
+.cab .qr svg{width:24mm;height:24mm;display:block;margin:0 auto 1mm}
+.n{display:inline-grid;place-items:center;width:7.5mm;height:7.5mm;border-radius:50%;background:var(--app);color:var(--sobre-app);font:600 12pt/1 var(--fonte-mono);flex:none}
+.rodape-pdf{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-between;font-size:7.5pt;color:var(--tinta-3)}
+</style>
+<style>
+.colunas{columns:2;column-gap:6mm}
+.sec{break-inside:avoid;margin:0 0 3.2mm}
+.sec h2{font-size:12pt;color:var(--app);display:flex;gap:2mm;align-items:center;margin:0 0 1mm}
+.sec h2 .n{width:6mm;height:6mm;font-size:9.5pt}
+.sec p{margin:0 0 1mm}.sec ul,.sec ol{margin:0;padding-left:4.5mm}.sec li{margin:.5mm 0}
+.fig-larga{margin:1.5mm 0 3mm}.fig-larga svg{width:100%;height:auto;display:block}
+.rotina{border:.5mm dashed var(--linha-forte);border-radius:3mm;padding:2.5mm 3.5mm;margin-bottom:3.5mm}
+.rotina h2{font-size:13pt;margin:0 0 1mm}.rotina ol{margin:0;padding-left:5mm;font-size:10.5pt}
+.selo-ex{font-size:8pt;padding:0 1.6mm}
+</style>
+</head>
+<body>
+<div class="cab"><img src="../icones/notas-tcs.svg" alt=""><div><h1>Guia rápido do escritório</h1><p>Receber, conferir e lançar as notas da obra no TCS · <b>marceloclr.gitlab.io/tcs</b></p></div></div>
+<div class="fig-larga"><svg viewBox="0 0 680 120" role="img" aria-labelledby="f-fluxo"><title id="f-fluxo">Caminho da nota: a obra envia, o sistema busca na SEFAZ, o escritório confere, separa e lança, e a nota fica vinculada às obras</title>
+    <g font-size="13" font-weight="600" text-anchor="middle">
+     <rect x="4" y="20" width="120" height="70" rx="12" class="s-app"/><text x="64" y="50" class="s-sobre">Obra envia</text><text x="64" y="70" font-size="11" font-weight="400" class="s-sobre">código ou foto</text>
+     <rect x="144" y="20" width="120" height="70" rx="12" class="s-sis-azulc"/><text x="204" y="50" class="s-sis-azul">Busca na SEFAZ</text><text x="204" y="70" font-size="11" font-weight="400" class="s-sis-cinza">automática</text>
+     <rect x="284" y="20" width="120" height="70" rx="12" class="s-carta s-linha" stroke-width="1.5"/><text x="344" y="50" class="s-tinta">Escritório</text><text x="344" y="70" font-size="11" font-weight="400" class="s-tinta2">confere</text>
+     <rect x="424" y="20" width="120" height="70" rx="12" class="s-carta s-linha" stroke-width="1.5"/><text x="484" y="50" class="s-tinta">Separa e lança</text><text x="484" y="70" font-size="11" font-weight="400" class="s-tinta2">entre as obras</text>
+     <rect x="564" y="20" width="112" height="70" rx="12" class="s-sis-verdec"/><text x="620" y="50" class="s-sis-verde">Vinculada</text><text x="620" y="70" font-size="11" font-weight="400" class="s-sis-verde">custo nas obras</text>
+    </g>
+    <g class="s-tinta3" font-size="20" text-anchor="middle"><text x="134" y="62">›</text><text x="274" y="62">›</text><text x="414" y="62">›</text><text x="554" y="62">›</text></g>
+   </svg></div>
+<div class="rotina"><h2>Rotina do dia</h2><ol><li>Abra <b>Estoque › Recebidas da obra</b>.</li><li>Nas notas com <span class="selo-ex verde">✓ Produtos e valores importados</span>, clique em <b>Conferir</b>.</li><li>Complete o que estiver em vermelho e acerte as obras; se houver mais de uma, separe os produtos.</li><li>Clique em <b>Confirmar entrada das notas</b>.</li></ol></div>
+<div class="colunas">
+ <div class="sec"><h2><span class="n">1</span>A fila da obra</h2>
+  <ul><li><span class="selo-ex cinza">Só código</span>: veio sem foto. <span class="selo-ex azul">2 obras</span>: o mestre marcou mais de uma.</li>
+  <li><span class="selo-ex azul">Buscando na SEFAZ…</span> logo após o envio; em 1 a 3 min, <span class="selo-ex verde">✓ Produtos e valores importados</span>.</li>
+  <li><span class="selo-ex amarelo">Busca falhou</span>: leia o motivo; confira pela foto. NF-e (nota grande): sem busca automática.</li>
+  <li>Busca automática de hora em hora, das 7h às 18h, de segunda a sábado; com pressa, <b>Buscar agora</b>.</li></ul></div>
+ <div class="sec"><h2><span class="n">2</span>Conferir</h2>
+  <ul><li><span class="selo-ex verde">exato</span> veio da chave · <span class="selo-ex azul">consulta</span> da SEFAZ · <span class="selo-ex verde">Receita</span> razão social pelo CNPJ.</li>
+  <li><span class="selo-ex azul">OCR</span> lido da foto: confira · <span class="selo-ex vermelho">preencher</span>: complete olhando a nota.</li>
+  <li><b>Desconto</b>: o cupom traz só o total; se foi em alguns itens, digite na coluna Desconto deles.</li>
+  <li><b>Descartar</b> pede o motivo; chave repetida é avisada.</li></ul></div>
+ <div class="sec"><h2><span class="n">3</span>Várias obras</h2>
+  <ul><li>Etiquetas no alto: <b>×</b> tira, <b>+ Adicionar obra</b> acrescenta, trocar = tirar e adicionar.</li>
+  <li>A <b>primeira obra recebe o restante</b>: digite nas outras e ela diminui na hora.</li>
+  <li>Setas <b>→ ←</b> passam a quantidade inteira entre obras vizinhas; <b>Tudo aqui</b> põe tudo numa obra.</li>
+  <li><span class="selo-ex vermelho">excede</span> bloqueia o lançamento.</li></ul>
+  <div class="fig-larga"><svg viewBox="0 0 680 190" role="img" aria-labelledby="f-sep"><title id="f-sep">Quadro de separação: cimento com 6 na Obra 1 (restante) e 4 na Obra 2, setas entre as obras e o valor por obra</title>
+   <rect x="2" y="2" width="676" height="186" rx="10" class="s-sis-painel s-sis-linha" stroke-width="1.5"/>
+   <rect x="2" y="2" width="676" height="44" rx="10" class="s-sis-fundo"/><rect x="2" y="36" width="676" height="10" class="s-sis-fundo"/>
+   <g font-size="10" font-weight="700" class="s-sis-cinza"><text x="14" y="28">PRODUTO</text><text x="210" y="28" text-anchor="end">NA NOTA</text><text x="330" y="22" text-anchor="end">OBRA 1</text><text x="330" y="36" text-anchor="end" font-weight="400">recebe o restante</text><text x="530" y="28" text-anchor="end">OBRA 2</text><text x="664" y="28" text-anchor="end">LIVRE</text></g>
+   <g font-size="12.5" class="s-sis-tinta"><text x="14" y="76">CIMENTO CP II 50KG</text><text x="210" y="76" text-anchor="end">10 SC</text><text x="14" y="122">AREIA MÉDIA M3</text><text x="210" y="122" text-anchor="end">2 M3</text></g>
+   <rect x="262" y="58" width="72" height="28" rx="6" class="s-sis-azulc"/><text x="326" y="77" font-size="13" font-weight="700" text-anchor="end" class="s-sis-azul">6</text>
+   <rect x="262" y="104" width="72" height="28" rx="6" class="s-sis-azulc"/><text x="326" y="123" font-size="13" font-weight="700" text-anchor="end" class="s-sis-azul">0</text>
+   <g class="s-sis-painel s-sis-linha" stroke-width="1.2"><rect x="352" y="60" width="26" height="24" rx="5"/><rect x="382" y="60" width="26" height="24" rx="5"/><rect x="352" y="106" width="26" height="24" rx="5"/><rect x="382" y="106" width="26" height="24" rx="5"/></g>
+   <g font-size="13" text-anchor="middle" class="s-sis-tinta"><text x="365" y="77">→</text><text x="395" y="77">←</text><text x="365" y="123">→</text><text x="395" y="123">←</text></g>
+   <rect x="346" y="54" width="68" height="36" rx="8" class="s-sem s-destaque" stroke-width="2.5"/>
+   <g class="s-sis-painel" stroke="var(--sis-azul)" stroke-width="1.5"><rect x="458" y="58" width="72" height="28" rx="6"/><rect x="458" y="104" width="72" height="28" rx="6"/></g>
+   <g font-size="13" text-anchor="end" class="s-sis-tinta"><text x="522" y="77">4</text><text x="522" y="123">2</text></g>
+   <g font-size="13" text-anchor="end" class="s-sis-cinza"><text x="664" y="77">✓</text><text x="664" y="123">✓</text></g>
+   <line x1="2" y1="146" x2="678" y2="146" stroke="var(--sis-linha)" stroke-width="1.2"/>
+   <text x="14" y="172" font-size="12.5" font-weight="700" class="s-sis-tinta">Valor por obra</text>
+   <text x="334" y="172" font-size="12.5" text-anchor="end" class="s-sis-tinta">R$ 195,00</text><text x="530" y="172" font-size="12.5" text-anchor="end" class="s-sis-tinta">R$ 310,00</text>
+  </svg></div></div>
+ <div class="sec"><h2><span class="n">4</span>Importar notas</h2>
+  <ul><li><b>XML</b> (o melhor), <b>PDF</b> do DANFE/cupom, <b>foto</b> ou <b>link da consulta</b> (copiar a página e colar).</li>
+  <li>XML que chega depois: <b>Substituir os dados pelos do XML</b>.</li></ul></div>
+ <div class="sec"><h2><span class="n">5</span>Notas fiscais</h2>
+  <ul><li><b>Vincular</b> a um projeto, <b>Distribuir</b> entre projetos, <b>Desvincular</b>.</li>
+  <li><b>Excluir nota</b> (administrador): pede motivo; bloqueada se já houve baixa; a captura volta para A conferir.</li></ul></div>
+ <div class="sec"><h2><span class="n">6</span>Estoque e custos</h2>
+  <ul><li>Em estoque = sob custódia. A <b>baixa</b> (com motivo) leva o custo ao projeto.</li>
+  <li>Baixa errada: <b>estorno</b>, nunca apagar. Custo de cada item = valor pago (descontos e frete rateados).</li></ul></div>
+ <div class="sec"><h2><span class="n">7</span>Cadastrar um mestre (administrador)</h2>
+  <ol><li><b>Usuários e acessos › Cadastrar pessoa</b>: e-mail Google, nome, telefone.</li><li>Papel <b>Obra</b>, situação <b>Ativo</b>, obras com <b>Leitura</b>.</li><li>Gravar e mandar o link <b>marceloclr.gitlab.io/tcs/mestre</b> e o cartaz.</li></ol>
+  <p>Ou aprovar em <b>Solicitações pendentes</b>. Para tirar alguém: <b>Desativado</b>.</p></div>
+ <div class="sec"><h2><span class="n">8</span>Deu problema?</h2>
+  <ul><li>Nota da obra não aparece: é de obra em que você não tem escrita.</li><li>"Diferença de R$": frete, imposto ou item faltando.</li><li>Versão antiga: <b>Ctrl+Shift+R</b>.</li></ul></div>
+</div>
+<div class="rodape-pdf"><span>Manual completo: marceloclr.gitlab.io/tcs/manual-escritorio</span><span>V-22102026-1335</span></div>
+<script>document.body.dataset.pronto='1'</script>
+</body>
+</html>

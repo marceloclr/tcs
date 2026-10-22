@@ -107,3 +107,9 @@ Não foram testados o OCR de PDF digitalizado nem PDFs reais de NFS-e de cada pr
   - A NF-e (modelo 55) não tem busca automática: segue pela foto ou pelo XML.
 - **Buscar agora:** botão na fila que dispara o job sem esperar a rodada, depois de o administrador gravar o token de trigger.
 - **Implantação** (conta de serviço, variável `FIREBASE_SA`, agendamento, token e cota de minutos): [`docs/busca-nfce.md`](docs/busca-nfce.md). As regras do Firestore mudaram (captura só com o código e `config/busca`): publique de novo no console.
+
+## Manuais (22/10/2026)
+- **Mestre de obras:** https://marceloclr.gitlab.io/tcs/manual ([`manual-mestre.html`](manual-mestre.html)), com ilustrações das telas. **Cartaz de uma folha** para colar na sala da obra, com QR Code que abre o Notas TCS: [`manuais/manual-mestre.pdf`](manuais/manual-mestre.pdf).
+- **Escritório:** https://marceloclr.gitlab.io/tcs/manual-escritorio ([`manual-escritorio.html`](manual-escritorio.html)), aberto pelo botão **Manual** no topo do sistema. Guia rápido em PDF: [`manuais/manual-escritorio.pdf`](manuais/manual-escritorio.pdf).
+- **Formato:** menu à esquerda, que marca a seção atual (no celular, gaveta pelo botão **Índice**), e "Voltar ao índice" em cada seção. Estilo e comportamento em [`css/manual.css`](css/manual.css) e [`js/manual.js`](js/manual.js), no padrão Papel e Tinta.
+- **Para refazer os PDFs** depois de mudar o texto, edite `manuais/cartaz-mestre.html` ou `manuais/guia-escritorio.html` e rode [`manuais/gerar-pdf.mjs`](manuais/gerar-pdf.mjs) (instruções no topo do arquivo).

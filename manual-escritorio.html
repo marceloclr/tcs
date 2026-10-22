@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual do escritório - V-22102026-1335</title>
+<meta name="description" content="Como receber, conferir e lançar as notas da obra no TCS, e as demais rotinas do escritório.">
+<link rel="icon" type="image/svg+xml" href="icones/notas-tcs.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap">
+<link rel="stylesheet" href="css/manual.css">
+</head>
+<body>
+<header class="topo">
+ <img src="icones/notas-tcs.svg" alt="">
+ <strong>Manual do escritório</strong>
+ <div class="acoes">
+  <button class="btn" id="tema" type="button" title="Troca entre o tema claro e o escuro" aria-label="Trocar o tema"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg> <span class="txt">Tema</span></button>
+  <a class="btn" href="manuais/manual-escritorio.pdf" download title="Baixa o guia rápido em PDF (A4), para imprimir"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg> <span class="txt">PDF para imprimir</span></a>
+ </div>
+</header>
+
+<div class="layout">
+<nav class="menu" id="menu" aria-label="Índice do manual">
+ <p class="rotulo">Neste manual</p>
+ <ol>
+  <li><a href="#inicio"><b>·</b>Início</a></li>
+  <li><a href="#entrar"><b>1</b>Entrar e se localizar</a></li>
+  <li><a href="#fila"><b>2</b>Notas que chegam da obra</a></li>
+  <li><a href="#conferir"><b>3</b>Conferir e lançar</a></li>
+  <li><a href="#obras"><b>4</b>Nota de várias obras</a></li>
+  <li><a href="#importar"><b>5</b>Importar notas</a></li>
+  <li><a href="#notas"><b>6</b>Notas fiscais e vínculos</a></li>
+  <li><a href="#estoque"><b>7</b>Estoque, baixas e custos</a></li>
+  <li><a href="#admin"><b>8</b>Administrador</a></li>
+  <li><a href="#problemas"><b>9</b>Deu problema?</a></li>
+  <li><a href="#rotina"><b>✓</b>Rotina do dia</a></li>
+ </ol>
+ <div class="extra"><a class="btn primario" href="./">Abrir o TCS</a><a class="btn" href="manual-mestre.html">Manual do mestre de obras</a><a class="btn" href="manuais/manual-escritorio.pdf" download>Baixar o guia em PDF</a></div>
+</nav>
+<div class="veu"></div>
+<main>
+<section class="capa" id="inicio">
+ <h1>Receber, conferir e lançar as notas da obra</h1>
+ <p>O mestre de obras manda a nota pelo celular. O sistema busca sozinho os produtos e os valores na SEFAZ. O escritório <b>confere</b>, <b>separa entre as obras</b> quando precisa e <b>lança</b>. Este manual explica cada passo.</p>
+ <a class="btn primario acessar" href="./">Abrir o TCS</a>
+ <div class="passo figura-larga" style="border:0;padding-bottom:0">
+  <div class="figura">
+   <svg viewBox="0 0 680 120" role="img" aria-labelledby="f-fluxo"><title id="f-fluxo">Caminho da nota: a obra envia, o sistema busca na SEFAZ, o escritório confere, separa e lança, e a nota fica vinculada às obras</title>
+    <g font-size="13" font-weight="600" text-anchor="middle">
+     <rect x="4" y="20" width="120" height="70" rx="12" class="s-app"/><text x="64" y="50" class="s-sobre">Obra envia</text><text x="64" y="70" font-size="11" font-weight="400" class="s-sobre">código ou foto</text>
+     <rect x="144" y="20" width="120" height="70" rx="12" class="s-sis-azulc"/><text x="204" y="50" class="s-sis-azul">Busca na SEFAZ</text><text x="204" y="70" font-size="11" font-weight="400" class="s-sis-cinza">automática</text>
+     <rect x="284" y="20" width="120" height="70" rx="12" class="s-carta s-linha" stroke-width="1.5"/><text x="344" y="50" class="s-tinta">Escritório</text><text x="344" y="70" font-size="11" font-weight="400" class="s-tinta2">confere</text>
+     <rect x="424" y="20" width="120" height="70" rx="12" class="s-carta s-linha" stroke-width="1.5"/><text x="484" y="50" class="s-tinta">Separa e lança</text><text x="484" y="70" font-size="11" font-weight="400" class="s-tinta2">entre as obras</text>
+     <rect x="564" y="20" width="112" height="70" rx="12" class="s-sis-verdec"/><text x="620" y="50" class="s-sis-verde">Vinculada</text><text x="620" y="70" font-size="11" font-weight="400" class="s-sis-verde">custo nas obras</text>
+    </g>
+    <g class="s-tinta3" font-size="20" text-anchor="middle"><text x="134" y="62">›</text><text x="274" y="62">›</text><text x="414" y="62">›</text><text x="554" y="62">›</text></g>
+   </svg>
+  </div>
+ </div>
+ <ul class="indice" id="indice" aria-label="Partes do manual">
+  <li><a href="#entrar"><b>1</b>Entrar e se localizar</a></li>
+  <li><a href="#fila"><b>2</b>Notas que chegam da obra</a></li>
+  <li><a href="#conferir"><b>3</b>Conferir e lançar</a></li>
+  <li><a href="#obras"><b>4</b>Nota de várias obras</a></li>
+  <li><a href="#importar"><b>5</b>Importar notas</a></li>
+  <li><a href="#notas"><b>6</b>Notas fiscais e vínculos</a></li>
+  <li><a href="#estoque"><b>7</b>Estoque, baixas e custos</a></li>
+  <li><a href="#admin"><b>8</b>Administrador</a></li>
+  <li><a href="#problemas"><b>9</b>Deu problema?</a></li>
+ </ul>
+</section>
+
+<!-- 1 -->
+<section class="bloco" id="entrar">
+ <h2>1. Entrar e se localizar</h2>
+ <div class="passo sem-figura"><div>
+  <h3><span class="n">1</span>Entre com a sua conta Google</h3>
+  <p>Abra <b class="mono">marceloclr.gitlab.io/tcs</b> e clique em <span class="botao-nome">Entrar com Google</span>. Se aparecer <b>"Acesso aguardando autorização"</b>, peça a um administrador para liberar você.</p>
+  <p>Você só vê os <b>clientes e projetos liberados</b> para a sua conta. Quem tem <b>leitura</b> consulta; quem tem <b>leitura e escrita</b> também confere, lança e vincula notas.</p>
+ </div></div>
+ <div class="passo sem-figura"><div>
+  <h3><span class="n">2</span>Onde fica cada coisa</h3>
+  <div class="tabela"><table>
+   <thead><tr><th>Menu</th><th>Para que serve</th></tr></thead>
+   <tbody>
+    <tr><td class="caminho">Visão geral</td><td>Resumo de estoque e custos por cliente e projeto; cartão das notas da obra esperando conferência.</td></tr>
+    <tr><td class="caminho">Estoque › Recebidas da obra</td><td>As notas que o mestre mandou pelo celular. <b>É aqui que começa o dia.</b></td></tr>
+    <tr><td class="caminho">Estoque › Importar notas</td><td>Lançar nota por XML, PDF, foto ou link de consulta; é também onde fica a conferência.</td></tr>
+    <tr><td class="caminho">Estoque › Notas fiscais</td><td>Todas as notas: vincular, distribuir entre projetos, desvincular, excluir.</td></tr>
+    <tr><td class="caminho">Estoque › Baixas de estoque</td><td>Saída de material da obra (o custo vai para o projeto).</td></tr>
+    <tr><td class="caminho">Solicitar orçamento</td><td>Pedido de orçamento em PDF para o fornecedor.</td></tr>
+    <tr><td class="caminho">Usuários e acessos</td><td>Só administradores: pessoas, papéis, acessos e log.</td></tr>
+   </tbody>
+  </table></div>
+ </div></div>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
+</section>
+
+<!-- 2 -->
+<section class="bloco" id="fila">
+ <h2>2. Notas que chegam da obra</h2>
+ <p class="sub">Em <span class="caminho">Estoque › Recebidas da obra</span>. O número ao lado do nome mostra quantas esperam.</p>
+ <div class="passo figura-larga"><div>
+  <h3><span class="n">1</span>Leia a linha da nota</h3>
+  <ul>
+   <li><b>Obra:</b> a obra (ou as obras) que o mestre escolheu. Com mais de uma, aparece <span class="selo-ex azul">2 obras</span>.</li>
+   <li><b>Fotos:</b> quantas fotos vieram, ou <span class="selo-ex cinza">Só código</span> quando o mestre mandou só o código.</li>
+   <li><b>Situação</b> da busca na SEFAZ:
+    <span class="selo-ex azul">Buscando na SEFAZ…</span> (acabou de chegar),
+    <span class="selo-ex verde">✓ Produtos e valores importados</span> (pronta para conferir, com a quantidade de itens e o total),
+    <span class="selo-ex amarelo">Busca falhou</span> (com o motivo) e
+    <span class="selo-ex cinza">NF-e: sem busca automática</span> (nota grande: confira pela foto ou pelo XML).</li>
+   <li><b>Aguardando:</b> há quanto tempo chegou. Acima de 48 horas, a linha fica destacada.</li>
+  </ul>
+ </div>
+ <div class="figura">
+  <svg viewBox="0 0 680 150" role="img" aria-labelledby="f-fila"><title id="f-fila">Linha da fila com duas obras, Só código e o selo verde Produtos e valores importados, ao lado do cartão Próxima busca com a contagem 28:40</title>
+   <rect x="2" y="2" width="676" height="146" rx="10" class="s-sis-painel s-sis-linha" stroke-width="1.5"/>
+   <rect x="2" y="2" width="676" height="30" rx="10" class="s-sis-fundo"/><rect x="2" y="22" width="676" height="10" class="s-sis-fundo"/>
+   <g font-size="10" font-weight="700" class="s-sis-cinza"><text x="14" y="21">OBRA</text><text x="150" y="21">FOTOS</text><text x="230" y="21">SITUAÇÃO</text><text x="430" y="21">AÇÕES</text></g>
+   <text x="14" y="58" font-size="12.5" font-weight="700" class="s-sis-tinta">Casa Térrea</text><text x="14" y="76" font-size="12.5" font-weight="700" class="s-sis-tinta">Casa Duplex</text>
+   <rect x="14" y="86" width="52" height="18" rx="9" class="s-sis-azulc"/><text x="40" y="99" font-size="10" font-weight="700" text-anchor="middle" class="s-sis-azul">2 obras</text>
+   <rect x="148" y="48" width="66" height="18" rx="9" class="s-sis-fundo"/><text x="181" y="61" font-size="10" font-weight="700" text-anchor="middle" class="s-sis-cinza">Só código</text>
+   <rect x="230" y="46" width="186" height="22" rx="11" class="s-sis-verdec"/><text x="323" y="61" font-size="11" font-weight="700" text-anchor="middle" class="s-sis-verde">✓ Produtos e valores importados</text>
+   <text x="232" y="86" font-size="11" class="s-sis-cinza">34 itens · R$ 474,30</text>
+   <rect x="430" y="46" width="68" height="26" rx="6" class="s-sis-azul"/><text x="464" y="63" font-size="11" font-weight="700" text-anchor="middle" fill="var(--sis-painel)">Conferir</text>
+   <rect x="504" y="46" width="68" height="26" rx="6" class="s-sis-painel s-sis-linha" stroke-width="1.2"/><text x="538" y="63" font-size="11" font-weight="700" text-anchor="middle" class="s-sis-tinta">Descartar</text>
+   <rect x="226" y="42" width="194" height="30" rx="14" class="s-sem s-destaque" stroke-width="2.5"/>
+   <rect x="588" y="40" width="82" height="98" rx="8" class="s-sis-fundo s-sis-linha" stroke-width="1"/>
+   <text x="629" y="56" font-size="8" font-weight="700" text-anchor="middle" class="s-sis-cinza">PRÓXIMA BUSCA</text>
+   <text x="629" y="84" font-size="20" font-weight="700" text-anchor="middle" class="s-sis-tinta" style="font-family:var(--fonte-mono)">28:40</text>
+   <rect x="596" y="94" width="66" height="3" rx="1.5" class="s-sis-linha" fill="var(--sis-linha)"/><rect x="596" y="94" width="34" height="3" rx="1.5" class="s-sis-azul"/>
+   <g class="s-sis-cinza"><rect x="596" y="106" width="9" height="5" rx="1"/><rect x="607" y="106" width="9" height="5" rx="1"/><rect x="618" y="106" width="9" height="5" rx="1"/><rect x="629" y="106" width="9" height="5" rx="1" fill="none" stroke="var(--sis-azul)" stroke-width="1.5"/></g>
+   <text x="629" y="128" font-size="8" text-anchor="middle" class="s-sis-cinza">rodadas de hoje</text>
+  </svg>
+ </div></div>
+ <div class="passo sem-figura"><div>
+  <h3><span class="n">2</span>A busca na SEFAZ é automática</h3>
+  <p>Quando o mestre envia um cupom (NFC-e), o próprio envio já pede a busca: em <b>1 a 3 minutos</b> aparece o selo verde. Além disso, o sistema busca <b>de hora em hora, das 7h às 18h, de segunda a sábado</b>. O cartão <b>Próxima busca</b> mostra a contagem ao vivo e as rodadas do dia.</p>
+  <p>Com pressa? Clique em <span class="botao-nome">Buscar agora</span>.</p>
+  <div class="dica"><span>ℹ️</span><span>A busca automática vale para o <b>cupom fiscal (NFC-e) do Ceará</b> ou com o link do QR. A <b>nota grande (NF-e)</b> se confere pela foto ou pelo XML do fornecedor.</span></div>
+ </div></div>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
+</section>
+
+<!-- 3 -->
+<section class="bloco" id="conferir">
+ <h2>3. Conferir e lançar</h2>
+ <div class="passo sem-figura"><div>
+  <h3><span class="n">1</span>Clique em "Conferir"</h3>
+  <p>A nota abre na conferência (em <span class="caminho">Importar notas</span>), já com a obra indicada pelo mestre. <b>Nada é gravado antes de você confirmar.</b></p>
+ </div></div>
+ <div class="passo figura-larga"><div>
+  <h3><span class="n">2</span>Confira os campos pelos selos</h3>
+  <p>Cada campo diz de onde veio o valor:</p>
+  <ul>
+   <li><span class="selo-ex verde">exato</span> veio da chave de acesso: número, série e CNPJ estão certos.</li>
+   <li><span class="selo-ex azul">consulta</span> veio da página da SEFAZ (com a confiança). <span class="selo-ex verde">Receita</span> é a razão social do cadastro da Receita Federal, pelo CNPJ.</li>
+   <li><span class="selo-ex azul">OCR</span> foi lido da foto: confira com a imagem. <span class="selo-ex amarelo">OCR baixo</span> pede atenção.</li>
+   <li><span class="selo-ex vermelho">preencher</span> não foi lido: complete olhando a nota.</li>
+  </ul>
+ </div>
+ <div class="figura">
+  <svg viewBox="0 0 680 92" role="img" aria-labelledby="f-selos"><title id="f-selos">Campos da conferência com os selos exato, Receita, consulta e preencher</title>
+   <g font-size="11" font-weight="700">
+    <text x="4" y="14" class="s-sis-tinta">Número</text><rect x="54" y="3" width="38" height="15" rx="7.5" class="s-sis-verdec"/><text x="73" y="14" font-size="9" text-anchor="middle" class="s-sis-verde">exato</text>
+    <rect x="4" y="24" width="150" height="34" rx="6" class="s-sis-painel s-sis-linha" stroke-width="1.2"/><text x="14" y="46" font-weight="400" class="s-sis-tinta">55917</text>
+    <text x="174" y="14" class="s-sis-tinta">Emitente</text><rect x="230" y="3" width="46" height="15" rx="7.5" class="s-sis-verdec"/><text x="253" y="14" font-size="9" text-anchor="middle" class="s-sis-verde">Receita</text>
+    <rect x="174" y="24" width="160" height="34" rx="6" class="s-sis-painel s-sis-linha" stroke-width="1.2"/><text x="184" y="46" font-weight="400" class="s-sis-tinta">DISTRIBUIDORA FARTURA</text>
+    <text x="354" y="14" class="s-sis-tinta">Data</text><rect x="386" y="3" width="70" height="15" rx="7.5" class="s-sis-azulc"/><text x="421" y="14" font-size="9" text-anchor="middle" class="s-sis-azul">consulta 92%</text>
+    <rect x="354" y="24" width="140" height="34" rx="6" class="s-sis-painel s-sis-linha" stroke-width="1.2"/><text x="364" y="46" font-weight="400" class="s-sis-tinta">22/10/2026</text>
+    <text x="514" y="14" class="s-sis-tinta">Total</text><rect x="548" y="3" width="56" height="15" rx="7.5" fill="color-mix(in srgb,var(--carmim) 16%,transparent)"/><text x="576" y="14" font-size="9" text-anchor="middle" fill="var(--carmim)">preencher</text>
+    <rect x="514" y="24" width="160" height="34" rx="6" fill="color-mix(in srgb,var(--carmim) 8%,var(--sis-painel))" stroke="var(--carmim)" stroke-width="1.2"/><text x="524" y="46" font-weight="400" class="s-sis-cinza">0</text>
+   </g>
+   <text x="4" y="82" font-size="11" class="s-sis-cinza">Complete os campos em vermelho; os outros, confira.</text>
+  </svg>
+ </div></div>
+ <div class="passo sem-figura"><div>
+  <h3><span class="n">3</span>Descontos</h3>
+  <p>O cupom da SEFAZ traz só o <b>desconto total</b>. Se o desconto foi em alguns produtos (promoção), digite-o na coluna <b>Desconto</b> desses itens, olhando o cupom impresso. O aviso mostra quanto falta; quando fecha, aparece <span class="selo-ex verde">✓ Desconto da nota todo informado nos itens</span>. O que não for atribuído é rateado pelo valor de cada item.</p>
+ </div></div>
+ <div class="passo sem-figura"><div>
+  <h3><span class="n">4</span>Confirme ou descarte</h3>
+  <ul>
+   <li><span class="botao-nome">Confirmar entrada das notas</span>: a nota é lançada, entra no estoque e fica vinculada às obras. A captura da obra passa a <b>Lançada</b>.</li>
+   <li><b>Descartar</b> (na fila): pede o motivo, por exemplo "foto repetida" ou "não é nota".</li>
+   <li><b>Nota repetida:</b> se a chave já foi lançada, o sistema avisa e oferece <b>Descartar como repetida</b>.</li>
+  </ul>
+ </div></div>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
+</section>
+
+<!-- 4 -->
+<section class="bloco" id="obras">
+ <h2>4. Nota de várias obras</h2>
+ <p class="sub">O mestre marcou mais de uma obra, ou a obra indicada está errada.</p>
+ <div class="passo sem-figura"><div>
+  <h3><span class="n">1</span>Acerte as obras</h3>
+  <p>No alto da conferência, as obras aparecem como etiquetas:</p>
+  <ul>
+   <li><b>×</b> tira uma obra. Ficando uma só, a nota inteira vai para ela.</li>
+   <li><b>+ Adicionar obra…</b> acrescenta outra (até 5).</li>
+   <li>Para <b>trocar</b> (o mestre marcou A e B, mas era C e D): tire A e B e adicione C e D.</li>
+  </ul>
+ </div></div>
+ <div class="passo figura-larga"><div>
+  <h3><span class="n">2</span>Separe os produtos</h3>
+  <p>Com duas obras ou mais, aparece o quadro <b>Separação entre as obras</b>, abaixo dos itens:</p>
+  <ul>
+   <li>A <b>primeira obra recebe o restante</b>. Digite quanto vai para as outras: ela diminui na hora.</li>
+   <li>As <b>setas → e ←</b>, na linha de cada produto, passam a quantidade inteira de uma obra para a vizinha.</li>
+   <li><b>Tudo aqui</b> põe a nota inteira numa obra.</li>
+   <li>Embaixo, o <b>valor por obra</b>. Se a soma passar da quantidade da nota, aparece <span class="selo-ex vermelho">excede</span> e o lançamento é bloqueado.</li>
+  </ul>
+ </div>
+ <div class="figura">
+  <svg viewBox="0 0 680 190" role="img" aria-labelledby="f-sep"><title id="f-sep">Quadro de separação: cimento com 6 na Obra 1 (restante) e 4 na Obra 2, setas entre as obras e o valor por obra</title>
+   <rect x="2" y="2" width="676" height="186" rx="10" class="s-sis-painel s-sis-linha" stroke-width="1.5"/>
+   <rect x="2" y="2" width="676" height="44" rx="10" class="s-sis-fundo"/><rect x="2" y="36" width="676" height="10" class="s-sis-fundo"/>
+   <g font-size="10" font-weight="700" class="s-sis-cinza"><text x="14" y="28">PRODUTO</text><text x="210" y="28" text-anchor="end">NA NOTA</text><text x="330" y="22" text-anchor="end">OBRA 1</text><text x="330" y="36" text-anchor="end" font-weight="400">recebe o restante</text><text x="530" y="28" text-anchor="end">OBRA 2</text><text x="664" y="28" text-anchor="end">LIVRE</text></g>
+   <g font-size="12.5" class="s-sis-tinta"><text x="14" y="76">CIMENTO CP II 50KG</text><text x="210" y="76" text-anchor="end">10 SC</text><text x="14" y="122">AREIA MÉDIA M3</text><text x="210" y="122" text-anchor="end">2 M3</text></g>
+   <rect x="262" y="58" width="72" height="28" rx="6" class="s-sis-azulc"/><text x="326" y="77" font-size="13" font-weight="700" text-anchor="end" class="s-sis-azul">6</text>
+   <rect x="262" y="104" width="72" height="28" rx="6" class="s-sis-azulc"/><text x="326" y="123" font-size="13" font-weight="700" text-anchor="end" class="s-sis-azul">0</text>
+   <g class="s-sis-painel s-sis-linha" stroke-width="1.2"><rect x="352" y="60" width="26" height="24" rx="5"/><rect x="382" y="60" width="26" height="24" rx="5"/><rect x="352" y="106" width="26" height="24" rx="5"/><rect x="382" y="106" width="26" height="24" rx="5"/></g>
+   <g font-size="13" text-anchor="middle" class="s-sis-tinta"><text x="365" y="77">→</text><text x="395" y="77">←</text><text x="365" y="123">→</text><text x="395" y="123">←</text></g>
+   <rect x="346" y="54" width="68" height="36" rx="8" class="s-sem s-destaque" stroke-width="2.5"/>
+   <g class="s-sis-painel" stroke="var(--sis-azul)" stroke-width="1.5"><rect x="458" y="58" width="72" height="28" rx="6"/><rect x="458" y="104" width="72" height="28" rx="6"/></g>
+   <g font-size="13" text-anchor="end" class="s-sis-tinta"><text x="522" y="77">4</text><text x="522" y="123">2</text></g>
+   <g font-size="13" text-anchor="end" class="s-sis-cinza"><text x="664" y="77">✓</text><text x="664" y="123">✓</text></g>
+   <line x1="2" y1="146" x2="678" y2="146" stroke="var(--sis-linha)" stroke-width="1.2"/>
+   <text x="14" y="172" font-size="12.5" font-weight="700" class="s-sis-tinta">Valor por obra</text>
+   <text x="334" y="172" font-size="12.5" text-anchor="end" class="s-sis-tinta">R$ 195,00</text><text x="530" y="172" font-size="12.5" text-anchor="end" class="s-sis-tinta">R$ 310,00</text>
+  </svg>
+ </div></div>
+ <div class="passo sem-figura"><div>
+  <h3><span class="n">3</span>Confirme</h3>
+  <p>Ao confirmar, a nota já sai <b>vinculada às obras conforme a separação</b>. O que ficar livre continua "a vincular" e pode ser distribuído depois em <span class="caminho">Notas fiscais</span>.</p>
+ </div></div>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
+</section>
+
+<!-- 5 -->
+<section class="bloco" id="importar">
+ <h2>5. Importar notas por conta própria</h2>
+ <p class="sub">Em <span class="caminho">Estoque › Importar notas</span>, nas caixas de <b>Materiais</b> e <b>Serviços</b>.</p>
+ <div class="passo sem-figura"><div>
+  <div class="tabela"><table>
+   <thead><tr><th>Você tem</th><th>O que fazer</th></tr></thead>
+   <tbody>
+    <tr><td><b>XML da nota</b> (do fornecedor)</td><td>Arraste ou escolha o arquivo. É a fonte mais confiável: traz tudo exato, inclusive o desconto de cada item.</td></tr>
+    <tr><td><b>PDF</b> do DANFE ou do cupom</td><td>Escolha o arquivo; o sistema lê o texto (PDF escaneado passa por leitura de imagem).</td></tr>
+    <tr><td><b>Foto</b> da nota</td><td>Escolha a foto; o sistema lê o código de barras, o QR e o texto. Confira tudo com a imagem ao lado.</td></tr>
+    <tr><td><b>Link da consulta</b> (QR do cupom)</td><td>No painel <b>A partir do link de consulta</b>: abra a consulta, copie a página inteira (Ctrl+A, Ctrl+C) e cole em <b>Colar conteúdo da consulta</b>.</td></tr>
+   </tbody>
+  </table></div>
+  <div class="dica boa"><span>✅</span><span><b>XML que chega depois:</b> se a nota já foi lançada pela foto ou pela consulta e depois chega o XML, importe-o: o sistema oferece <b>Substituir os dados pelos do XML</b>, mantendo fotos, obra e vínculos.</span></div>
+ </div></div>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
+</section>
+
+<!-- 6 -->
+<section class="bloco" id="notas">
+ <h2>6. Notas fiscais e vínculos</h2>
+ <p class="sub">Em <span class="caminho">Estoque › Notas fiscais</span>, nas abas <b>A vincular</b>, <b>Em distribuição</b> e <b>Vinculadas</b>.</p>
+ <div class="passo sem-figura"><div>
+  <ul>
+   <li><b>Vincular:</b> abra a nota e escolha o projeto; a nota inteira vai para ele.</li>
+   <li><b>Distribuir</b> (compra para vários projetos): acrescente colunas de projeto e digite as quantidades de cada item; a coluna da direita mostra o que falta.</li>
+   <li><b>Desvincular:</b> tira a nota de um projeto (bloqueado se o projeto já deu baixa daquele material).</li>
+   <li><b>Fotos da obra:</b> as fotos enviadas pelo mestre ficam como comprovante de recebimento.</li>
+   <li><b>Excluir nota</b> (só administradores): pede o motivo, desfaz vínculos e entradas no estoque e libera a chave para importar de novo. Bloqueada se já houve baixa do material; se a nota veio da obra, a captura volta para <b>A conferir</b>.</li>
+  </ul>
+ </div></div>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
+</section>
+
+<!-- 7 -->
+<section class="bloco" id="estoque">
+ <h2>7. Estoque, baixas e custos</h2>
+ <div class="passo sem-figura"><div>
+  <ul>
+   <li><b>Material em estoque</b> é material recebido e ainda não usado: está <b>sob custódia</b>, ainda não é custo.</li>
+   <li><b>Baixa de estoque</b> (<span class="caminho">Estoque › Baixas de estoque</span>): registre a saída para a obra, com o <b>motivo</b>. Aí o material vira <b>custo do projeto</b>, pelo custo médio.</li>
+   <li><b>Errou uma baixa?</b> Não se apaga: faça o <b>estorno</b>, com o motivo. Fica tudo no histórico.</li>
+   <li><b>Custo pago:</b> cada item entra pelo que foi pago de fato: descontos, frete e impostos da nota são distribuídos entre os itens.</li>
+   <li><b>Serviços</b> viram custo do projeto quando a nota é vinculada.</li>
+  </ul>
+ </div></div>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
+</section>
+
+<!-- 8 -->
+<section class="bloco" id="admin" style="--acento:var(--petroleo)">
+ <h2>8. Administrador</h2>
+ <div class="passo sem-figura"><div>
+  <h3><span class="n">1</span>Cadastrar um mestre de obras</h3>
+  <ol>
+   <li>Em <span class="caminho">Usuários e acessos › Cadastrar pessoa</span>, informe o <b>e-mail da conta Google</b> dele, o nome e o telefone.</li>
+   <li><b>Papel:</b> Obra. <b>Situação:</b> Ativo.</li>
+   <li>Na matriz de acessos, marque as obras dele com <b>Leitura</b>. Marcando o cliente, valem todas as obras desse cliente, inclusive as futuras.</li>
+   <li><b>Gravar.</b> Mande a ele o link <b class="mono">marceloclr.gitlab.io/tcs/mestre</b> e o <a href="manuais/manual-mestre.pdf" download>cartaz em PDF</a>.</li>
+  </ol>
+  <p>Ou deixe a pessoa pedir: ela entra pelo link, e o pedido aparece em <b>Solicitações pendentes</b>. Clique em <b>Aprovar</b> e complete o cadastro.</p>
+  <div class="dica"><span>ℹ️</span><span>Não é preciso mexer no GitLab nem no Firebase para cadastrar pessoas. Para tirar alguém, use <b>Situação: Desativado</b>: a pessoa perde o acesso na hora e o histórico fica.</span></div>
+ </div></div>
+ <div class="passo sem-figura"><div>
+  <h3><span class="n">2</span>Outras tarefas</h3>
+  <ul>
+   <li><b>Papéis:</b> Administrador (tudo), Escritório (lê, ou lê e altera, os clientes e projetos marcados) e Obra (só envia notas).</li>
+   <li><b>Log de atividades:</b> quem fez o quê e quando, com valores e motivos. Ninguém altera nem apaga.</li>
+   <li><b>Buscar agora:</b> o token do GitLab é gravado em <span class="caminho">Recebidas da obra › Configurar token</span> (já configurado).</li>
+   <li><b>Backup:</b> em <span class="caminho">Dados e segurança</span>, baixe o backup de tempos em tempos.</li>
+  </ul>
+ </div></div>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
+</section>
+
+<!-- 9 -->
+<section class="bloco" id="problemas" style="--acento:var(--ferrugem)">
+ <h2>9. Deu problema?</h2>
+ <div class="tabela"><table>
+  <thead><tr><th>O que acontece</th><th>O que fazer</th></tr></thead>
+  <tbody>
+   <tr><td>A nota da obra não aparece na fila</td><td>Ela é de uma obra em que você não tem escrita (a fila mostra pela primeira obra marcada). Peça a um administrador.</td></tr>
+   <tr><td><span class="selo-ex amarelo">Busca falhou</span></td><td>Leia o motivo. A busca tenta de novo até 3 vezes; se não der, confira pela foto ou cole a página da consulta.</td></tr>
+   <tr><td>Campos em vermelho ao confirmar</td><td>Complete número, data, emitente e total olhando a nota.</td></tr>
+   <tr><td><b>"Diferença de R$ …"</b></td><td>Pode ser frete, seguro ou imposto (são rateados), ou um item faltando. Confira os itens.</td></tr>
+   <tr><td><b>"excede"</b> na separação</td><td>Diminua a quantidade de alguma obra até a soma caber na nota.</td></tr>
+   <tr><td>Não consigo excluir a nota</td><td>Só administradores excluem; se houver baixa do material, estorne antes.</td></tr>
+   <tr><td>Versão antiga na tela</td><td>Recarregue com <b>Ctrl+Shift+R</b> e confira a versão no canto inferior esquerdo.</td></tr>
+  </tbody>
+ </table></div>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
+</section>
+
+<section class="resumo" id="rotina" aria-labelledby="t-rotina">
+ <h2 id="t-rotina">Rotina do dia</h2>
+ <ol>
+  <li>Abra <b>Recebidas da obra</b>.</li>
+  <li>Nas notas com <b>✓ Produtos e valores importados</b>, clique em <b>Conferir</b>.</li>
+  <li>Complete o que estiver em vermelho e acerte as obras.</li>
+  <li>Se houver mais de uma obra, separe os produtos.</li>
+  <li><b>Confirmar entrada das notas.</b></li>
+ </ol>
+</section>
+
+<p class="rodape">TCS · manual do escritório · <a href="./">abrir o sistema</a> · <a href="manual-mestre.html">manual do mestre de obras</a></p>
+</main>
+</div>
+<button class="btn primario abre-indice" type="button" aria-controls="menu" aria-expanded="false">☰ Índice</button>
+<p class="versao" id="versao"></p>
+<script src="js/manual.js"></script>
+</body>
+</html>

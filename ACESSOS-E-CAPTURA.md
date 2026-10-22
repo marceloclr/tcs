@@ -4,7 +4,9 @@ Guia do controle de acesso por cliente e projeto, da captura de notas pelo celul
 
 - Sistema: https://marceloclr.gitlab.io/tcs/
 - Tela da obra: https://marceloclr.gitlab.io/tcs/mestre (o endereço antigo, `captura.html`, continua funcionando)
-- Manual do mestre de obras, com figuras, para imprimir ou mandar o link: https://marceloclr.gitlab.io/tcs/manual (arquivo [`manual-mestre.html`](manual-mestre.html); também no link **Como usar** da tela da obra)
+- Manual do mestre de obras, com figuras: https://marceloclr.gitlab.io/tcs/manual (arquivo [`manual-mestre.html`](manual-mestre.html); também no link **Como usar** da tela da obra). Cartaz de uma folha em PDF, para colar na sala da obra: [`manuais/manual-mestre.pdf`](manuais/manual-mestre.pdf).
+- Manual do escritório: https://marceloclr.gitlab.io/tcs/manual-escritorio (botão **Manual** no topo do sistema). Guia rápido em PDF: [`manuais/manual-escritorio.pdf`](manuais/manual-escritorio.pdf).
+- Os PDFs saem das páginas `manuais/cartaz-mestre.html` e `manuais/guia-escritorio.html`; para refazer depois de mudar o texto, veja as instruções no topo de `manuais/gerar-pdf.mjs`.
 
 ## 1. Implantação (uma vez)
 

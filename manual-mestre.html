@@ -3,94 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Manual do mestre de obras - V-22102026-1321</title>
+<title>Manual do mestre de obras - V-22102026-1335</title>
 <meta name="description" content="Como mandar a nota fiscal da obra para o escritório pelo celular, com o Notas TCS.">
 <link rel="icon" type="image/svg+xml" href="icones/notas-tcs.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap">
-<style>
-/* Papel e Tinta (github.com/marceloclr/design-system): tokens e temas. Manual para ler no celular: corpo 17 px. */
-:root{color-scheme:light;
- --papel:#f3f1ec;--papel-2:#e9e6e0;--carta:#fffefc;--carta-2:#faf8f4;--tinta:#1c1f23;--tinta-2:#4a5058;--tinta-3:#737a83;--linha:#d9d4cb;--linha-forte:#c1bab0;
- --grafite:#3f4750;--latao:#8d7130;--musgo:#4c6847;--ardosia:#3f5c78;--ocre:#867123;--carmim:#8b3a3a;--ferrugem:#8a5240;
- --acento:var(--ardosia);--raio:12px;--raio-p:7px;--sombra:0 1px 1px rgba(28,31,35,.05),0 10px 26px -18px rgba(28,31,35,.35);
- --fonte-corpo:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;--fonte-titulo:"IBM Plex Serif",Georgia,serif;--fonte-mono:"IBM Plex Mono",ui-monospace,monospace;
- /* cores da tela do aplicativo (Notas TCS), usadas nas ilustrações */
- --app:#173B68;--sobre-app:#ffffff;--app-ok:#1f6f3a;--app-ok-fundo:#e6f3ea;--app-alerta:#8a5a00;--app-alerta-fundo:#fff4d6;--tela:#f3f1ec;--papel-nota:#ffffff;--tinta-nota:#1c1f23;--camera:#2b2f33;--app-texto:#173B68}
-html[data-tema="escuro"]{color-scheme:dark;
- --papel:#14171b;--papel-2:#1a1e23;--carta:#1f242a;--carta-2:#242a31;--tinta:#e9e6e0;--tinta-2:#bab5ac;--tinta-3:#8d949d;--linha:#2e343b;--linha-forte:#3e454e;
- --grafite:#9fa9b4;--latao:#c4a45e;--musgo:#87ab7f;--ardosia:#7ba3c8;--ocre:#c0aa4e;--carmim:#cf7d7d;--ferrugem:#c68a74;--sombra:0 1px 1px rgba(0,0,0,.4),0 10px 26px -18px rgba(0,0,0,.8);
- --app:#2c5a8c;--app-texto:#7ba3c8;--app-ok:#6fcf8f;--app-ok-fundo:#18301f;--app-alerta:#f0c060;--app-alerta-fundo:#33280f;--tela:#121417;--papel-nota:#e9e6e0;--tinta-nota:#1c1f23}
-@media (prefers-color-scheme:dark){html:not([data-tema]){color-scheme:dark;
- --papel:#14171b;--papel-2:#1a1e23;--carta:#1f242a;--carta-2:#242a31;--tinta:#e9e6e0;--tinta-2:#bab5ac;--tinta-3:#8d949d;--linha:#2e343b;--linha-forte:#3e454e;
- --grafite:#9fa9b4;--latao:#c4a45e;--musgo:#87ab7f;--ardosia:#7ba3c8;--ocre:#c0aa4e;--carmim:#cf7d7d;--ferrugem:#c68a74;--sombra:0 1px 1px rgba(0,0,0,.4),0 10px 26px -18px rgba(0,0,0,.8);
- --app:#2c5a8c;--app-texto:#7ba3c8;--app-ok:#6fcf8f;--app-ok-fundo:#18301f;--app-alerta:#f0c060;--app-alerta-fundo:#33280f;--tela:#121417;--papel-nota:#e9e6e0;--tinta-nota:#1c1f23}}
-*,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--papel);color:var(--tinta);font:400 17px/1.6 var(--fonte-corpo);-webkit-font-smoothing:antialiased}
-h1,h2,h3{font-family:var(--fonte-titulo);font-weight:600;letter-spacing:-.01em;margin:0}
-a{color:var(--ardosia)}
-:focus-visible{outline:3px solid var(--ardosia);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-
-.topo{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--carta);border-bottom:1px solid var(--linha)}
-.topo img{width:34px;height:34px;border-radius:8px}
-.topo strong{font-family:var(--fonte-titulo);font-size:17px}
-.topo .acoes{margin-left:auto;display:flex;gap:8px}
-.btn{font:500 14px/1 var(--fonte-corpo);color:var(--tinta);background:var(--carta);border:1px solid var(--linha);border-radius:var(--raio-p);padding:9px 12px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
-.btn:hover{border-color:var(--linha-forte)}
-.btn.primario{background:var(--app);border-color:var(--app);color:var(--sobre-app)}
-
-main{max-width:900px;margin:0 auto;padding:20px 16px 48px}
-.capa{padding:8px 0 16px}
-.capa h1{font-size:clamp(28px,6vw,40px);line-height:1.15}
-.capa p{font-size:19px;color:var(--tinta-2);max-width:62ch;margin:10px 0 0}
-.capa .acessar{display:inline-flex;margin-top:16px;font-size:16px;padding:12px 16px}
-.indice{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin:22px 0 8px;padding:0;list-style:none}
-.indice a{display:flex;gap:10px;align-items:center;padding:12px 14px;background:var(--carta);border:1px solid var(--linha);border-radius:var(--raio);text-decoration:none;color:var(--tinta);font-weight:500;box-shadow:var(--sombra)}
-.indice b{display:grid;place-items:center;width:30px;height:30px;flex:none;border-radius:50%;background:var(--app);color:var(--sobre-app);font-family:var(--fonte-mono)}
-
-.bloco{background:var(--carta);border:1px solid var(--linha);border-left:3px solid var(--acento);border-radius:var(--raio);box-shadow:var(--sombra);padding:18px 18px 8px;margin:22px 0;scroll-margin-top:70px}
-.bloco > h2{font-size:24px;color:var(--acento);margin-bottom:4px}
-.bloco > .sub{color:var(--tinta-2);margin:0 0 12px}
-.passo{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:8px 22px;align-items:start;padding:14px 0;border-top:1px solid var(--linha)}
-.passo:first-of-type{border-top:0}
-.passo.sem-figura{grid-template-columns:1fr}
-.passo h3{font-size:19px;display:flex;gap:10px;align-items:baseline}
-.passo h3 .n{display:inline-grid;place-items:center;width:32px;height:32px;flex:none;border-radius:50%;background:var(--app);color:var(--sobre-app);font:600 16px/1 var(--fonte-mono)}
-.passo p,.passo ul{margin:6px 0 0}
-.passo ul{padding-left:22px}
-.passo li{margin:4px 0}
-.figura{justify-self:center;width:100%;max-width:210px}
-.figura.larga{max-width:340px}
-.figura svg{display:block;width:100%;height:auto}
-.dica{display:flex;gap:10px;margin:10px 0 6px;padding:10px 12px;border-radius:var(--raio-p);background:var(--carta-2);border:1px solid var(--linha);font-size:16px}
-.dica.boa{border-left:3px solid var(--musgo)}.dica.atencao{border-left:3px solid var(--ocre)}
-.dica b.r{white-space:nowrap}
-kbd,.botao-nome{font:600 15px/1.2 var(--fonte-corpo);padding:1px 7px;border-radius:6px;background:var(--app);color:var(--sobre-app);white-space:nowrap}
-
-table{width:100%;border-collapse:collapse;font-size:16px;margin:4px 0 12px}
-th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--linha);vertical-align:top}
-th{font-weight:600;color:var(--tinta-2);background:var(--carta-2);font-size:14px}
-.resumo{background:var(--carta);border:2px dashed var(--linha-forte);border-radius:var(--raio);padding:18px 20px;margin:22px 0}
-.resumo h2{font-size:22px;margin-bottom:8px}
-.resumo ol{margin:0;padding-left:26px;font-size:19px}
-.resumo li{margin:6px 0}
-.tenue{color:var(--tinta-3)}
-.rodape{margin-top:28px;color:var(--tinta-3);font-size:14px;text-align:center}
-.versao{position:fixed;left:8px;bottom:6px;font:11px var(--fonte-mono);color:var(--tinta-3);opacity:.7}
-
-/* ilustrações: só tokens (seguem o tema) */
-svg text{font-family:var(--fonte-corpo)}
-.s-corpo{fill:var(--grafite)}.s-tela{fill:var(--tela)}.s-carta{fill:var(--carta)}.s-app{fill:var(--app)}.s-sobre{fill:var(--sobre-app)}
-.s-tinta{fill:var(--tinta)}.s-tinta2{fill:var(--tinta-2)}.s-linha{stroke:var(--linha-forte)}.s-borda-app{stroke:var(--app)}
-.s-ok{fill:var(--app-ok)}.s-okf{fill:var(--app-ok-fundo)}.s-al{fill:var(--app-alerta)}.s-alf{fill:var(--app-alerta-fundo)}
-.s-nota{fill:var(--papel-nota)}.s-tnota{fill:var(--tinta-nota)}.s-destaque{stroke:var(--latao)}.s-latao{fill:var(--latao)}.s-risco{stroke:var(--carmim)}
-.s-sem{fill:none}
-
-@media (max-width:640px){.passo{grid-template-columns:1fr}.figura{max-width:240px}.figura.larga{max-width:100%}.topo .acoes .txt{display:none}}
-@media print{.topo,.versao,.capa .acessar{display:none}body{background:#fff;font-size:13pt}.bloco,.resumo{box-shadow:none;break-inside:avoid-page}.passo{break-inside:avoid}main{padding:0}}
-</style>
+<link rel="stylesheet" href="css/manual.css">
 </head>
 <body>
 <header class="topo">
@@ -98,16 +16,32 @@ svg text{font-family:var(--fonte-corpo)}
  <strong>Manual do mestre de obras</strong>
  <div class="acoes">
   <button class="btn" id="tema" type="button" title="Troca entre o tema claro e o escuro" aria-label="Trocar o tema"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg> <span class="txt">Tema</span></button>
-  <button class="btn" type="button" onclick="print()" title="Imprime este manual (ou salva em PDF)"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M4 6V1.5h8V6M4 12H2V6h12v6h-2"/><path d="M4 9.5h8v5H4z"/></svg> <span class="txt">Imprimir</span></button>
+  <a class="btn" href="manuais/manual-mestre.pdf" download title="Baixa o cartaz em PDF (A4), para imprimir e colar na sala da obra"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg> <span class="txt">PDF para imprimir</span></a>
  </div>
 </header>
 
+<div class="layout">
+<nav class="menu" id="menu" aria-label="Índice do manual">
+ <p class="rotulo">Neste manual</p>
+ <ol>
+  <li><a href="#inicio"><b>·</b>Início</a></li>
+  <li><a href="#primeira-vez"><b>1</b>Primeira vez</a></li>
+  <li><a href="#chegou-nota"><b>2</b>Chegou uma nota</a></li>
+  <li><a href="#varias-obras"><b>3</b>Nota de mais de uma obra</a></li>
+  <li><a href="#sem-codigo"><b>4</b>Nota sem código</a></li>
+  <li><a href="#sem-internet"><b>5</b>Sem internet</a></li>
+  <li><a href="#problemas"><b>6</b>Deu problema?</a></li>
+  <li><a href="#resumo"><b>✓</b>Resumo</a></li>
+ </ol>
+ <div class="extra"><a class="btn primario" href="mestre">Abrir o Notas TCS</a><a class="btn" href="manuais/manual-mestre.pdf" download>Baixar o cartaz em PDF</a></div>
+</nav>
+<div class="veu"></div>
 <main>
-<section class="capa">
+<section class="capa" id="inicio">
  <h1>Como mandar a nota da obra para o escritório</h1>
  <p>Chegou material na obra com nota fiscal? Mande a nota pelo celular, no aplicativo <b>Notas TCS</b>. O escritório confere e lança no sistema. Leva menos de um minuto.</p>
  <a class="btn primario acessar" href="mestre">Abrir o Notas TCS</a>
- <ul class="indice" aria-label="Partes do manual">
+ <ul class="indice" id="indice" aria-label="Partes do manual">
   <li><a href="#primeira-vez"><b>1</b>Primeira vez</a></li>
   <li><a href="#chegou-nota"><b>2</b>Chegou uma nota</a></li>
   <li><a href="#varias-obras"><b>3</b>Nota de mais de uma obra</a></li>
@@ -173,6 +107,7 @@ svg text{font-family:var(--fonte-corpo)}
    </svg>
   </div>
  </div>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
 </section>
 
 <!-- ============ 2. CHEGOU UMA NOTA ============ -->
@@ -312,6 +247,7 @@ svg text{font-family:var(--fonte-corpo)}
    </svg>
   </div>
  </div>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
 </section>
 
 <!-- ============ 3. VÁRIAS OBRAS ============ -->
@@ -337,6 +273,7 @@ svg text{font-family:var(--fonte-corpo)}
    </svg>
   </div>
  </div>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
 </section>
 
 <!-- ============ 4. SEM CÓDIGO ============ -->
@@ -363,6 +300,7 @@ svg text{font-family:var(--fonte-corpo)}
    </svg>
   </div>
  </div>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
 </section>
 
 <!-- ============ 5. SEM INTERNET ============ -->
@@ -386,6 +324,7 @@ svg text{font-family:var(--fonte-corpo)}
    </svg>
   </div>
  </div>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
 </section>
 
 <!-- ============ 6. PROBLEMAS ============ -->
@@ -405,10 +344,11 @@ svg text{font-family:var(--fonte-corpo)}
   </tbody>
  </table>
  <p>Ainda com dúvida? <b>Ligue para o escritório.</b></p>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
 </section>
 
 <!-- ============ RESUMO ============ -->
-<section class="resumo" aria-labelledby="t-resumo">
+<section class="resumo" id="resumo" aria-labelledby="t-resumo">
  <h2 id="t-resumo">Resumo para colar na parede</h2>
  <ol>
   <li>Abra o <b>Notas TCS</b>.</li>
@@ -421,12 +361,9 @@ svg text{font-family:var(--fonte-corpo)}
 
 <p class="rodape">Notas TCS · manual do mestre de obras · <a href="mestre">abrir o aplicativo</a></p>
 </main>
+</div>
+<button class="btn primario abre-indice" type="button" aria-controls="menu" aria-expanded="false">☰ Índice</button>
 <p class="versao" id="versao"></p>
-<script>
-// Versão no canto (mesma do título) e tema claro/escuro guardado neste navegador.
-document.getElementById('versao').textContent=(document.title.match(/V-\d{8}-\d{4}/)||[''])[0];
-(function(){const h=document.documentElement;try{const t=localStorage.getItem('tcs-manual-tema');if(t)h.dataset.tema=t}catch(e){}
- document.getElementById('tema').addEventListener('click',()=>{const escuro=h.dataset.tema?h.dataset.tema==='escuro':matchMedia('(prefers-color-scheme: dark)').matches;h.dataset.tema=escuro?'claro':'escuro';try{localStorage.setItem('tcs-manual-tema',h.dataset.tema)}catch(e){}})})();
-</script>
+<script src="js/manual.js"></script>
 </body>
 </html>

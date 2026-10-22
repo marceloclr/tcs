@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pt-BR" data-tema="claro">
+<head>
+<meta charset="utf-8">
+<title>Notas TCS - cartaz do mestre de obras - V-22102026-1335</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap">
+<link rel="stylesheet" href="../css/manual.css">
+<style>
+/* Página só para gerar o PDF (manuais/gerar-pdf.mjs): A4, tema claro, compacta. */
+@page{size:A4;margin:9mm}
+html,body{background:#fff}
+body{font-size:10pt;line-height:1.38;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.versao,.topo,.menu,.abre-indice{display:none}
+h1,h2,h3{font-family:var(--fonte-titulo)}
+.cab{display:flex;align-items:center;gap:4mm;border-bottom:.6mm solid var(--app);padding-bottom:3mm;margin-bottom:3mm}
+.cab img{width:12mm;height:12mm;border-radius:2.5mm}
+.cab h1{font-size:19pt;line-height:1.1}
+.cab p{margin:1mm 0 0;color:var(--tinta-2);font-size:10.5pt}
+.cab .qr{margin-left:auto;text-align:center;font-size:7.5pt;color:var(--tinta-2);line-height:1.2}
+.cab .qr svg{width:24mm;height:24mm;display:block;margin:0 auto 1mm}
+.n{display:inline-grid;place-items:center;width:7.5mm;height:7.5mm;border-radius:50%;background:var(--app);color:var(--sobre-app);font:600 12pt/1 var(--fonte-mono);flex:none}
+.rodape-pdf{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-between;font-size:7.5pt;color:var(--tinta-3)}
+</style>
+<style>
+.passos{display:grid;grid-template-columns:repeat(3,1fr);gap:2.6mm}
+.cartao-p{border:.35mm solid var(--linha-forte);border-radius:3mm;padding:2.6mm 3mm;display:flex;flex-direction:column;break-inside:avoid}
+.cartao-p h2{display:flex;gap:2.5mm;align-items:center;font-size:12.5pt;line-height:1.15;margin:0 0 1.5mm}
+.cartao-p p{margin:0 0 2mm;font-size:9.6pt;color:var(--tinta-2)}
+.cartao-p .fig{margin-top:auto;display:flex;justify-content:center}
+.cartao-p .fig svg{height:54mm;width:auto}
+.cartao-p.largo .fig svg{height:auto;width:100%;max-height:54mm}
+.baixo{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;margin-top:3mm}
+.caixa{border-radius:3mm;padding:2.6mm 3mm;background:var(--carta-2);border:.35mm solid var(--linha);font-size:9.4pt}
+.caixa h3{font-size:11pt;margin:0 0 1mm}
+.caixa ul{margin:0;padding-left:4mm}.caixa li{margin:.6mm 0}
+.fone{margin-top:3mm;display:flex;align-items:center;gap:3mm;border:.5mm dashed var(--linha-forte);border-radius:3mm;padding:3mm 4mm;font-size:12pt;font-weight:600}
+.fone span{flex:1;border-bottom:.4mm solid var(--tinta-3);height:6mm}
+</style>
+</head>
+<body data-qr="https://marceloclr.gitlab.io/tcs/mestre">
+<div class="cab"><img src="../icones/notas-tcs.svg" alt=""><div><h1>Como mandar a nota da obra para o escritório</h1><p>Chegou material com nota fiscal? Mande pelo celular, no <b>Notas TCS</b>. Leva menos de um minuto.</p></div><div class="qr"><svg id="qr" viewBox="0 0 10 10" role="img" aria-label="QR Code para abrir o Notas TCS"></svg>Aponte a câmera:<br><b>abre o Notas TCS</b></div></div>
+<div class="passos">
+ <div class="cartao-p"><h2><span class="n">1</span>Toque em "Ler código da nota"</h2><p>Abra o <b>Notas TCS</b> e toque no primeiro botão. Na primeira vez, permita a câmera.</p><div class="fig"><svg viewBox="0 0 200 380" role="img" aria-labelledby="f-inicio"><title id="f-inicio">Tela inicial do Notas TCS com o botão Ler código da nota destacado</title>
+    <rect x="4" y="4" width="192" height="372" rx="26" class="s-corpo"/><rect x="12" y="16" width="176" height="348" rx="18" class="s-tela"/>
+    <rect x="12" y="16" width="176" height="40" rx="18" class="s-app"/><rect x="12" y="40" width="176" height="16" class="s-app"/>
+    <text x="30" y="43" font-size="13" font-weight="700" class="s-sobre">Notas da obra</text>
+    <rect x="24" y="84" width="152" height="70" rx="12" class="s-app"/>
+    <circle cx="48" cy="114" r="9" class="s-sem" stroke="var(--sobre-app)" stroke-width="3"/><path d="M54 121 l8 8" stroke="var(--sobre-app)" stroke-width="3.5" stroke-linecap="round"/>
+    <text x="70" y="113" font-size="12" font-weight="700" class="s-sobre">Ler código</text><text x="70" y="129" font-size="12" font-weight="700" class="s-sobre">da nota</text>
+    <rect x="18" y="78" width="164" height="82" rx="16" class="s-sem s-destaque" stroke-width="3"/>
+    <text x="100" y="186" font-size="9.5" text-anchor="middle" class="s-tinta2">Ou fotografe a nota inteira</text>
+    <rect x="24" y="200" width="152" height="56" rx="12" class="s-app"/>
+    <rect x="40" y="218" width="24" height="18" rx="3" class="s-sem" stroke="var(--sobre-app)" stroke-width="2.5"/><circle cx="52" cy="227" r="4.5" class="s-sem" stroke="var(--sobre-app)" stroke-width="2.2"/>
+    <text x="74" y="233" font-size="12" font-weight="700" class="s-sobre">Fotografar nota</text>
+    <rect x="24" y="270" width="152" height="44" rx="12" class="s-carta" stroke="var(--app-texto)" stroke-width="2.5"/>
+    <text x="100" y="297" font-size="11.5" font-weight="700" text-anchor="middle" fill="var(--app-texto)">Usar foto da galeria</text>
+   </svg></div></div>
+ <div class="cartao-p largo"><h2><span class="n">2</span>Aponte para o código</h2><p><b>Cupom:</b> o QR Code no fim. <b>Nota grande:</b> o código de barras no alto. Segure parado até vibrar.</p><div class="fig"><svg viewBox="0 0 340 300" role="img" aria-labelledby="f-codigos"><title id="f-codigos">Onde fica o código: QR Code no fim do cupom fiscal e código de barras no alto da nota grande</title>
+    <!-- cupom -->
+    <path d="M20 14 h110 v250 l-9 8 l-9-8 l-9 8 l-9-8 l-9 8 l-9-8 l-9 8 l-9-8 l-9 8 l-9-8 l-9 8 l-9-8 z" class="s-nota s-linha" stroke-width="1.2"/>
+    <rect x="34" y="28" width="82" height="6" rx="2" class="s-tnota" opacity=".7"/><rect x="44" y="40" width="62" height="4" rx="2" class="s-tnota" opacity=".35"/>
+    <g class="s-tnota" opacity=".3"><rect x="32" y="62" width="86" height="3"/><rect x="32" y="72" width="70" height="3"/><rect x="32" y="82" width="86" height="3"/><rect x="32" y="92" width="60" height="3"/><rect x="32" y="102" width="80" height="3"/><rect x="32" y="112" width="74" height="3"/><rect x="32" y="128" width="86" height="3"/><rect x="32" y="138" width="50" height="3"/></g>
+    <g class="s-tnota">
+     <rect x="47" y="160" width="56" height="56" fill="none" stroke="var(--tinta-nota)" stroke-width="2"/>
+     <rect x="51" y="164" width="14" height="14"/><rect x="85" y="164" width="14" height="14"/><rect x="51" y="198" width="14" height="14"/>
+     <rect x="70" y="166" width="5" height="5"/><rect x="77" y="174" width="5" height="5"/><rect x="70" y="182" width="5" height="5"/><rect x="84" y="186" width="5" height="5"/><rect x="91" y="194" width="5" height="5"/><rect x="72" y="200" width="5" height="5"/><rect x="80" y="206" width="5" height="5"/><rect x="92" y="204" width="5" height="5"/><rect x="66" y="190" width="5" height="5"/>
+    </g>
+    <rect x="40" y="153" width="70" height="70" rx="6" class="s-sem s-destaque" stroke-width="3"/>
+    <text x="75" y="290" font-size="13" font-weight="700" text-anchor="middle" class="s-tinta">Cupom: QR Code</text>
+    <!-- nota grande -->
+    <rect x="170" y="14" width="150" height="250" rx="3" class="s-nota s-linha" stroke-width="1.2"/>
+    <rect x="182" y="26" width="52" height="40" rx="2" fill="none" stroke="var(--tinta-nota)" stroke-width="1" opacity=".5"/><text x="208" y="50" font-size="9" font-weight="700" text-anchor="middle" class="s-tnota">DANFE</text>
+    <g class="s-tnota"><rect x="242" y="28" width="2" height="26"/><rect x="246" y="28" width="1" height="26"/><rect x="249" y="28" width="3" height="26"/><rect x="254" y="28" width="1" height="26"/><rect x="257" y="28" width="2" height="26"/><rect x="261" y="28" width="1" height="26"/><rect x="264" y="28" width="3" height="26"/><rect x="269" y="28" width="1" height="26"/><rect x="272" y="28" width="2" height="26"/><rect x="276" y="28" width="1" height="26"/><rect x="279" y="28" width="3" height="26"/><rect x="284" y="28" width="2" height="26"/><rect x="288" y="28" width="1" height="26"/><rect x="291" y="28" width="3" height="26"/><rect x="296" y="28" width="1" height="26"/><rect x="299" y="28" width="2" height="26"/><rect x="303" y="28" width="1" height="26"/><rect x="306" y="28" width="3" height="26"/></g>
+    <text x="242" y="64" font-size="5.5" class="s-tnota">CHAVE DE ACESSO</text><text x="242" y="72" font-size="5" class="s-tnota" style="font-family:var(--fonte-mono)">2326 1007 0123 4500 …</text>
+    <rect x="236" y="22" width="78" height="56" rx="5" class="s-sem s-destaque" stroke-width="3"/>
+    <g class="s-tnota" opacity=".3"><rect x="182" y="92" width="126" height="3"/><rect x="182" y="102" width="100" height="3"/><rect x="182" y="120" width="126" height="16"/><rect x="182" y="146" width="126" height="3"/><rect x="182" y="156" width="126" height="3"/><rect x="182" y="166" width="126" height="3"/><rect x="182" y="176" width="110" height="3"/><rect x="182" y="186" width="126" height="3"/><rect x="182" y="196" width="90" height="3"/><rect x="182" y="226" width="126" height="22"/></g>
+    <text x="245" y="290" font-size="13" font-weight="700" text-anchor="middle" class="s-tinta">Nota grande: barras</text>
+   </svg></div></div>
+ <div class="cartao-p"><h2><span class="n">3</span>Não leu? Digite</h2><p>Toque em <b>Digitar os números</b> e digite os <b>44 números</b> da chave de acesso.</p><div class="fig"><svg viewBox="0 0 200 380" role="img" aria-labelledby="f-digitar"><title id="f-digitar">Campo para digitar os 44 números da chave de acesso, com o contador e o botão Usar estes números</title>
+    <rect x="4" y="4" width="192" height="372" rx="26" class="s-corpo"/><rect x="12" y="16" width="176" height="348" rx="18" class="s-tela"/>
+    <rect x="12" y="16" width="176" height="40" rx="18" class="s-app"/><rect x="12" y="40" width="176" height="16" class="s-app"/>
+    <text x="30" y="43" font-size="13" font-weight="700" class="s-sobre">Notas da obra</text>
+    <text x="24" y="92" font-size="11" class="s-tinta">Os 44 números da</text><text x="24" y="107" font-size="11" font-weight="700" class="s-tinta">chave de acesso:</text>
+    <rect x="24" y="120" width="152" height="44" rx="10" class="s-carta" stroke="var(--app-texto)" stroke-width="2.5"/>
+    <text x="34" y="147" font-size="11.5" font-weight="600" class="s-tinta" style="font-family:var(--fonte-mono)">2326 1007 0123 4500</text>
+    <text x="24" y="184" font-size="10.5" class="s-tinta2">44 de 44 números</text>
+    <rect x="24" y="200" width="152" height="44" rx="10" class="s-app"/><text x="100" y="227" font-size="12" font-weight="700" text-anchor="middle" class="s-sobre">Usar estes números</text>
+    <g class="s-tinta2" opacity=".55"><rect x="24" y="270" width="44" height="26" rx="5"/><rect x="78" y="270" width="44" height="26" rx="5"/><rect x="132" y="270" width="44" height="26" rx="5"/><rect x="24" y="302" width="44" height="26" rx="5"/><rect x="78" y="302" width="44" height="26" rx="5"/><rect x="132" y="302" width="44" height="26" rx="5"/></g>
+    <g font-size="12" font-weight="700" text-anchor="middle" class="s-sobre"><text x="46" y="288">1</text><text x="100" y="288">2</text><text x="154" y="288">3</text><text x="46" y="320">4</text><text x="100" y="320">5</text><text x="154" y="320">6</text></g>
+   </svg></div></div>
+ <div class="cartao-p"><h2><span class="n">4</span>Toque na obra</h2><p>Se puder, fotografe a nota também. Faltou material ou veio quebrado? Marque antes de enviar.</p><div class="fig"><svg viewBox="0 0 200 380" role="img" aria-labelledby="f-obra"><title id="f-obra">Tela com o código lido, a obra marcada e o botão Enviar</title>
+    <rect x="4" y="4" width="192" height="372" rx="26" class="s-corpo"/><rect x="12" y="16" width="176" height="348" rx="18" class="s-tela"/>
+    <rect x="12" y="16" width="176" height="40" rx="18" class="s-app"/><rect x="12" y="40" width="176" height="16" class="s-app"/>
+    <text x="30" y="43" font-size="13" font-weight="700" class="s-sobre">Notas da obra</text>
+    <rect x="22" y="68" width="156" height="58" rx="10" class="s-okf" stroke="var(--app-ok)" stroke-width="2.5"/>
+    <circle cx="40" cy="88" r="9" class="s-ok"/><path d="M35 88 l4 4 l7-8" fill="none" stroke="var(--app-ok-fundo)" stroke-width="2.5" stroke-linecap="round"/>
+    <text x="56" y="92" font-size="11" font-weight="700" class="s-ok">Código da nota lido</text><text x="34" y="114" font-size="9.5" class="s-tinta2">Nota nº 1234, série 1</text>
+    <text x="24" y="152" font-size="13" font-weight="700" class="s-tinta">Qual obra?</text>
+    <rect x="22" y="162" width="156" height="38" rx="10" class="s-okf" stroke="var(--app-ok)" stroke-width="2.5"/><text x="36" y="186" font-size="12" font-weight="700" class="s-ok">✔ Casa Térrea</text>
+    <rect x="22" y="208" width="156" height="38" rx="10" class="s-carta" stroke="var(--app-texto)" stroke-width="2.5"/><text x="36" y="232" font-size="12" font-weight="700" fill="var(--app-texto)">Prédio Iguape</text>
+    <rect x="22" y="254" width="74" height="30" rx="8" class="s-carta" stroke="var(--app-texto)" stroke-width="2"/><text x="59" y="273" font-size="8.5" font-weight="700" text-anchor="middle" fill="var(--app-texto)">Faltou material</text>
+    <rect x="104" y="254" width="74" height="30" rx="8" class="s-carta" stroke="var(--app-texto)" stroke-width="2"/><text x="141" y="273" font-size="8.5" font-weight="700" text-anchor="middle" fill="var(--app-texto)">Veio avariado</text>
+    <rect x="22" y="296" width="156" height="48" rx="12" class="s-app"/><text x="100" y="326" font-size="15" font-weight="700" text-anchor="middle" class="s-sobre">Enviar</text>
+   </svg></div></div>
+ <div class="cartao-p"><h2><span class="n">5</span>Toque em "Enviar"</h2><p>Aparece <b>"Nota enviada!"</b>. Para a próxima, toque em <b>Próxima nota</b>.</p><div class="fig"><svg viewBox="0 0 200 380" role="img" aria-labelledby="f-enviada"><title id="f-enviada">Tela de confirmação: Nota enviada! O escritório vai conferir.</title>
+    <rect x="4" y="4" width="192" height="372" rx="26" class="s-corpo"/><rect x="12" y="16" width="176" height="348" rx="18" class="s-tela"/>
+    <rect x="12" y="16" width="176" height="40" rx="18" class="s-app"/><rect x="12" y="40" width="176" height="16" class="s-app"/>
+    <text x="30" y="43" font-size="13" font-weight="700" class="s-sobre">Notas da obra</text>
+    <circle cx="100" cy="140" r="40" class="s-ok"/><path d="M80 140 l14 14 l26-28" fill="none" stroke="var(--tela)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="100" y="214" font-size="18" font-weight="700" text-anchor="middle" class="s-tinta">Nota enviada!</text>
+    <text x="100" y="238" font-size="11.5" text-anchor="middle" class="s-tinta2">O escritório vai conferir.</text>
+    <rect x="24" y="282" width="152" height="50" rx="12" class="s-app"/><text x="100" y="313" font-size="13" font-weight="700" text-anchor="middle" class="s-sobre">Próxima nota</text>
+   </svg></div></div>
+ <div class="cartao-p"><h2><span class="n">+</span>Nota de várias obras?</h2><p>Marque <b>todas</b> as obras. O escritório separa os produtos entre elas.</p><div class="fig"><svg viewBox="0 0 200 300" role="img" aria-labelledby="f-varias"><title id="f-varias">Duas obras marcadas e o aviso de que o escritório separa os produtos</title>
+    <rect x="4" y="4" width="192" height="292" rx="22" class="s-corpo"/><rect x="12" y="14" width="176" height="272" rx="16" class="s-tela"/>
+    <text x="24" y="44" font-size="13" font-weight="700" class="s-tinta">Qual obra?</text><text x="24" y="62" font-size="10" class="s-tinta2">Pode marcar mais de uma.</text>
+    <rect x="22" y="72" width="156" height="38" rx="10" class="s-okf" stroke="var(--app-ok)" stroke-width="2.5"/><text x="36" y="96" font-size="12" font-weight="700" class="s-ok">✔ Casa Térrea</text>
+    <rect x="22" y="118" width="156" height="38" rx="10" class="s-okf" stroke="var(--app-ok)" stroke-width="2.5"/><text x="36" y="142" font-size="12" font-weight="700" class="s-ok">✔ Casa Duplex</text>
+    <rect x="22" y="164" width="156" height="38" rx="10" class="s-carta" stroke="var(--app-texto)" stroke-width="2.5"/><text x="36" y="188" font-size="12" font-weight="700" fill="var(--app-texto)">Prédio Iguape</text>
+    <rect x="22" y="212" width="156" height="58" rx="10" class="s-okf"/>
+    <text x="32" y="232" font-size="9.5" font-weight="700" class="s-ok">A nota é de mais de uma</text><text x="32" y="246" font-size="9.5" font-weight="700" class="s-ok">obra: o escritório separa</text><text x="32" y="260" font-size="9.5" font-weight="700" class="s-ok">os produtos entre elas.</text>
+   </svg></div></div>
+</div>
+<div class="baixo">
+ <div class="caixa"><h3>Sem internet?</h3>Pode enviar assim mesmo: a nota fica no celular (faixa amarela) e vai <b>sozinha</b> quando a internet voltar.</div>
+ <div class="caixa"><h3>Nota sem código?</h3>Toque em <b>Fotografar nota</b>: nota inteira, lugar claro, celular parado. <b>Não mande pelo WhatsApp.</b></div>
+ <div class="caixa"><h3>Primeira vez no celular</h3><ul><li>Chrome: <b>marceloclr.gitlab.io/tcs/mestre</b></li><li><b>Entrar com Google</b></li><li>⋮ › <b>Instalar app</b></li></ul></div>
+</div>
+<div class="fone">Dúvida? Ligue para o escritório:<span></span></div>
+<div class="rodape-pdf"><span>Manual completo: marceloclr.gitlab.io/tcs/manual</span><span>V-22102026-1335</span></div>
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
+<script>
+// QR Code do endereço, desenhado em SVG na geração do PDF.
+(function(){const url=document.body.dataset.qr;const Z=window.ZXing;const m=new Z.QRCodeWriter().encode(url,Z.BarcodeFormat.QR_CODE,0,0,new Map([[Z.EncodeHintType.MARGIN,1]]));
+ const w=m.getWidth(),h=m.getHeight();let d='';for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(m.get(x,y))d+=`M${x} ${y}h1v1h-1z`;
+ document.querySelectorAll('svg#qr').forEach(s=>{s.setAttribute('viewBox',`0 0 ${w} ${h}`);s.innerHTML=`<rect width="${w}" height="${h}" fill="#fff"/><path d="${d}" fill="#000"/>`});document.body.dataset.pronto='1'})();
+</script>
+</body>
+</html>

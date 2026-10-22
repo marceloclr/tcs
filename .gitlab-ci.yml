@@ -6,8 +6,8 @@ create-pages:
   stage: deploy
   script:
     - mkdir -p public
-    - cp index.html captura.html manual-mestre.html manifest.webmanifest sw.js _redirects public/
-    - cp -r css js icones public/
+    - cp index.html captura.html manual-mestre.html manual-escritorio.html manifest.webmanifest sw.js _redirects public/
+    - cp -r css js icones manuais public/
     - if [ -d libs ]; then cp -r libs public/; fi
   pages: true
   rules:
