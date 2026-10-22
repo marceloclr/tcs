@@ -92,7 +92,7 @@ async function enviar(){const p=Cap.projetos.find(x=>x.id===Cap.obra);if(!p)retu
 
 // ---------- Fotos compartilhadas (menu Compartilhar do Android) ----------
 async function compartilhadasReceber(){const lista=await capOp('compartilhados','readonly',s=>s.getAll());if(!lista?.length)return false;await capOp('compartilhados','readwrite',s=>s.clear());
- history.replaceState(null,'','captura.html');await fotosReceber(lista.map(x=>new File([x.blob],x.nome,{type:x.tipo})),'compartilhado');return true}
+ history.replaceState(null,'',location.pathname);await fotosReceber(lista.map(x=>new File([x.blob],x.nome,{type:x.tipo})),'compartilhado');return true}
 
 // ---------- Login, papel e obras ----------
 function aviso(html){$('#avisoTexto').innerHTML=html;mostrar('telaAviso')}

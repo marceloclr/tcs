@@ -3,7 +3,7 @@
 Guia do controle de acesso por cliente e projeto, da captura de notas pelo celular da obra, da fila do escritório e do aproveitamento das consultas das notas.
 
 - Sistema: https://marceloclr.gitlab.io/tcs/
-- Tela da obra: https://marceloclr.gitlab.io/tcs/captura.html
+- Tela da obra: https://marceloclr.gitlab.io/tcs/mestre (o endereço antigo, `captura.html`, continua funcionando)
 
 ## 1. Implantação (uma vez)
 
@@ -50,7 +50,7 @@ A aba **Usuários e acessos** aparece só para administradores.
 > **Notas TCS — como mandar a nota da obra para o escritório**
 >
 > **Uma vez só: colocar o ícone no celular**
-> 1. No celular, abra o **Chrome** e entre em: **marceloclr.gitlab.io/tcs/captura.html**
+> 1. No celular, abra o **Chrome** e entre em: **marceloclr.gitlab.io/tcs/mestre**
 > 2. Toque em **Entrar com Google** e escolha a sua conta.
 > 3. Toque nos **três pontinhos ⋮** (no alto, à direita) e depois em **Instalar app** ou **Adicionar à tela inicial**.
 > 4. Pronto: aparece o ícone **Notas TCS** na tela do celular.

@@ -3,7 +3,7 @@
   "short_name": "Notas TCS",
   "description": "Fotografe a nota recebida na obra e envie para o escritório conferir.",
   "lang": "pt-BR",
-  "start_url": "captura.html",
+  "start_url": "mestre",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
@@ -16,7 +16,7 @@
     { "src": "icones/notas-tcs.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ],
   "share_target": {
-    "action": "captura.html?compartilhado=1",
+    "action": "mestre?compartilhado=1",
     "method": "POST",
     "enctype": "multipart/form-data",
     "params": {

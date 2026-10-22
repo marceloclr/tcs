@@ -83,7 +83,7 @@ Não foram testados o OCR de PDF digitalizado nem PDFs reais de NFS-e de cada pr
 ## Acessos, captura pela obra e estoque sob custódia (19/10/2026)
 - **Acesso por usuário, cliente e projeto**, administrado na aba Usuários e acessos e garantido pelas regras do Firestore ([`firestore.rules`](firestore.rules)).
 - **Importação de fotos, PDF de NFC-e, código de barras e QR Code**, com chave validada e bloqueio de nota repetida; aproveitamento do link de consulta (página salva ou texto colado).
-- **Tela da obra** ([`captura.html`](captura.html), app "Notas TCS"): fotografar, escolher a obra e enviar, também sem internet e pelo menu Compartilhar; **fila "Recebidas da obra"** no escritório.
+- **Tela da obra** (https://marceloclr.gitlab.io/tcs/mestre, arquivo [`captura.html`](captura.html), app "Notas TCS"): fotografar, escolher a obra e enviar, também sem internet e pelo menu Compartilhar; **fila "Recebidas da obra"** no escritório.
 - **Visão geral** separa o valor em estoque sob custódia do custo apropriado (baixas e serviços).
 - Guia completo, inclusive o passo a passo para o mestre de obras: [`ACESSOS-E-CAPTURA.md`](ACESSOS-E-CAPTURA.md). Testes: [`testes/LEIA-ME.md`](testes/LEIA-ME.md). Plano: [`docs/planos/acessos-e-captura.md`](docs/planos/acessos-e-captura.md).
 
