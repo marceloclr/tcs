@@ -6,7 +6,7 @@ create-pages:
   stage: deploy
   script:
     - mkdir -p public
-    - cp index.html captura.html manifest.webmanifest sw.js public/
+    - cp index.html captura.html manifest.webmanifest sw.js _redirects public/
     - cp -r css js icones public/
     - if [ -d libs ]; then cp -r libs public/; fi
   pages: true

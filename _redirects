@@ -1,0 +1,3 @@
+# GitLab Pages: endereço curto da tela do mestre de obras. Serve captura.html em /tcs/mestre (200 = reescrita, a URL não muda).
+/tcs/mestre /tcs/captura.html 200
+/tcs/mestre/ /tcs/mestre 301
