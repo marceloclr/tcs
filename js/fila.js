@@ -157,9 +157,12 @@ document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.tar
 // Uma obra só: a nota inteira vai para ela. Sem obra: a nota fica a vincular.
 function filaObrasDaCaptura(c){return (c?.obras?.length?c.obras.map(o=>o.projectId):[c?.projectId]).filter(Boolean)}
 const filaObras=inv=>inv._obras||(inv._obras=inv._projeto?[inv._projeto]:[]);
-// separação de um item: {projetoId: quantidade}. Com uma obra só, tudo nela; com várias, o padrão é tudo na primeira.
+// Separação de um item: {projetoId: quantidade}. Uma obra só: tudo nela. Várias: a primeira obra (a que recebeu tudo
+// automaticamente) fica sempre com o restante = quantidade da nota − o que foi posto nas outras; se as outras passarem
+// da quantidade da nota, ela fica com zero e o excesso aparece em "Livre".
 function filaDistItem(inv,it){const ob=filaObras(inv),q=Number(it.quantity)||0;if(ob.length===1)return {[ob[0]]:q};if(!ob.length)return {};
- const d=it._obras||(it._obras={});Object.keys(d).forEach(k=>{if(!ob.includes(k))delete d[k]});if(!Object.keys(d).length)d[ob[0]]=q;return d}
+ const d=it._obras||(it._obras={});Object.keys(d).forEach(k=>{if(!ob.includes(k))delete d[k]});
+ const outras=ob.slice(1).reduce((s,p)=>s+Number(d[p]||0),0);d[ob[0]]=Math.max(0,Math.round((q-outras)*1e6)/1e6);return d}
 const filaLivre=(inv,it)=>Math.round(((Number(it.quantity)||0)-Object.values(filaDistItem(inv,it)).reduce((s,v)=>s+Number(v||0),0))*1e6)/1e6;
 function filaDistErro(inv){if(!inv._captura||filaObras(inv).length<2)return '';const it=inv.items.find(x=>filaLivre(inv,x)<-1e-6);return it?`Na nota ${inv.number||''}, o item "${it.description}" foi separado em quantidade maior que a da nota. Corrija o quadro "Separação entre as obras".`:''}
 function filaProjetoHtml(inv,ii){if(!inv._captura)return '';const c=Fila.itens.get(inv._captura);const ob=filaObras(inv),indicadas=filaObrasDaCaptura(c);
@@ -171,17 +174,35 @@ function filaProjetoHtml(inv,ii){if(!inv._captura)return '';const c=Fila.itens.g
   ${ob.length===1?'<p class="hint">Ao confirmar, a nota inteira é vinculada a esta obra.</p>':ob.length>1?'<p class="hint">Separe os produtos entre as obras no quadro abaixo dos itens.</p>':''}</div>${(inv._fotosExtra||[]).length?`<div class="fotos-extra">${inv._fotosExtra.map((u,i)=>`<a href="${u}" target="_blank" rel="noopener" title="Abre a foto ${i+2} em tamanho original"><img src="${u}" alt="Foto ${i+2}"></a>`).join('')}</div>`:''}`}
 // Quadro "Separação entre as obras" (mais de uma obra): produto × obra, com a quantidade livre e o valor de cada obra.
 function filaDistHtml(inv,ii){const ob=filaObras(inv);if(!inv._captura||ob.length<2||!inv.items.length)return '';
- const valorObra=pid=>inv.items.reduce((s,it,j)=>s+Number(filaDistItem(inv,it)[pid]||0)*itemUnitCost(inv,j),0);
- const linhas=inv.items.map((it,j)=>{const d=filaDistItem(inv,it),l=filaLivre(inv,it);return `<tr><td>${esc(it.description||'Item '+(j+1))}</td><td class="num">${num(it.quantity)} ${esc(it.unit||'')}</td>${ob.map(pid=>`<td class="num"><input type="number" min="0" step="any" data-fila-dist="${ii}" data-j="${j}" data-p="${esc(pid)}" value="${d[pid]?d[pid]:''}" aria-label="Quantidade de ${esc(it.description)} para ${esc(projectById(pid)?.name||'a obra')}"></td>`).join('')}<td class="num ${l<-1e-6?'erro-txt':l>1e-6?'':'muted'}">${l<-1e-6?'excede '+num(-l):l>1e-6?num(l):'✓'}</td></tr>`}).join('');
- return `<div class="panel fila-dist"><h3>Separação entre as obras</h3><p class="hint">Quanto de cada produto vai para cada obra. O que ficar livre continua a vincular e pode ser distribuído depois em Notas fiscais.</p>
-  <div class="tablewrap"><table class="no-sort"><thead><tr><th>Produto</th><th class="num">Na nota</th>${ob.map(pid=>`<th class="num">${esc(projectById(pid)?.name||pid)}<div><button type="button" class="btn sm" data-fila-tudo="${ii}" data-p="${esc(pid)}" title="Põe todos os produtos desta nota nesta obra">Tudo aqui</button></div></th>`).join('')}<th class="num">Livre</th></tr></thead>
-  <tbody>${linhas}</tbody><tfoot><tr><td colspan="2"><strong>Valor por obra</strong></td>${ob.map(pid=>{const v=valorObra(pid);return `<td class="num"><span class="calc" title="Fórmula: soma de quantidade × custo unitário pago (com descontos e despesas rateados) dos produtos separados para esta obra">${money(v)}</span></td>`}).join('')}<td></td></tr></tfoot></table></div></div>`}
+ const nome=pid=>projectById(pid)?.name||pid;
+ const seta=(j,de,para,txt)=>`<button type="button" class="btn sm seta" data-fila-mover="${ii}" data-j="${j}" data-de="${esc(de)}" data-para="${esc(para)}" title="Move toda a quantidade de ${esc(nome(de))} para ${esc(nome(para))}" aria-label="Mover tudo de ${esc(nome(de))} para ${esc(nome(para))}">${txt}</button>`;
+ const linhas=inv.items.map((it,j)=>{const d=filaDistItem(inv,it);
+  const cels=ob.map((pid,k)=>{const cel=k===0?`<td class="num"><output class="restante" data-fila-rest="${ii}" data-j="${j}" title="Restante: quantidade da nota menos o que foi posto nas outras obras">${num(d[pid]||0)}</output></td>`
+    :`<td class="num"><input type="number" min="0" step="any" inputmode="decimal" data-fila-dist="${ii}" data-j="${j}" data-p="${esc(pid)}" value="${d[pid]?d[pid]:''}" aria-label="Quantidade de ${esc(it.description)} para ${esc(nome(pid))}"></td>`;
+   return k<ob.length-1?cel+`<td class="setas">${seta(j,pid,ob[k+1],'→')}${seta(j,ob[k+1],pid,'←')}</td>`:cel}).join('');
+  return `<tr><td>${esc(it.description||'Item '+(j+1))}</td><td class="num">${num(it.quantity)} ${esc(it.unit||'')}</td>${cels}<td class="num" data-fila-livre="${ii}" data-j="${j}">${filaLivreHtml(inv,it)}</td></tr>`}).join('');
+ return `<div class="panel fila-dist"><h3>Separação entre as obras</h3><p class="hint">Digite quanto vai para as outras obras: <b>${esc(nome(ob[0]))}</b> fica com o restante, atualizado ao vivo. As setas movem a quantidade inteira de uma obra para a vizinha.</p>
+  <div class="tablewrap"><table class="no-sort"><thead><tr><th>Produto</th><th class="num">Na nota</th>${ob.map((pid,k)=>`<th class="num">${esc(nome(pid))}${k===0?'<div class="hint">recebe o restante</div>':''}<div><button type="button" class="btn sm" data-fila-tudo="${ii}" data-p="${esc(pid)}" title="Põe todos os produtos desta nota nesta obra">Tudo aqui</button></div></th>${k<ob.length-1?'<th class="setas" aria-label="Mover entre as obras"></th>':''}`).join('')}<th class="num">Livre</th></tr></thead>
+  <tbody>${linhas}</tbody><tfoot><tr><td colspan="2"><strong>Valor por obra</strong></td>${ob.map((pid,k)=>`<td class="num"><span class="calc" data-fila-valor="${ii}" data-p="${esc(pid)}" title="Fórmula: soma de quantidade × custo unitário pago (com descontos e despesas rateados) dos produtos separados para esta obra">${money(filaValorObra(inv,pid))}</span></td>${k<ob.length-1?'<td></td>':''}`).join('')}<td></td></tr></tfoot></table></div></div>`}
+const filaValorObra=(inv,pid)=>inv.items.reduce((s,it,j)=>s+Number(filaDistItem(inv,it)[pid]||0)*itemUnitCost(inv,j),0);
+function filaLivreHtml(inv,it){const l=filaLivre(inv,it);return l<-1e-6?`<span class="erro-txt">excede ${num(-l)}</span>`:l>1e-6?num(l):'<span class="muted">✓</span>'}
+// Pintura ao vivo enquanto se digita: restante, livre e valores por obra, sem redesenhar (o campo não perde o foco).
+function filaDistPintar(ii,j){const inv=draft[ii],it=inv?.items[j];if(!it)return;const d=filaDistItem(inv,it);
+ const r=document.querySelector(`[data-fila-rest="${ii}"][data-j="${j}"]`);if(r)r.textContent=num(d[filaObras(inv)[0]]||0);
+ const l=document.querySelector(`[data-fila-livre="${ii}"][data-j="${j}"]`);if(l)l.innerHTML=filaLivreHtml(inv,it);
+ document.querySelectorAll(`[data-fila-valor="${ii}"]`).forEach(el=>{el.textContent=money(filaValorObra(inv,el.dataset.p))})}
+document.addEventListener('input',e=>{const d=e.target.closest('[data-fila-dist]');if(!d)return;const ii=+d.dataset.filaDist,j=+d.dataset.j,inv=draft[ii],it=inv?.items[j];if(!it)return;
+ filaDistItem(inv,it)[d.dataset.p]=Math.max(0,Number(String(d.value).replace(',','.'))||0);filaDistPintar(ii,j)});
 document.addEventListener('change',e=>{const t=e.target;
  const add=t.closest('[data-fila-obra-add]');if(add){const inv=draft[+add.dataset.filaObraAdd];if(inv&&add.value){const ob=filaObras(inv);if(!ob.includes(add.value)){if(ob.length===1)inv.items.forEach(it=>{it._obras={[ob[0]]:Number(it.quantity)||0}});ob.push(add.value)}inv._projeto=ob[0]}renderPreview();return}
- const d=t.closest('[data-fila-dist]');if(d){const inv=draft[+d.dataset.filaDist];const it=inv?.items[+d.dataset.j];if(!it)return;filaDistItem(inv,it)[d.dataset.p]=Math.max(0,Number(String(d.value).replace(',','.'))||0);renderPreview()}});
-document.addEventListener('click',e=>{const b=e.target.closest('[data-fila-obra-tirar],[data-fila-tudo]');if(!b)return;
+});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-fila-obra-tirar],[data-fila-tudo],[data-fila-mover]');if(!b)return;
+ if(b.dataset.filaMover!==undefined){const inv=draft[+b.dataset.filaMover],it=inv?.items[+b.dataset.j];if(!it)return;const ob=filaObras(inv),d=filaDistItem(inv,it),de=b.dataset.de,para=b.dataset.para,q=Number(it.quantity)||0;
+  // a primeira obra é o restante: mover para ela é zerar a origem; mover dela é dar o restante ao destino
+  if(para===ob[0])d[de]=0;else{d[para]=Math.min(q,Math.round((Number(d[para]||0)+Number(d[de]||0))*1e6)/1e6);if(de!==ob[0])d[de]=0}
+  renderPreview();return}
  if(b.dataset.filaObraTirar!==undefined){const inv=draft[+b.dataset.filaObraTirar];if(!inv)return;inv._obras=filaObras(inv).filter(p=>p!==b.dataset.p);inv.items.forEach(it=>{if(it._obras)delete it._obras[b.dataset.p]});inv._projeto=inv._obras[0]||'';renderPreview();return}
- const inv=draft[+b.dataset.filaTudo];if(!inv)return;inv.items.forEach(it=>{it._obras={[b.dataset.p]:Number(it.quantity)||0}});renderPreview()});
+ const inv=draft[+b.dataset.filaTudo];if(!inv)return;const ob=filaObras(inv);inv.items.forEach(it=>{it._obras=b.dataset.p===ob[0]?{}:{[b.dataset.p]:Number(it.quantity)||0}});renderPreview()});
 
 // ---------- XML que chega depois da foto ----------
 // Se a nota foi lançada pela foto (ou consulta, ou PDF) e depois chega o XML da mesma chave, os dados lidos são trocados pelos do XML,

@@ -113,3 +113,6 @@ tr.atrasada td{background:#fffbeb}.atraso-txt{color:#92400e;font-weight:700}.aco
 .obras-chips select{max-width:240px}
 .fila-dist{margin-top:12px}.fila-dist h3{margin:0 0 4px}.fila-dist input{width:90px;text-align:right}.fila-dist th .btn{margin-top:4px}
 .fila-dist tfoot td{border-top:1px solid var(--line)}
+.fila-dist .setas{width:1%;white-space:nowrap;text-align:center;padding-left:2px;padding-right:2px}
+.fila-dist .seta{min-width:30px;padding:4px 6px;font-size:14px;line-height:1;margin:1px}
+.fila-dist output.restante{display:inline-block;min-width:90px;padding:6px 8px;border-radius:8px;background:var(--blue-soft);color:#1e3a8a;font-weight:700;font-variant-numeric:tabular-nums}

@@ -102,6 +102,8 @@ Em **Estoque › Recebidas da obra** (o número ao lado mostra quantas aguardam)
   - Para trocar (por exemplo, a obra indicou A e B, mas era C e D), tire as erradas e adicione as certas.
 - **Separação entre as obras** (mais de uma obra), abaixo dos itens:
   - a quantidade de cada produto para cada obra, o que ficou livre e o valor de cada obra;
+  - a **primeira obra recebe o restante**: digite nas outras obras, e ela diminui ao vivo, também com três obras ou mais;
+  - as **setas → e ←**, entre duas obras vizinhas na linha de cada produto, movem a quantidade inteira de uma para a outra;
   - **Tudo aqui** põe a nota inteira numa obra;
   - separar mais do que a nota tem bloqueia a confirmação;
   - o que ficar livre continua a vincular.

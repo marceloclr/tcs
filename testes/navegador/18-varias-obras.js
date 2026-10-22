@@ -28,11 +28,24 @@ r.conferencia={obras:[...inv._obras],quadro:!!document.querySelector('.fila-dist
 // troca a Obra 2 pela Obra 3
 document.querySelector(`[data-fila-obra-tirar="${ii}"][data-p="P2"]`).click();r.depoisDeTirar={obras:[...inv._obras],quadro:!!document.querySelector('.fila-dist')};
 const sel=document.querySelector(`[data-fila-obra-add="${ii}"]`);sel.value='P3';sel.dispatchEvent(new Event('change',{bubbles:true}));r.depoisDeAdicionar=[...inv._obras];
-const pon=(j,p,v)=>{const el=document.querySelector(`[data-fila-dist="${ii}"][data-j="${j}"][data-p="${p}"]`);el.value=v;el.dispatchEvent(new Event('change',{bubbles:true}))};
-pon(0,'P1',11);r.excesso={erro:filaDistErro(inv),livre:document.querySelector('.fila-dist tbody tr td:last-child').textContent};
-window.__alerta='';await postDraft();r.bloqueouLancamento={alerta:window.__alerta,aindaNaConferencia:draft.includes(inv)};
-pon(0,'P1',6);pon(0,'P3',4);document.querySelector(`[data-fila-dist="${ii}"][data-j="1"][data-p="P3"]`);pon(1,'P1',0);pon(1,'P3',2);
-r.quadro=[...document.querySelectorAll('.fila-dist tbody tr, .fila-dist tfoot tr')].map(tr=>[...tr.cells].map(td=>td.querySelector('input')?td.querySelector('input').value||'0':td.innerText.trim()).join(' | '));
+// digitar nas outras obras: a primeira (Obra 1, que recebeu tudo) mostra o restante ao vivo, sem redesenhar
+const pon=(j,p,v)=>{const el=document.querySelector(`[data-fila-dist="${ii}"][data-j="${j}"][data-p="${p}"]`);el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}))};
+const restante=j=>document.querySelector(`[data-fila-rest="${ii}"][data-j="${j}"]`).textContent,livre=j=>document.querySelector(`[data-fila-livre="${ii}"][data-j="${j}"]`).textContent.trim();
+const campo=document.querySelector(`[data-fila-dist="${ii}"][data-j="0"][data-p="P3"]`);campo.focus();
+pon(0,'P3',4);r.aoVivo={obra1:restante(0),livre:livre(0),mesmoCampo:document.activeElement===campo};
+pon(0,'P3',11);r.excesso={obra1:restante(0),livre:livre(0),erro:filaDistErro(inv)};
+window.__alerta='';await postDraft();r.bloqueouLancamento={alerta:!!window.__alerta,aindaNaConferencia:draft.includes(inv)};
+pon(0,'P3',4);
+// setas: areia toda da Obra 1 para a Obra 3; cimento de volta para a Obra 1 e de novo 4 na Obra 3
+const mover=(j,de,para)=>document.querySelector(`[data-fila-mover="${ii}"][data-j="${j}"][data-de="${de}"][data-para="${para}"]`).click();
+mover(1,'P1','P3');r.setaDireita={areiaObra1:restante(1),areiaObra3:document.querySelector(`[data-fila-dist="${ii}"][data-j="1"][data-p="P3"]`).value};
+mover(0,'P3','P1');r.setaEsquerda={cimentoObra1:restante(0),cimentoObra3:document.querySelector(`[data-fila-dist="${ii}"][data-j="0"][data-p="P3"]`).value||'0'};
+pon(0,'P3',4);
+// terceira obra: o que vai para ela sai sempre da Obra 1 (o restante), não da Obra 3
+const sel2=document.querySelector(`[data-fila-obra-add="${ii}"]`);sel2.value='P2';sel2.dispatchEvent(new Event('change',{bubbles:true}));
+pon(0,'P2',1);r.terceiraObra={obras:[...inv._obras],cimento:{obra1:restante(0),obra3:inv.items[0]._obras.P3,obra2:inv.items[0]._obras.P2},setasNaLinha:document.querySelectorAll(`[data-fila-mover="${ii}"][data-j="0"]`).length};
+document.querySelector(`[data-fila-obra-tirar="${ii}"][data-p="P2"]`).click();
+r.quadro=[...document.querySelectorAll('.fila-dist tbody tr, .fila-dist tfoot tr')].map(tr=>[...tr.cells].map(td=>td.querySelector('input')?td.querySelector('input').value||'0':td.innerText.trim()).filter(Boolean).join(' | '));
 await postDraft();await espera(()=>Fila.itens.get(c.id)?.status==='lancada');const n=state.invoices.find(i=>i.key===CE);
 r.lancada={situacao:invoiceStatus(n),projetos:n.projetos,rateios:state.allocations.filter(a=>a.invoiceId===n.id).map(a=>`${n.items[a.itemIndex].description} → ${projectById(a.projectId).name}: ${a.quantity}`).sort(),itensSemCampoTemporario:n.items.every(it=>!('_obras' in it))};
 return r}catch(e){return 'ERRO '+e.message+'\n'+e.stack}})()
