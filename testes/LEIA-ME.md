@@ -43,6 +43,10 @@ O app real, ligado aos emuladores (`?emulador=1`, só funciona em localhost), co
      - conferir com os dados da SEFAZ e lançar;
      - NF-e só com a chave.
    - Busca do servidor contra o emulador: dentro de `testes/`, `npx firebase emulators:exec --config ../firebase.json --only firestore --project demo-tcs "node ../servidor/testar-busca.mjs"`.
+   - `17-excluir-nota.js` em 8767 (depois do `10-fila.js`; preencha o emitente se o OCR não ler, ver item 3):
+     - botão só para administradores;
+     - exclusão bloqueada com baixa no projeto;
+     - nota da obra excluída, com rateios, projeções, entradas e chave apagados, saldo recalculado, captura de volta em "A conferir" e motivo no log.
    - `10-fila.js` em 8767 (depois do `7-captura.js`): fila do escritório, cartão e destaque de 48 h, conferir com o projeto indicado, lançar, fotos como comprovante, descartar com motivo e XML da mesma chave substituindo os dados da foto.
 
 Variáveis do `cdp.mjs`: `CDP_PORTA` (9446), `ESPERA` (ms antes de rodar o script), `FIM` (ms antes de fechar), `INIT` (script injetado antes da página) e `TEMA=claro|escuro` força o tema; o script pode chamar `console.log('__cdp_offline__')` e `console.log('__cdp_online__')` para derrubar e religar a rede da página.

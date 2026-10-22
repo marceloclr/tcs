@@ -70,7 +70,7 @@ function atvDiferencas(antes, depois, campos){
  return Object.entries(campos).filter(([k]) => String(antes?.[k] ?? '') !== String(depois?.[k] ?? ''))
   .map(([k, rot]) => `${rot}: ${antes?.[k] ?? '—'} → ${depois?.[k] ?? '—'}`).join('; ');
 }
-function atvDeOps(ops){
+function atvDeOps(ops, opts = {}){
  const lista = [], porStore = {};
  ops.forEach(o => {if(o.op !== 'clear' && !ATV_IGNORAR.has(o.store)) (porStore[o.store] = porStore[o.store] || []).push(o)});
  const antigo = (store, id) => (state[store] || []).find(x => String(x.id) === String(id));
@@ -94,7 +94,7 @@ function atvDeOps(ops){
  // notas
  for(const o of porStore.invoices || []){
   const n = o.obj, v = antigo('invoices', o.id);
-  if(o.op === 'delete'){lista.push({cat:'notas', acao:'nota_excluida', texto:`Excluiu a nota ${atvNota(v)}${v ? ' (' + money(v.total) + ')' : ''}`, ref:'invoices/' + o.id}); continue}
+  if(o.op === 'delete'){lista.push({cat:'notas', acao:'nota_excluida', texto:`Excluiu a nota ${atvNota(v)}${v ? ' (' + money(v.total) + ')' : ''}${opts.motivo ? '. Motivo: ' + opts.motivo : ''}`, ref:'invoices/' + o.id}); continue}
   if(!v) lista.push({cat:'notas', acao:'nota_importada', texto:`Importou a nota ${atvNota(n)}, ${money(n.total)}, ${isServico(n) ? 'serviços' : 'materiais'} (${n.source || n.format || 'importação'})`, ref:'invoices/' + o.id, valor:Number(n.total) || 0});
   // só campos que a pessoa vê; o escopo (aberta/fechada) é interno e muda junto com o vínculo, que já tem registro próprio
   else{const d = atvDiferencas(v, n, {number:'Número', series:'Série', date:'Data', issuer:'Emitente', total:'Total', tipo:'Tipo', format:'Formato'});
@@ -177,7 +177,7 @@ atvEnvolverCommit();
 // Liga o log às gravações locais. O envio à nuvem continua com o onLocalCommit original (js/nuvem.js).
 {const enviarNuvem = onLocalCommit;
  onLocalCommit = (ops, opts = {}) => {
-  if(!opts.semLog){try{atvDeOps(ops).forEach(registrarAtividade)}catch(e){console.error('Falha ao registrar a atividade:', e)}}
+  if(!opts.semLog){try{atvDeOps(ops, opts).forEach(registrarAtividade)}catch(e){console.error('Falha ao registrar a atividade:', e)}}
   if(enviarNuvem) enviarNuvem(ops, opts);
  };
 }

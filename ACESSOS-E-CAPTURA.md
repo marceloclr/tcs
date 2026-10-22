@@ -98,6 +98,17 @@ Em **Estoque › Recebidas da obra** (o número ao lado mostra quantas aguardam)
 - **Nota repetida:** se a chave já foi lançada, o sistema avisa e oferece **Descartar como repetida**.
 - **XML que chega depois:** ao importar o XML de uma nota já lançada pela foto, pela consulta ou pelo PDF, o sistema oferece **Substituir os dados pelos do XML**. Fotos, captura e projeto são mantidos e as entradas no estoque são refeitas. Fica bloqueado se a nota estiver dividida entre vários projetos ou se já houver saídas desses produtos.
 
+### Excluir uma nota (administradores)
+Em **Notas fiscais**, abra a nota e clique em **Excluir nota**, informando o motivo.
+- **O que é apagado:**
+  - os vínculos com projetos;
+  - as entradas no estoque (o saldo dos produtos é recalculado);
+  - o índice da chave, para que a mesma nota possa ser importada de novo;
+  - a nota.
+- **Bloqueio:** se algum projeto já deu baixa do material da nota, estorne essas baixas antes.
+- **Nota que veio da obra:** a captura volta para **A conferir**, com as fotos e a busca da SEFAZ.
+- **Registro:** o log de atividades guarda quem excluiu, quando, o valor e o motivo.
+
 ## 5. Importar notas: XML, PDF e foto
 
 Em **Estoque › Importar notas**, nas caixas de **Materiais** e **Serviços**.
