@@ -152,7 +152,7 @@ async function xmlSubstituir(key){const xml=xmlPendentes.get(key),inv=state.invo
   state.movements.filter(m=>m.type==='ENTRADA'&&m.invoiceId===inv.id).forEach(m=>os.movements.delete(m.id));
   const porChave=new Map([...cache.values()].map(p=>[p.key,p]));
   novo.items.forEach((it,itemIndex)=>{const k=productKey(it);let p=porChave.get(k);if(!p){p={id:uid(),key:k,code:it.code||'',barcode:it.barcode||'',name:it.description,unit:it.unit||'UN',stock:0,createdAt:now};porChave.set(k,p);cache.set(p.id,p)}p.stock=Number(p.stock||0)+Number(it.quantity);os.products.put(p);it.productId=p.id;
-   os.movements.add({id:uid(),productId:p.id,invoiceId:novo.id,invoiceKey:novo.key,itemIndex,date:novo.date,type:'ENTRADA',escopo:'aberta',quantity:Number(it.quantity),unitCost:Number(it.unitPrice),description:it.description,source:novo.source,createdAt:now})});
+   os.movements.add({id:uid(),productId:p.id,invoiceId:novo.id,invoiceKey:novo.key,itemIndex,date:novo.date,type:'ENTRADA',escopo:'aberta',quantity:Number(it.quantity),unitCost:Math.round(itemUnitCost(novo,itemIndex)*1e6)/1e6,description:it.description,source:novo.source,createdAt:now})});
   os.invoices.put({...novo,escopo:'aberta',projetos:[],clientes:[]})});
  await refresh();const atual=state.invoices.find(i=>i.id===inv.id);
  await saveInvoiceAllocations(atual,projetos.length?atual.items.map((it,j)=>makeAlloc(atual,j,projetos[0],Number(it.quantity))):[]);
