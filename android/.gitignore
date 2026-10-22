@@ -1,0 +1,11 @@
+# saídas do Gradle e do Bubblewrap: o APK publicado fica em ../apk/notas-tcs.apk
+.gradle/
+build/
+app/build/
+local.properties
+*.apk
+*.aab
+*.idsig
+# a chave de assinatura nunca entra no git (fica em ~/.android-keys)
+*.jks
+*.keystore

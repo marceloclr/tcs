@@ -10,6 +10,11 @@ const Visor={stream:null,timer:0,det:null,zxing:null,ocupado:false};
 const telas=['telaCarregando','telaEntrar','telaAviso','telaFoto','telaCodigo','telaConferir','telaPronto'];
 function mostrar(id){if(id!=='telaCodigo')visorParar();telas.forEach(t=>$('#'+t).classList.toggle('ativa',t===id));window.scrollTo(0,0)}
 $('#versao').textContent=(document.title.match(/V-\d{8}-\d{4}/)||[''])[0];
+// Tema claro/escuro (design system Papel e Tinta): sem escolha, segue o celular; o botão do topo fixa e guarda neste aparelho.
+function temaAtual(){const t=document.documentElement.dataset.tema;return t||(matchMedia('(prefers-color-scheme: dark)').matches?'escuro':'claro')}
+function temaCorBarra(){const c=temaAtual()==='escuro'?'#1f242a':'#fffefc';document.querySelectorAll('meta[name="theme-color"]').forEach(m=>{m.content=c;m.removeAttribute('media')})}
+$('#tema').addEventListener('click',()=>{const t=temaAtual()==='escuro'?'claro':'escuro';document.documentElement.dataset.tema=t;try{localStorage.setItem('tcs-captura-tema',t)}catch(e){}temaCorBarra()});
+if(document.documentElement.dataset.tema)temaCorBarra();matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{if(!document.documentElement.dataset.tema)temaCorBarra()});
 
 // ---------- Fila local (IndexedDB) ----------
 function capDb(){return new Promise((res,rej)=>{const r=indexedDB.open('tcs-captura',1);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains('fila'))d.createObjectStore('fila',{keyPath:'id'});if(!d.objectStoreNames.contains('compartilhados'))d.createObjectStore('compartilhados',{keyPath:'id',autoIncrement:true})};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}

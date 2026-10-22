@@ -7,7 +7,7 @@ create-pages:
   script:
     - mkdir -p public
     - cp index.html captura.html manual-mestre.html manual-escritorio.html manifest.webmanifest sw.js _redirects public/
-    - cp -r css js icones manuais public/
+    - cp -r css js icones manuais apk public/
     - if [ -d libs ]; then cp -r libs public/; fi
   pages: true
   rules:

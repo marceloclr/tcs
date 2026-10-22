@@ -120,3 +120,6 @@ Não foram testados o OCR de PDF digitalizado nem PDFs reais de NFS-e de cada pr
 - `.nojekyll` faz o GitHub publicar os arquivos sem processá-los.
 - O login com Google funciona porque `marceloclr.github.io` está entre os domínios autorizados do Firebase (Authentication › Configurações).
 - O job de busca na SEFAZ roda só no GitLab.
+
+## App Android do mestre (APK)
+A tela do mestre também existe como app Android (TWA): https://marceloclr.gitlab.io/tcs/apk/notas-tcs.apk. Ele abre a mesma página `/tcs/mestre`, então as mudanças na tela chegam sozinhas. Como gerar de novo e onde fica a chave: `android/LEIA-ME.md`.
