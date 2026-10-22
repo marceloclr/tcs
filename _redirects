@@ -1,3 +1,5 @@
 # GitLab Pages: endereço curto da tela do mestre de obras. Serve captura.html em /tcs/mestre (200 = reescrita, a URL não muda).
 # Com barra no fim (/tcs/mestre/) o Pages serve o mesmo conteúdo; a própria página tira a barra (script no topo de captura.html).
 /tcs/mestre /tcs/captura.html 200
+# manual do mestre de obras (para imprimir ou mandar o link)
+/tcs/manual /tcs/manual-mestre.html 200

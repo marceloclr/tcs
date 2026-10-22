@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual do mestre de obras - V-22102026-1321</title>
+<meta name="description" content="Como mandar a nota fiscal da obra para o escritório pelo celular, com o Notas TCS.">
+<link rel="icon" type="image/svg+xml" href="icones/notas-tcs.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap">
+<style>
+/* Papel e Tinta (github.com/marceloclr/design-system): tokens e temas. Manual para ler no celular: corpo 17 px. */
+:root{color-scheme:light;
+ --papel:#f3f1ec;--papel-2:#e9e6e0;--carta:#fffefc;--carta-2:#faf8f4;--tinta:#1c1f23;--tinta-2:#4a5058;--tinta-3:#737a83;--linha:#d9d4cb;--linha-forte:#c1bab0;
+ --grafite:#3f4750;--latao:#8d7130;--musgo:#4c6847;--ardosia:#3f5c78;--ocre:#867123;--carmim:#8b3a3a;--ferrugem:#8a5240;
+ --acento:var(--ardosia);--raio:12px;--raio-p:7px;--sombra:0 1px 1px rgba(28,31,35,.05),0 10px 26px -18px rgba(28,31,35,.35);
+ --fonte-corpo:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;--fonte-titulo:"IBM Plex Serif",Georgia,serif;--fonte-mono:"IBM Plex Mono",ui-monospace,monospace;
+ /* cores da tela do aplicativo (Notas TCS), usadas nas ilustrações */
+ --app:#173B68;--sobre-app:#ffffff;--app-ok:#1f6f3a;--app-ok-fundo:#e6f3ea;--app-alerta:#8a5a00;--app-alerta-fundo:#fff4d6;--tela:#f3f1ec;--papel-nota:#ffffff;--tinta-nota:#1c1f23;--camera:#2b2f33;--app-texto:#173B68}
+html[data-tema="escuro"]{color-scheme:dark;
+ --papel:#14171b;--papel-2:#1a1e23;--carta:#1f242a;--carta-2:#242a31;--tinta:#e9e6e0;--tinta-2:#bab5ac;--tinta-3:#8d949d;--linha:#2e343b;--linha-forte:#3e454e;
+ --grafite:#9fa9b4;--latao:#c4a45e;--musgo:#87ab7f;--ardosia:#7ba3c8;--ocre:#c0aa4e;--carmim:#cf7d7d;--ferrugem:#c68a74;--sombra:0 1px 1px rgba(0,0,0,.4),0 10px 26px -18px rgba(0,0,0,.8);
+ --app:#2c5a8c;--app-texto:#7ba3c8;--app-ok:#6fcf8f;--app-ok-fundo:#18301f;--app-alerta:#f0c060;--app-alerta-fundo:#33280f;--tela:#121417;--papel-nota:#e9e6e0;--tinta-nota:#1c1f23}
+@media (prefers-color-scheme:dark){html:not([data-tema]){color-scheme:dark;
+ --papel:#14171b;--papel-2:#1a1e23;--carta:#1f242a;--carta-2:#242a31;--tinta:#e9e6e0;--tinta-2:#bab5ac;--tinta-3:#8d949d;--linha:#2e343b;--linha-forte:#3e454e;
+ --grafite:#9fa9b4;--latao:#c4a45e;--musgo:#87ab7f;--ardosia:#7ba3c8;--ocre:#c0aa4e;--carmim:#cf7d7d;--ferrugem:#c68a74;--sombra:0 1px 1px rgba(0,0,0,.4),0 10px 26px -18px rgba(0,0,0,.8);
+ --app:#2c5a8c;--app-texto:#7ba3c8;--app-ok:#6fcf8f;--app-ok-fundo:#18301f;--app-alerta:#f0c060;--app-alerta-fundo:#33280f;--tela:#121417;--papel-nota:#e9e6e0;--tinta-nota:#1c1f23}}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--papel);color:var(--tinta);font:400 17px/1.6 var(--fonte-corpo);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--fonte-titulo);font-weight:600;letter-spacing:-.01em;margin:0}
+a{color:var(--ardosia)}
+:focus-visible{outline:3px solid var(--ardosia);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.topo{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--carta);border-bottom:1px solid var(--linha)}
+.topo img{width:34px;height:34px;border-radius:8px}
+.topo strong{font-family:var(--fonte-titulo);font-size:17px}
+.topo .acoes{margin-left:auto;display:flex;gap:8px}
+.btn{font:500 14px/1 var(--fonte-corpo);color:var(--tinta);background:var(--carta);border:1px solid var(--linha);border-radius:var(--raio-p);padding:9px 12px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--linha-forte)}
+.btn.primario{background:var(--app);border-color:var(--app);color:var(--sobre-app)}
+
+main{max-width:900px;margin:0 auto;padding:20px 16px 48px}
+.capa{padding:8px 0 16px}
+.capa h1{font-size:clamp(28px,6vw,40px);line-height:1.15}
+.capa p{font-size:19px;color:var(--tinta-2);max-width:62ch;margin:10px 0 0}
+.capa .acessar{display:inline-flex;margin-top:16px;font-size:16px;padding:12px 16px}
+.indice{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin:22px 0 8px;padding:0;list-style:none}
+.indice a{display:flex;gap:10px;align-items:center;padding:12px 14px;background:var(--carta);border:1px solid var(--linha);border-radius:var(--raio);text-decoration:none;color:var(--tinta);font-weight:500;box-shadow:var(--sombra)}
+.indice b{display:grid;place-items:center;width:30px;height:30px;flex:none;border-radius:50%;background:var(--app);color:var(--sobre-app);font-family:var(--fonte-mono)}
+
+.bloco{background:var(--carta);border:1px solid var(--linha);border-left:3px solid var(--acento);border-radius:var(--raio);box-shadow:var(--sombra);padding:18px 18px 8px;margin:22px 0;scroll-margin-top:70px}
+.bloco > h2{font-size:24px;color:var(--acento);margin-bottom:4px}
+.bloco > .sub{color:var(--tinta-2);margin:0 0 12px}
+.passo{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:8px 22px;align-items:start;padding:14px 0;border-top:1px solid var(--linha)}
+.passo:first-of-type{border-top:0}
+.passo.sem-figura{grid-template-columns:1fr}
+.passo h3{font-size:19px;display:flex;gap:10px;align-items:baseline}
+.passo h3 .n{display:inline-grid;place-items:center;width:32px;height:32px;flex:none;border-radius:50%;background:var(--app);color:var(--sobre-app);font:600 16px/1 var(--fonte-mono)}
+.passo p,.passo ul{margin:6px 0 0}
+.passo ul{padding-left:22px}
+.passo li{margin:4px 0}
+.figura{justify-self:center;width:100%;max-width:210px}
+.figura.larga{max-width:340px}
+.figura svg{display:block;width:100%;height:auto}
+.dica{display:flex;gap:10px;margin:10px 0 6px;padding:10px 12px;border-radius:var(--raio-p);background:var(--carta-2);border:1px solid var(--linha);font-size:16px}
+.dica.boa{border-left:3px solid var(--musgo)}.dica.atencao{border-left:3px solid var(--ocre)}
+.dica b.r{white-space:nowrap}
+kbd,.botao-nome{font:600 15px/1.2 var(--fonte-corpo);padding:1px 7px;border-radius:6px;background:var(--app);color:var(--sobre-app);white-space:nowrap}
+
+table{width:100%;border-collapse:collapse;font-size:16px;margin:4px 0 12px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--linha);vertical-align:top}
+th{font-weight:600;color:var(--tinta-2);background:var(--carta-2);font-size:14px}
+.resumo{background:var(--carta);border:2px dashed var(--linha-forte);border-radius:var(--raio);padding:18px 20px;margin:22px 0}
+.resumo h2{font-size:22px;margin-bottom:8px}
+.resumo ol{margin:0;padding-left:26px;font-size:19px}
+.resumo li{margin:6px 0}
+.tenue{color:var(--tinta-3)}
+.rodape{margin-top:28px;color:var(--tinta-3);font-size:14px;text-align:center}
+.versao{position:fixed;left:8px;bottom:6px;font:11px var(--fonte-mono);color:var(--tinta-3);opacity:.7}
+
+/* ilustrações: só tokens (seguem o tema) */
+svg text{font-family:var(--fonte-corpo)}
+.s-corpo{fill:var(--grafite)}.s-tela{fill:var(--tela)}.s-carta{fill:var(--carta)}.s-app{fill:var(--app)}.s-sobre{fill:var(--sobre-app)}
+.s-tinta{fill:var(--tinta)}.s-tinta2{fill:var(--tinta-2)}.s-linha{stroke:var(--linha-forte)}.s-borda-app{stroke:var(--app)}
+.s-ok{fill:var(--app-ok)}.s-okf{fill:var(--app-ok-fundo)}.s-al{fill:var(--app-alerta)}.s-alf{fill:var(--app-alerta-fundo)}
+.s-nota{fill:var(--papel-nota)}.s-tnota{fill:var(--tinta-nota)}.s-destaque{stroke:var(--latao)}.s-latao{fill:var(--latao)}.s-risco{stroke:var(--carmim)}
+.s-sem{fill:none}
+
+@media (max-width:640px){.passo{grid-template-columns:1fr}.figura{max-width:240px}.figura.larga{max-width:100%}.topo .acoes .txt{display:none}}
+@media print{.topo,.versao,.capa .acessar{display:none}body{background:#fff;font-size:13pt}.bloco,.resumo{box-shadow:none;break-inside:avoid-page}.passo{break-inside:avoid}main{padding:0}}
+</style>
+</head>
+<body>
+<header class="topo">
+ <img src="icones/notas-tcs.svg" alt="">
+ <strong>Manual do mestre de obras</strong>
+ <div class="acoes">
+  <button class="btn" id="tema" type="button" title="Troca entre o tema claro e o escuro" aria-label="Trocar o tema"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg> <span class="txt">Tema</span></button>
+  <button class="btn" type="button" onclick="print()" title="Imprime este manual (ou salva em PDF)"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M4 6V1.5h8V6M4 12H2V6h12v6h-2"/><path d="M4 9.5h8v5H4z"/></svg> <span class="txt">Imprimir</span></button>
+ </div>
+</header>
+
+<main>
+<section class="capa">
+ <h1>Como mandar a nota da obra para o escritório</h1>
+ <p>Chegou material na obra com nota fiscal? Mande a nota pelo celular, no aplicativo <b>Notas TCS</b>. O escritório confere e lança no sistema. Leva menos de um minuto.</p>
+ <a class="btn primario acessar" href="mestre">Abrir o Notas TCS</a>
+ <ul class="indice" aria-label="Partes do manual">
+  <li><a href="#primeira-vez"><b>1</b>Primeira vez</a></li>
+  <li><a href="#chegou-nota"><b>2</b>Chegou uma nota</a></li>
+  <li><a href="#varias-obras"><b>3</b>Nota de mais de uma obra</a></li>
+  <li><a href="#sem-codigo"><b>4</b>Nota sem código</a></li>
+  <li><a href="#sem-internet"><b>5</b>Sem internet</a></li>
+  <li><a href="#problemas"><b>6</b>Deu problema?</a></li>
+ </ul>
+</section>
+
+<!-- ============ 1. PRIMEIRA VEZ ============ -->
+<section class="bloco" id="primeira-vez">
+ <h2>1. Primeira vez <span class="tenue" style="font-size:16px;font-weight:400">(só uma vez em cada celular)</span></h2>
+ <p class="sub">O escritório precisa liberar a sua conta Google antes. Se ainda não liberou, peça.</p>
+
+ <div class="passo sem-figura">
+  <div>
+   <h3><span class="n">1</span>Abra o endereço no Chrome</h3>
+   <p>No celular, abra o <b>Chrome</b> e digite:</p>
+   <p><b class="mono" style="font-family:var(--fonte-mono)">marceloclr.gitlab.io/tcs/mestre</b></p>
+  </div>
+ </div>
+
+ <div class="passo">
+  <div>
+   <h3><span class="n">2</span>Entre com a sua conta Google</h3>
+   <p>Toque em <span class="botao-nome">Entrar com Google</span> e escolha a sua conta. É a mesma conta do Gmail do celular.</p>
+   <div class="dica atencao"><span>⏳</span><span>Se aparecer <b>"Aguardando liberação"</b>, o escritório ainda não liberou você. Avise o escritório: quando liberarem, a tela abre sozinha.</span></div>
+  </div>
+  <div class="figura">
+   <svg viewBox="0 0 200 380" role="img" aria-labelledby="f-entrar"><title id="f-entrar">Celular com a tela de entrada e o botão Entrar com Google</title>
+    <rect x="4" y="4" width="192" height="372" rx="26" class="s-corpo"/><rect x="12" y="16" width="176" height="348" rx="18" class="s-tela"/>
+    <rect x="12" y="16" width="176" height="40" rx="18" class="s-app"/><rect x="12" y="40" width="176" height="16" class="s-app"/>
+    <text x="30" y="43" font-size="13" font-weight="700" class="s-sobre">Notas da obra</text>
+    <text x="24" y="110" font-size="12" font-weight="600" class="s-tinta">Para enviar as notas</text><text x="24" y="126" font-size="12" font-weight="600" class="s-tinta">da obra, entre com a</text><text x="24" y="142" font-size="12" font-weight="600" class="s-tinta">sua conta Google.</text>
+    <text x="24" y="168" font-size="10.5" class="s-tinta2">Você só faz isso uma vez</text><text x="24" y="182" font-size="10.5" class="s-tinta2">neste celular.</text>
+    <rect x="24" y="210" width="152" height="46" rx="10" class="s-app"/><text x="100" y="238" font-size="13" font-weight="700" text-anchor="middle" class="s-sobre">Entrar com Google</text>
+    <circle cx="166" cy="262" r="12" class="s-sem s-destaque" stroke-width="3"/><path d="M168 272 l-4 26 l8-7 l6 13 l6-3 l-6-12 l11-2z" class="s-latao"/>
+   </svg>
+  </div>
+ </div>
+
+ <div class="passo">
+  <div>
+   <h3><span class="n">3</span>Coloque o ícone na tela do celular</h3>
+   <p>Toque nos <b>três pontinhos ⋮</b> (no alto, à direita) e depois em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.</p>
+   <p>Pronto: aparece o ícone <b>Notas TCS</b>. Daqui para a frente, é só tocar nele.</p>
+   <div class="dica"><span>📱</span><span>No iPhone, use o Safari: toque em <b>Compartilhar</b> (quadrado com seta) e depois em <b>Adicionar à Tela de Início</b>.</span></div>
+  </div>
+  <div class="figura">
+   <svg viewBox="0 0 200 380" role="img" aria-labelledby="f-instalar"><title id="f-instalar">Menu do Chrome com a opção Instalar app destacada e o ícone Notas TCS na tela inicial</title>
+    <rect x="4" y="4" width="192" height="372" rx="26" class="s-corpo"/><rect x="12" y="16" width="176" height="348" rx="18" class="s-tela"/>
+    <rect x="12" y="16" width="176" height="34" rx="18" class="s-carta"/><rect x="24" y="24" width="120" height="18" rx="9" class="s-tela"/>
+    <circle cx="170" cy="28" r="2.6" class="s-tinta"/><circle cx="170" cy="35" r="2.6" class="s-tinta"/><circle cx="170" cy="42" r="2.6" class="s-tinta"/>
+    <circle cx="170" cy="35" r="11" class="s-sem s-destaque" stroke-width="2.5"/>
+    <rect x="70" y="54" width="112" height="128" rx="8" class="s-carta s-linha" stroke-width="1"/>
+    <text x="82" y="78" font-size="11" class="s-tinta2">Nova guia</text><text x="82" y="102" font-size="11" class="s-tinta2">Favoritos</text>
+    <rect x="74" y="114" width="104" height="28" rx="6" class="s-sem s-destaque" stroke-width="2.5"/><text x="82" y="133" font-size="11.5" font-weight="700" class="s-tinta">Instalar app</text>
+    <text x="82" y="164" font-size="11" class="s-tinta2">Configurações</text>
+    <text x="100" y="222" font-size="22" text-anchor="middle" class="s-tinta2">↓</text>
+    <rect x="72" y="244" width="56" height="56" rx="14" class="s-app"/><rect x="88" y="256" width="24" height="30" rx="2" class="s-sobre"/>
+    <rect x="92" y="262" width="16" height="2.5" class="s-app"/><rect x="92" y="268" width="16" height="2.5" class="s-app"/><rect x="92" y="274" width="11" height="2.5" class="s-app"/>
+    <text x="100" y="318" font-size="11.5" font-weight="700" text-anchor="middle" class="s-tinta">Notas TCS</text>
+   </svg>
+  </div>
+ </div>
+</section>
+
+<!-- ============ 2. CHEGOU UMA NOTA ============ -->
+<section class="bloco" id="chegou-nota">
+ <h2>2. Toda vez que chegar uma nota</h2>
+ <p class="sub">O jeito mais rápido é ler o código da nota. O sistema busca sozinho os produtos e os valores.</p>
+
+ <div class="passo">
+  <div>
+   <h3><span class="n">1</span>Toque em "Ler código da nota"</h3>
+   <p>Abra o <b>Notas TCS</b> e toque no primeiro botão, <span class="botao-nome">🔍 Ler código da nota</span>.</p>
+   <p>Na primeira vez, o celular pergunta se pode usar a câmera: toque em <b>Permitir</b>.</p>
+  </div>
+  <div class="figura">
+   <svg viewBox="0 0 200 380" role="img" aria-labelledby="f-inicio"><title id="f-inicio">Tela inicial do Notas TCS com o botão Ler código da nota destacado</title>
+    <rect x="4" y="4" width="192" height="372" rx="26" class="s-corpo"/><rect x="12" y="16" width="176" height="348" rx="18" class="s-tela"/>
+    <rect x="12" y="16" width="176" height="40" rx="18" class="s-app"/><rect x="12" y="40" width="176" height="16" class="s-app"/>
+    <text x="30" y="43" font-size="13" font-weight="700" class="s-sobre">Notas da obra</text>
+    <rect x="24" y="84" width="152" height="70" rx="12" class="s-app"/>
+    <circle cx="48" cy="114" r="9" class="s-sem" stroke="var(--sobre-app)" stroke-width="3"/><path d="M54 121 l8 8" stroke="var(--sobre-app)" stroke-width="3.5" stroke-linecap="round"/>
+    <text x="70" y="113" font-size="12" font-weight="700" class="s-sobre">Ler código</text><text x="70" y="129" font-size="12" font-weight="700" class="s-sobre">da nota</text>
+    <rect x="18" y="78" width="164" height="82" rx="16" class="s-sem s-destaque" stroke-width="3"/>
+    <text x="100" y="186" font-size="9.5" text-anchor="middle" class="s-tinta2">Ou fotografe a nota inteira</text>
+    <rect x="24" y="200" width="152" height="56" rx="12" class="s-app"/>
+    <rect x="40" y="218" width="24" height="18" rx="3" class="s-sem" stroke="var(--sobre-app)" stroke-width="2.5"/><circle cx="52" cy="227" r="4.5" class="s-sem" stroke="var(--sobre-app)" stroke-width="2.2"/>
+    <text x="74" y="233" font-size="12" font-weight="700" class="s-sobre">Fotografar nota</text>
+    <rect x="24" y="270" width="152" height="44" rx="12" class="s-carta" stroke="var(--app-texto)" stroke-width="2.5"/>
+    <text x="100" y="297" font-size="11.5" font-weight="700" text-anchor="middle" fill="var(--app-texto)">Usar foto da galeria</text>
+   </svg>
+  </div>
+ </div>
+
+ <div class="passo">
+  <div>
+   <h3><span class="n">2</span>Aponte a câmera para o código</h3>
+   <ul>
+    <li><b>Cupom fiscal</b> (papel estreito, de loja ou supermercado): aponte para o <b>QR Code</b>, o quadradinho no fim do cupom.</li>
+    <li><b>Nota grande</b> (folha A4, chamada DANFE): aponte para o <b>código de barras</b>, no alto da folha.</li>
+   </ul>
+   <p>Segure parado, com o código dentro do quadro branco. Quando ler, o celular vibra e aparece <b>"Código da nota lido"</b>.</p>
+   <div class="dica atencao"><span>⚠️</span><span>Não use o código do <b>boleto</b> nem o QR do <b>PIX</b>: o celular avisa que não é o código da nota.</span></div>
+  </div>
+  <div class="figura larga">
+   <svg viewBox="0 0 340 300" role="img" aria-labelledby="f-codigos"><title id="f-codigos">Onde fica o código: QR Code no fim do cupom fiscal e código de barras no alto da nota grande</title>
+    <!-- cupom -->
+    <path d="M20 14 h110 v250 l-9 8 l-9-8 l-9 8 l-9-8 l-9 8 l-9-8 l-9 8 l-9-8 l-9 8 l-9-8 l-9 8 l-9-8 z" class="s-nota s-linha" stroke-width="1.2"/>
+    <rect x="34" y="28" width="82" height="6" rx="2" class="s-tnota" opacity=".7"/><rect x="44" y="40" width="62" height="4" rx="2" class="s-tnota" opacity=".35"/>
+    <g class="s-tnota" opacity=".3"><rect x="32" y="62" width="86" height="3"/><rect x="32" y="72" width="70" height="3"/><rect x="32" y="82" width="86" height="3"/><rect x="32" y="92" width="60" height="3"/><rect x="32" y="102" width="80" height="3"/><rect x="32" y="112" width="74" height="3"/><rect x="32" y="128" width="86" height="3"/><rect x="32" y="138" width="50" height="3"/></g>
+    <g class="s-tnota">
+     <rect x="47" y="160" width="56" height="56" fill="none" stroke="var(--tinta-nota)" stroke-width="2"/>
+     <rect x="51" y="164" width="14" height="14"/><rect x="85" y="164" width="14" height="14"/><rect x="51" y="198" width="14" height="14"/>
+     <rect x="70" y="166" width="5" height="5"/><rect x="77" y="174" width="5" height="5"/><rect x="70" y="182" width="5" height="5"/><rect x="84" y="186" width="5" height="5"/><rect x="91" y="194" width="5" height="5"/><rect x="72" y="200" width="5" height="5"/><rect x="80" y="206" width="5" height="5"/><rect x="92" y="204" width="5" height="5"/><rect x="66" y="190" width="5" height="5"/>
+    </g>
+    <rect x="40" y="153" width="70" height="70" rx="6" class="s-sem s-destaque" stroke-width="3"/>
+    <text x="75" y="290" font-size="13" font-weight="700" text-anchor="middle" class="s-tinta">Cupom: QR Code</text>
+    <!-- nota grande -->
+    <rect x="170" y="14" width="150" height="250" rx="3" class="s-nota s-linha" stroke-width="1.2"/>
+    <rect x="182" y="26" width="52" height="40" rx="2" fill="none" stroke="var(--tinta-nota)" stroke-width="1" opacity=".5"/><text x="208" y="50" font-size="9" font-weight="700" text-anchor="middle" class="s-tnota">DANFE</text>
+    <g class="s-tnota"><rect x="242" y="28" width="2" height="26"/><rect x="246" y="28" width="1" height="26"/><rect x="249" y="28" width="3" height="26"/><rect x="254" y="28" width="1" height="26"/><rect x="257" y="28" width="2" height="26"/><rect x="261" y="28" width="1" height="26"/><rect x="264" y="28" width="3" height="26"/><rect x="269" y="28" width="1" height="26"/><rect x="272" y="28" width="2" height="26"/><rect x="276" y="28" width="1" height="26"/><rect x="279" y="28" width="3" height="26"/><rect x="284" y="28" width="2" height="26"/><rect x="288" y="28" width="1" height="26"/><rect x="291" y="28" width="3" height="26"/><rect x="296" y="28" width="1" height="26"/><rect x="299" y="28" width="2" height="26"/><rect x="303" y="28" width="1" height="26"/><rect x="306" y="28" width="3" height="26"/></g>
+    <text x="242" y="64" font-size="5.5" class="s-tnota">CHAVE DE ACESSO</text><text x="242" y="72" font-size="5" class="s-tnota" style="font-family:var(--fonte-mono)">2326 1007 0123 4500 …</text>
+    <rect x="236" y="22" width="78" height="56" rx="5" class="s-sem s-destaque" stroke-width="3"/>
+    <g class="s-tnota" opacity=".3"><rect x="182" y="92" width="126" height="3"/><rect x="182" y="102" width="100" height="3"/><rect x="182" y="120" width="126" height="16"/><rect x="182" y="146" width="126" height="3"/><rect x="182" y="156" width="126" height="3"/><rect x="182" y="166" width="126" height="3"/><rect x="182" y="176" width="110" height="3"/><rect x="182" y="186" width="126" height="3"/><rect x="182" y="196" width="90" height="3"/><rect x="182" y="226" width="126" height="22"/></g>
+    <text x="245" y="290" font-size="13" font-weight="700" text-anchor="middle" class="s-tinta">Nota grande: barras</text>
+   </svg>
+  </div>
+ </div>
+
+ <div class="passo">
+  <div>
+   <h3><span class="n">3</span>Não leu? Digite os números</h3>
+   <p>Toque em <span class="botao-nome">⌨️ Digitar os números</span> e digite os <b>44 números</b> da <b>chave de acesso</b>. Eles ficam embaixo do código de barras (nota grande) ou perto do QR Code (cupom).</p>
+   <p>O celular confere os números: se faltar algum ou se algum estiver errado, ele avisa.</p>
+  </div>
+  <div class="figura">
+   <svg viewBox="0 0 200 380" role="img" aria-labelledby="f-digitar"><title id="f-digitar">Campo para digitar os 44 números da chave de acesso, com o contador e o botão Usar estes números</title>
+    <rect x="4" y="4" width="192" height="372" rx="26" class="s-corpo"/><rect x="12" y="16" width="176" height="348" rx="18" class="s-tela"/>
+    <rect x="12" y="16" width="176" height="40" rx="18" class="s-app"/><rect x="12" y="40" width="176" height="16" class="s-app"/>
+    <text x="30" y="43" font-size="13" font-weight="700" class="s-sobre">Notas da obra</text>
+    <text x="24" y="92" font-size="11" class="s-tinta">Os 44 números da</text><text x="24" y="107" font-size="11" font-weight="700" class="s-tinta">chave de acesso:</text>
+    <rect x="24" y="120" width="152" height="44" rx="10" class="s-carta" stroke="var(--app-texto)" stroke-width="2.5"/>
+    <text x="34" y="147" font-size="11.5" font-weight="600" class="s-tinta" style="font-family:var(--fonte-mono)">2326 1007 0123 4500</text>
+    <text x="24" y="184" font-size="10.5" class="s-tinta2">44 de 44 números</text>
+    <rect x="24" y="200" width="152" height="44" rx="10" class="s-app"/><text x="100" y="227" font-size="12" font-weight="700" text-anchor="middle" class="s-sobre">Usar estes números</text>
+    <g class="s-tinta2" opacity=".55"><rect x="24" y="270" width="44" height="26" rx="5"/><rect x="78" y="270" width="44" height="26" rx="5"/><rect x="132" y="270" width="44" height="26" rx="5"/><rect x="24" y="302" width="44" height="26" rx="5"/><rect x="78" y="302" width="44" height="26" rx="5"/><rect x="132" y="302" width="44" height="26" rx="5"/></g>
+    <g font-size="12" font-weight="700" text-anchor="middle" class="s-sobre"><text x="46" y="288">1</text><text x="100" y="288">2</text><text x="154" y="288">3</text><text x="46" y="320">4</text><text x="100" y="320">5</text><text x="154" y="320">6</text></g>
+   </svg>
+  </div>
+ </div>
+
+ <div class="passo sem-figura">
+  <div>
+   <h3><span class="n">4</span>Se puder, fotografe a nota também</h3>
+   <p>Toque em <span class="botao-nome">➕ Fotografar a nota também</span>. A foto é <b>opcional</b>, mas serve de comprovante de que o material chegou.</p>
+  </div>
+ </div>
+
+ <div class="passo">
+  <div>
+   <h3><span class="n">5</span>Toque no nome da obra</h3>
+   <p>Toque na obra que recebeu o material. Se você trabalha numa obra só, ela já vem marcada.</p>
+   <p>Faltou material ou chegou algo quebrado? Antes de enviar, toque em <b>Faltou material</b> ou <b>Veio avariado</b>.</p>
+  </div>
+  <div class="figura">
+   <svg viewBox="0 0 200 380" role="img" aria-labelledby="f-obra"><title id="f-obra">Tela com o código lido, a obra marcada e o botão Enviar</title>
+    <rect x="4" y="4" width="192" height="372" rx="26" class="s-corpo"/><rect x="12" y="16" width="176" height="348" rx="18" class="s-tela"/>
+    <rect x="12" y="16" width="176" height="40" rx="18" class="s-app"/><rect x="12" y="40" width="176" height="16" class="s-app"/>
+    <text x="30" y="43" font-size="13" font-weight="700" class="s-sobre">Notas da obra</text>
+    <rect x="22" y="68" width="156" height="58" rx="10" class="s-okf" stroke="var(--app-ok)" stroke-width="2.5"/>
+    <circle cx="40" cy="88" r="9" class="s-ok"/><path d="M35 88 l4 4 l7-8" fill="none" stroke="var(--app-ok-fundo)" stroke-width="2.5" stroke-linecap="round"/>
+    <text x="56" y="92" font-size="11" font-weight="700" class="s-ok">Código da nota lido</text><text x="34" y="114" font-size="9.5" class="s-tinta2">Nota nº 1234, série 1</text>
+    <text x="24" y="152" font-size="13" font-weight="700" class="s-tinta">Qual obra?</text>
+    <rect x="22" y="162" width="156" height="38" rx="10" class="s-okf" stroke="var(--app-ok)" stroke-width="2.5"/><text x="36" y="186" font-size="12" font-weight="700" class="s-ok">✔ Casa Térrea</text>
+    <rect x="22" y="208" width="156" height="38" rx="10" class="s-carta" stroke="var(--app-texto)" stroke-width="2.5"/><text x="36" y="232" font-size="12" font-weight="700" fill="var(--app-texto)">Prédio Iguape</text>
+    <rect x="22" y="254" width="74" height="30" rx="8" class="s-carta" stroke="var(--app-texto)" stroke-width="2"/><text x="59" y="273" font-size="8.5" font-weight="700" text-anchor="middle" fill="var(--app-texto)">Faltou material</text>
+    <rect x="104" y="254" width="74" height="30" rx="8" class="s-carta" stroke="var(--app-texto)" stroke-width="2"/><text x="141" y="273" font-size="8.5" font-weight="700" text-anchor="middle" fill="var(--app-texto)">Veio avariado</text>
+    <rect x="22" y="296" width="156" height="48" rx="12" class="s-app"/><text x="100" y="326" font-size="15" font-weight="700" text-anchor="middle" class="s-sobre">Enviar</text>
+   </svg>
+  </div>
+ </div>
+
+ <div class="passo">
+  <div>
+   <h3><span class="n">6</span>Toque em "Enviar"</h3>
+   <p>Vai aparecer <b>"Nota enviada! O escritório vai conferir."</b> Pronto.</p>
+   <p>Para a próxima nota, toque em <span class="botao-nome">Próxima nota</span>.</p>
+   <div class="dica boa"><span>✅</span><span>Em poucos minutos, o escritório já recebe os produtos e os valores da nota, sem ninguém digitar nada.</span></div>
+  </div>
+  <div class="figura">
+   <svg viewBox="0 0 200 380" role="img" aria-labelledby="f-enviada"><title id="f-enviada">Tela de confirmação: Nota enviada! O escritório vai conferir.</title>
+    <rect x="4" y="4" width="192" height="372" rx="26" class="s-corpo"/><rect x="12" y="16" width="176" height="348" rx="18" class="s-tela"/>
+    <rect x="12" y="16" width="176" height="40" rx="18" class="s-app"/><rect x="12" y="40" width="176" height="16" class="s-app"/>
+    <text x="30" y="43" font-size="13" font-weight="700" class="s-sobre">Notas da obra</text>
+    <circle cx="100" cy="140" r="40" class="s-ok"/><path d="M80 140 l14 14 l26-28" fill="none" stroke="var(--tela)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="100" y="214" font-size="18" font-weight="700" text-anchor="middle" class="s-tinta">Nota enviada!</text>
+    <text x="100" y="238" font-size="11.5" text-anchor="middle" class="s-tinta2">O escritório vai conferir.</text>
+    <rect x="24" y="282" width="152" height="50" rx="12" class="s-app"/><text x="100" y="313" font-size="13" font-weight="700" text-anchor="middle" class="s-sobre">Próxima nota</text>
+   </svg>
+  </div>
+ </div>
+</section>
+
+<!-- ============ 3. VÁRIAS OBRAS ============ -->
+<section class="bloco" id="varias-obras">
+ <h2>3. Nota de mais de uma obra</h2>
+ <p class="sub">Uma nota só, mas o material é para duas obras ou mais.</p>
+ <div class="passo">
+  <div>
+   <h3><span class="n">✔</span>Marque todas as obras</h3>
+   <p>Em <b>"Qual obra?"</b>, toque em <b>todas</b> as obras que vão receber material daquela nota. Cada uma fica marcada com ✔.</p>
+   <p>Aparece o aviso <b>"A nota é de mais de uma obra: o escritório separa os produtos entre elas."</b> Você não precisa separar nada.</p>
+   <div class="dica"><span>👉</span><span>Marcou errado? Toque de novo na obra para desmarcar.</span></div>
+  </div>
+  <div class="figura">
+   <svg viewBox="0 0 200 300" role="img" aria-labelledby="f-varias"><title id="f-varias">Duas obras marcadas e o aviso de que o escritório separa os produtos</title>
+    <rect x="4" y="4" width="192" height="292" rx="22" class="s-corpo"/><rect x="12" y="14" width="176" height="272" rx="16" class="s-tela"/>
+    <text x="24" y="44" font-size="13" font-weight="700" class="s-tinta">Qual obra?</text><text x="24" y="62" font-size="10" class="s-tinta2">Pode marcar mais de uma.</text>
+    <rect x="22" y="72" width="156" height="38" rx="10" class="s-okf" stroke="var(--app-ok)" stroke-width="2.5"/><text x="36" y="96" font-size="12" font-weight="700" class="s-ok">✔ Casa Térrea</text>
+    <rect x="22" y="118" width="156" height="38" rx="10" class="s-okf" stroke="var(--app-ok)" stroke-width="2.5"/><text x="36" y="142" font-size="12" font-weight="700" class="s-ok">✔ Casa Duplex</text>
+    <rect x="22" y="164" width="156" height="38" rx="10" class="s-carta" stroke="var(--app-texto)" stroke-width="2.5"/><text x="36" y="188" font-size="12" font-weight="700" fill="var(--app-texto)">Prédio Iguape</text>
+    <rect x="22" y="212" width="156" height="58" rx="10" class="s-okf"/>
+    <text x="32" y="232" font-size="9.5" font-weight="700" class="s-ok">A nota é de mais de uma</text><text x="32" y="246" font-size="9.5" font-weight="700" class="s-ok">obra: o escritório separa</text><text x="32" y="260" font-size="9.5" font-weight="700" class="s-ok">os produtos entre elas.</text>
+   </svg>
+  </div>
+ </div>
+</section>
+
+<!-- ============ 4. SEM CÓDIGO ============ -->
+<section class="bloco" id="sem-codigo">
+ <h2>4. Nota sem código? Fotografe</h2>
+ <p class="sub">Notas de serviço, recibos ou notas apagadas, sem código que dê para ler.</p>
+ <div class="passo">
+  <div>
+   <h3><span class="n">📷</span>Toque em "Fotografar nota"</h3>
+   <ul>
+    <li>Pegue a <b>nota inteira</b> na foto, com as quatro pontas aparecendo.</li>
+    <li>Fotografe em <b>lugar claro</b>, com o celular parado, de frente para a nota.</li>
+    <li>Nota comprida ou com verso? Toque em <b>Mais uma foto desta nota</b>.</li>
+   </ul>
+   <div class="dica atencao"><span>🚫</span><span>Não mande pelo WhatsApp: ele diminui a foto, e o escritório não consegue ler. Use sempre o Notas TCS.</span></div>
+  </div>
+  <div class="figura">
+   <svg viewBox="0 0 200 300" role="img" aria-labelledby="f-foto"><title id="f-foto">Como enquadrar: a nota inteira dentro da moldura, com as quatro pontas aparecendo</title>
+    <rect x="4" y="4" width="192" height="292" rx="22" class="s-corpo"/><rect x="12" y="14" width="176" height="272" rx="16" fill="var(--camera)"/>
+    <rect x="46" y="44" width="108" height="210" rx="3" class="s-nota"/>
+    <g class="s-tnota" opacity=".35"><rect x="58" y="58" width="84" height="5"/><rect x="58" y="72" width="60" height="3"/><rect x="58" y="90" width="84" height="3"/><rect x="58" y="100" width="70" height="3"/><rect x="58" y="110" width="84" height="3"/><rect x="58" y="120" width="54" height="3"/><rect x="58" y="138" width="84" height="3"/><rect x="58" y="148" width="76" height="3"/><rect x="58" y="158" width="84" height="3"/><rect x="58" y="210" width="84" height="26"/></g>
+    <g fill="none" stroke="var(--sobre-app)" stroke-width="4" stroke-linecap="round"><path d="M34 52 v-20 h20"/><path d="M146 32 h20 v20"/><path d="M34 246 v20 h20"/><path d="M146 266 h20 v-20"/></g>
+    <circle cx="160" cy="40" r="11" class="s-ok"/><path d="M155 40 l4 4 l7-8" fill="none" stroke="var(--sobre-app)" stroke-width="2.5" stroke-linecap="round"/>
+   </svg>
+  </div>
+ </div>
+</section>
+
+<!-- ============ 5. SEM INTERNET ============ -->
+<section class="bloco" id="sem-internet">
+ <h2>5. Sem internet na obra</h2>
+ <div class="passo">
+  <div>
+   <h3><span class="n">📶</span>Pode enviar assim mesmo</h3>
+   <p>A nota fica guardada no celular e vai <b>sozinha</b> quando a internet voltar. Enquanto isso, aparece a faixa amarela <b>"Aguardando internet para enviar"</b>.</p>
+   <p>Não apague o aplicativo nem limpe os dados do Chrome enquanto houver nota esperando.</p>
+  </div>
+  <div class="figura">
+   <svg viewBox="0 0 200 200" role="img" aria-labelledby="f-offline"><title id="f-offline">Faixa amarela: Aguardando internet para enviar (1 nota)</title>
+    <rect x="4" y="4" width="192" height="192" rx="22" class="s-corpo"/><rect x="12" y="14" width="176" height="172" rx="16" class="s-tela"/>
+    <rect x="12" y="14" width="176" height="36" rx="16" class="s-app"/><rect x="12" y="34" width="176" height="16" class="s-app"/>
+    <text x="30" y="38" font-size="12" font-weight="700" class="s-sobre">Notas da obra</text>
+    <rect x="12" y="50" width="176" height="46" class="s-alf"/><rect x="12" y="94" width="176" height="3" class="s-al"/>
+    <text x="100" y="70" font-size="10" font-weight="700" text-anchor="middle" class="s-al">Aguardando internet para</text><text x="100" y="85" font-size="10" font-weight="700" text-anchor="middle" class="s-al">enviar (1 nota).</text>
+    <g class="s-sem" stroke="var(--tinta-2)" stroke-width="2.5" stroke-linejoin="round"><path d="M82 112 l18-8 l18 8 v20 l-18 8 l-18-8z"/><path d="M82 112 l18 8 l18-8 M100 120 v20"/></g>
+    <text x="100" y="166" font-size="10.5" text-anchor="middle" class="s-tinta2">Vai sozinha quando a</text><text x="100" y="180" font-size="10.5" text-anchor="middle" class="s-tinta2">internet voltar.</text>
+   </svg>
+  </div>
+ </div>
+</section>
+
+<!-- ============ 6. PROBLEMAS ============ -->
+<section class="bloco" id="problemas" style="--acento:var(--ferrugem)">
+ <h2>6. Deu problema?</h2>
+ <table>
+  <thead><tr><th>O que aparece</th><th>O que fazer</th></tr></thead>
+  <tbody>
+   <tr><td><b>Aguardando liberação</b></td><td>O escritório ainda não liberou a sua conta. Avise o escritório; quando liberarem, a tela abre sozinha.</td></tr>
+   <tr><td><b>Acesso suspenso</b></td><td>Fale com o escritório.</td></tr>
+   <tr><td>A câmera não abre</td><td>Toque em <b>Digitar os números</b>. Para liberar a câmera: Chrome › ⋮ › Configurações › Configurações do site › Câmera › permitir para este site.</td></tr>
+   <tr><td><b>"Esse é o código do boleto"</b> ou <b>"o QR do PIX"</b></td><td>Procure o código <b>da nota fiscal</b>, não o do pagamento.</td></tr>
+   <tr><td><b>"Algum número está errado"</b></td><td>Confira os 44 números com a nota, de 4 em 4, e corrija.</td></tr>
+   <tr><td>A obra não aparece na lista</td><td>Ela não foi liberada para você. Peça ao escritório.</td></tr>
+   <tr><td><b>Foto escura</b> ou <b>tremida</b></td><td>Toque em <b>Tirar de novo</b>, em lugar mais claro e com o celular parado.</td></tr>
+   <tr><td><b>Foto pequena</b> (veio do WhatsApp)</td><td>Fotografe a nota de novo pelo Notas TCS.</td></tr>
+  </tbody>
+ </table>
+ <p>Ainda com dúvida? <b>Ligue para o escritório.</b></p>
+</section>
+
+<!-- ============ RESUMO ============ -->
+<section class="resumo" aria-labelledby="t-resumo">
+ <h2 id="t-resumo">Resumo para colar na parede</h2>
+ <ol>
+  <li>Abra o <b>Notas TCS</b>.</li>
+  <li>Toque em <b>Ler código da nota</b> e aponte para o código.</li>
+  <li>Não leu? <b>Digite os 44 números</b>.</li>
+  <li>Toque na <b>obra</b> (ou nas obras).</li>
+  <li>Toque em <b>Enviar</b>.</li>
+ </ol>
+</section>
+
+<p class="rodape">Notas TCS · manual do mestre de obras · <a href="mestre">abrir o aplicativo</a></p>
+</main>
+<p class="versao" id="versao"></p>
+<script>
+// Versão no canto (mesma do título) e tema claro/escuro guardado neste navegador.
+document.getElementById('versao').textContent=(document.title.match(/V-\d{8}-\d{4}/)||[''])[0];
+(function(){const h=document.documentElement;try{const t=localStorage.getItem('tcs-manual-tema');if(t)h.dataset.tema=t}catch(e){}
+ document.getElementById('tema').addEventListener('click',()=>{const escuro=h.dataset.tema?h.dataset.tema==='escuro':matchMedia('(prefers-color-scheme: dark)').matches;h.dataset.tema=escuro?'claro':'escuro';try{localStorage.setItem('tcs-manual-tema',h.dataset.tema)}catch(e){}})})();
+</script>
+</body>
+</html>

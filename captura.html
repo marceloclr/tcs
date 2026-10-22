@@ -5,7 +5,7 @@
 <!-- endereço curto /tcs/mestre (_redirects): com barra no fim, os caminhos relativos quebrariam; volta para o endereço sem a barra -->
 <script>if(/\/mestre\/$/.test(location.pathname))location.replace(location.pathname.replace(/\/$/,'')+location.search+location.hash)</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Notas TCS - V-22102026-1308</title>
+<title>Notas TCS - V-22102026-1321</title>
 <meta name="theme-color" content="#173B68">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="icones/notas-tcs.svg">
@@ -24,6 +24,7 @@
   <p>Você só precisa fazer isso uma vez neste celular.</p>
   <button class="botao principal" id="entrar" title="Abre a tela do Google para escolher a sua conta">Entrar com Google</button>
   <p class="erro" id="entrarErro"></p>
+  <a class="botao texto" href="manual-mestre.html" title="Abre o manual com o passo a passo e as figuras">📘 Como usar</a>
  </section>
 
  <section id="telaAviso" class="tela"><div class="aviso-grande" id="avisoTexto"></div><button class="botao secundario" id="trocarConta" title="Sai desta conta para entrar com outra">Entrar com outra conta</button></section>
@@ -40,6 +41,7 @@
    <span class="icone" aria-hidden="true">🖼️</span> Usar foto da galeria
    <input type="file" accept="image/*" id="galeria" multiple hidden>
   </label>
+  <a class="botao texto" href="manual-mestre.html" title="Abre o manual com o passo a passo e as figuras">📘 Como usar</a>
  </section>
 
  <section id="telaCodigo" class="tela">
