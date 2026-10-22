@@ -91,21 +91,33 @@ const BUSCA_AGENDA={horas:[7,18],dias:[1,6],fusoMin:-180,janelaMin:4};
 function buscaRodadas(agora=Date.now()){const H=36e5,off=BUSCA_AGENDA.fusoMin*6e4;const vale=t=>{const d=new Date(t+off);const h=d.getUTCHours(),w=d.getUTCDay();return h>=BUSCA_AGENDA.horas[0]&&h<=BUSCA_AGENDA.horas[1]&&w>=BUSCA_AGENDA.dias[0]&&w<=BUSCA_AGENDA.dias[1]};
  const cheia=Math.floor(agora/H)*H;let ant=null,prox=null;for(let t=cheia;t>cheia-8*24*H&&ant===null;t-=H)if(vale(t))ant=t;for(let t=cheia+H;t<cheia+8*24*H&&prox===null;t+=H)if(vale(t))prox=t;return {ant,prox}}
 const doisDig=n=>String(n).padStart(2,'0');
-function buscaRelogioTexto(agora=Date.now()){const {ant,prox}=buscaRodadas(agora);const jan=BUSCA_AGENDA.janelaMin*6e4;
- if(Fila.pedidaEm&&agora-Fila.pedidaEm<jan)return {relogio:'buscando',quando:'Buscar agora pedido às '+new Date(Fila.pedidaEm).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'; os dados chegam em 1 a 3 min',ativo:true};
- if(ant!==null&&agora-ant<jan)return {relogio:'buscando',quando:'rodada das '+new Date(ant).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+' em andamento',ativo:true};
+const horaFtz=t=>new Date(t).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:'America/Fortaleza'});
+// Estado da agenda agora: próxima rodada, contagem, andamento da hora e as rodadas de hoje (7h às 18h) com a situação de cada uma.
+function buscaEstado(agora=Date.now()){const {ant,prox}=buscaRodadas(agora),jan=BUSCA_AGENDA.janelaMin*6e4,H=36e5,off=BUSCA_AGENDA.fusoMin*6e4;
+ const pedida=Fila.pedidaEm&&agora-Fila.pedidaEm<jan,rodando=pedida||(ant!==null&&agora-ant<jan);
  const seg=Math.max(0,Math.ceil((prox-agora)/1000)),h=Math.floor(seg/3600),m=Math.floor(seg%3600/60),ss=seg%60;
- const dia=new Date(prox).toLocaleDateString('pt-BR',{weekday:'long'}),hoje=new Date(prox).toDateString()===new Date(agora).toDateString();
- return {relogio:(h?doisDig(h)+':':'')+doisDig(m)+':'+doisDig(ss),quando:(hoje?'às ':dia+' às ')+new Date(prox).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),ativo:false}}
-// Relógio ao vivo: só troca o texto do contador, sem redesenhar a fila.
-setInterval(()=>{const el=document.getElementById('buscaRelogio');if(!el)return;const r=buscaRelogioTexto();el.textContent=r.relogio;el.classList.toggle('ativo',r.ativo);const q=document.getElementById('buscaQuando');if(q)q.textContent=r.quando},1000);
+ const local=new Date(agora+off),dia0=Date.UTC(local.getUTCFullYear(),local.getUTCMonth(),local.getUTCDate())-off,util=local.getUTCDay()>=BUSCA_AGENDA.dias[0]&&local.getUTCDay()<=BUSCA_AGENDA.dias[1];
+ const rodadas=[];for(let hr=BUSCA_AGENDA.horas[0];hr<=BUSCA_AGENDA.horas[1];hr++){const t=dia0+hr*H;rodadas.push({hr,t,sit:!util?'folga':agora>=t&&agora-t<jan?'agora':t===prox?'proxima':t<agora?'feita':'futura'})}
+ const amanha=new Date(prox+off).getUTCDate()!==local.getUTCDate();
+ return {rodando,pedida,prox,ant,contagem:h?`${h} h ${doisDig(m)} min`:doisDig(m)+':'+doisDig(ss),longa:h>0,
+  hora:horaFtz(prox),diaProx:amanha?new Date(prox).toLocaleDateString('pt-BR',{weekday:'long',timeZone:'America/Fortaleza'}):'hoje',
+  fracao:ant!==null&&prox-ant===H?Math.min(1,(agora-ant)/H):null,rodadas,util,agora}}
+function buscaProximaHtml(e=buscaEstado()){
+ const dia=`<span class="bp-legenda">${e.util?'rodadas de hoje':'hoje não há rodadas'}</span><ol class="bp-dia" aria-label="Rodadas de hoje, das 7h às 18h">${e.rodadas.map(r=>`<li class="${r.sit}" title="${r.hr}h: ${({feita:'já rodou',agora:'rodando agora',proxima:'próxima rodada',futura:'mais tarde',folga:'sem busca hoje (domingo)'})[r.sit]}"><span>${r.hr}</span></li>`).join('')}</ol>`;
+ if(e.rodando)return `<div class="bp-topo"><span class="bp-rotulo">${e.pedida?'Buscar agora pedido':'Rodada das '+horaFtz(e.ant)}</span></div><div class="bp-agora"><span class="bp-pulso" aria-hidden="true"></span>Buscando na SEFAZ…</div><p class="bp-nota">Os dados aparecem na fila em 1 a 3 minutos.</p>${dia}`;
+ return `<div class="bp-topo"><span class="bp-rotulo">Próxima busca</span><span class="bp-hora">${e.diaProx==='hoje'?'':esc(e.diaProx)+', '}${e.hora}</span></div>
+  <div class="bp-contagem"><span class="calc" tabindex="0" title="Fórmula: próxima rodada − agora = ${e.hora} − ${horaFtz(e.agora)} (agenda do GitLab: de hora em hora, das 7h às 18h, de segunda a sábado, horário de Fortaleza)">${e.contagem}</span><small>${e.longa?'faltam':'min:s'}</small></div>
+  ${e.fracao!==null?`<div class="bp-barra" title="Andamento da hora até a próxima rodada"><i style="width:${(e.fracao*100).toFixed(1)}%"></i></div>`:''}${dia}`}
+// Relógio ao vivo: redesenha só o cartão da próxima busca, uma vez por segundo.
+setInterval(()=>{const el=document.getElementById('buscaProxima');if(el)el.innerHTML=buscaProximaHtml()},1000);
 function filaBuscaHtml(abertas){const espera=abertas.filter(c=>buscaCobre(c)&&(!c.busca||(c.busca.status==='erro'&&(c.busca.tentativas||0)<3))).length;
- const adm=Nuvem.perfil?.papel==='admin',pronto=!!Fila.gatilho?.gatilhoToken,r=buscaRelogioTexto();
- return `<div class="busca-sefaz"><div class="busca-sefaz-info"><strong>Busca automática na SEFAZ: de hora em hora</strong>
-  <span>Das <b>7h às 18h</b>, de <b>segunda a sábado</b> (horário de Fortaleza), o sistema busca na SEFAZ os dados dos cupons (NFC-e) enviados pela obra. A NF-e se confere pela foto ou pelo XML.</span>
-  <span class="busca-sefaz-espera">${espera?`<b>${espera}</b> nota(s) esperando a próxima busca.`:'Nenhuma nota esperando busca.'}</span></div>
- <div class="busca-sefaz-relogio" title="Contagem ao vivo até a próxima busca automática na SEFAZ (horas:minutos:segundos quando falta mais de uma hora)"><small>próxima busca em</small><span id="buscaRelogio" class="relogio${r.ativo?' ativo':''}" aria-live="off">${r.relogio}</span><small id="buscaQuando">${esc(r.quando)}</small></div>
- <div class="busca-sefaz-acoes"><button class="btn primary" data-fila-buscar ${!pronto&&!adm?'disabled':''} title="${pronto?'Pede ao GitLab para buscar agora os dados das NFC-e na SEFAZ, sem esperar a próxima rodada. Leva de 1 a 3 minutos':adm?'Antes, grave o token de trigger do GitLab (roteiro em docs/busca-nfce.md)':'O administrador ainda não liberou o Buscar agora'}">Buscar agora</button>${adm?`<button class="btn sm" data-fila-gatilho title="Grava ou troca o token de trigger do GitLab usado pelo Buscar agora (roteiro em docs/busca-nfce.md)">${pronto?'Trocar token':'Configurar token'}</button>`:''}</div></div>`}
+ const adm=Nuvem.perfil?.papel==='admin',pronto=!!Fila.gatilho?.gatilhoToken;
+ return `<div class="busca-sefaz"><div class="busca-sefaz-info"><h3>Busca automática na SEFAZ</h3>
+  <p class="bp-freq"><b>De hora em hora, das 7h às 18h, de segunda a sábado</b> <span>(horário de Fortaleza)</span></p>
+  <p>Traz os dados dos cupons (NFC-e) enviados pela obra. A NF-e se confere pela foto ou pelo XML.</p>
+  <p class="busca-sefaz-espera">${espera?`<b>${espera}</b> ${espera===1?'nota esperando':'notas esperando'} a próxima busca.`:'Nenhuma nota esperando busca.'}</p>
+  <div class="busca-sefaz-acoes"><button class="btn primary" data-fila-buscar ${!pronto&&!adm?'disabled':''} title="${pronto?'Pede ao GitLab para buscar agora os dados das NFC-e na SEFAZ, sem esperar a próxima rodada. Os dados chegam em 1 a 3 minutos':adm?'Antes, grave o token de trigger do GitLab (roteiro em docs/busca-nfce.md)':'O administrador ainda não liberou o Buscar agora'}">Buscar agora</button>${adm?`<button class="btn sm" data-fila-gatilho title="Grava ou troca o token de trigger do GitLab usado pelo Buscar agora (roteiro em docs/busca-nfce.md)">${pronto?'Trocar token':'Configurar token'}</button>`:''}</div></div>
+ <div class="busca-sefaz-proxima" id="buscaProxima" aria-live="off">${buscaProximaHtml()}</div></div>`}
 async function filaBuscarAgora(b){const g=Fila.gatilho;if(!g?.gatilhoToken){if(Nuvem.perfil?.papel==='admin')return filaConfigurarGatilho();return}b.disabled=true;
  try{const f=new FormData();f.append('token',g.gatilhoToken);f.append('ref',g.ref||'main');const r=await fetch(`https://gitlab.com/api/v4/projects/${encodeURIComponent(g.projeto||'87585318')}/trigger/pipeline`,{method:'POST',body:f});
   if(!r.ok)throw new Error('GitLab respondeu '+r.status);Fila.pedidaEm=Date.now();Fila.msg='Busca pedida ao GitLab. Os dados aparecem nesta fila em 1 a 3 minutos.'}
