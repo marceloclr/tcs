@@ -8,7 +8,7 @@
 //   busca: {status:'sem_fonte', em, motivo}                 NF-e, ou NFC-e de outro estado sem link: segue pela foto
 //
 // Uso:
-//   node buscar-nfce.mjs                      processa a fila (credencial em GOOGLE_APPLICATION_CREDENTIALS, ou FIRESTORE_EMULATOR_HOST)
+//   node buscar-nfce.mjs                      processa a fila (credencial em FIREBASE_SA ou GOOGLE_APPLICATION_CREDENTIALS, ou FIRESTORE_EMULATOR_HOST)
 //   node buscar-nfce.mjs --url "<link do QR>"  só consulta e imprime o texto da nota (teste, sem Firestore)
 //   node buscar-nfce.mjs --chave <44 dígitos>  idem, pela chave
 import { parseArgs } from 'node:util';
@@ -89,10 +89,17 @@ if (arg.url || arg.chave) {
 }
 
 // ---------- Fila ----------
-const { initializeApp, applicationDefault } = await import('firebase-admin/app');
+const { initializeApp, applicationDefault, cert } = await import('firebase-admin/app');
 const { getFirestore } = await import('firebase-admin/firestore');
 const emulador = !!process.env.FIRESTORE_EMULATOR_HOST;
-initializeApp(emulador ? { projectId: process.env.GCLOUD_PROJECT || 'demo-tcs' } : { credential: applicationDefault(), projectId: process.env.FIREBASE_PROJETO || 'thiago-17d18' });
+// FIREBASE_SA: caminho do arquivo (variável de CI do tipo File) ou o próprio JSON (tipo Variable). Nunca é impressa.
+function credencial() {
+  const v = (process.env.FIREBASE_SA || '').trim();
+  if (!v) return applicationDefault(); // GOOGLE_APPLICATION_CREDENTIALS, no teste local
+  try { return cert(v.startsWith('{') ? JSON.parse(v) : v) }
+  catch (e) { console.error('FIREBASE_SA inválida: não é o JSON da conta de serviço nem o caminho de um arquivo com ele.'); process.exit(1) }
+}
+initializeApp(emulador ? { projectId: process.env.GCLOUD_PROJECT || 'demo-tcs' } : { credential: credencial(), projectId: process.env.FIREBASE_PROJETO || 'thiago-17d18' });
 const db = getFirestore();
 const snap = await db.collection('capturas').where('status', 'in', ['pendente', 'em_conferencia']).get();
 const fila = snap.docs.filter(d => { const b = d.data().busca; return !b || (b.status === 'erro' && (b.tentativas || 0) < TENTATIVAS) });

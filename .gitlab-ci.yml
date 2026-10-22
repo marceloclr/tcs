@@ -17,7 +17,7 @@ create-pages:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
 
 # Busca dos dados da NFC-e das capturas da obra (servidor/buscar-nfce.mjs). Roteiro em docs/busca-nfce.md.
-# FIREBASE_SA: variável de CI do tipo arquivo, protegida e mascarada, com a chave da conta de serviço do Firebase.
+# FIREBASE_SA: variável de CI protegida com a chave da conta de serviço do Firebase (tipo File ou Variable; o script aceita os dois).
 buscar-nfce:
   stage: buscar
   image: node:22-alpine
@@ -30,7 +30,7 @@ buscar-nfce:
   script:
     - cd servidor
     - npm install --no-fund --no-audit --omit=dev
-    - GOOGLE_APPLICATION_CREDENTIALS="$FIREBASE_SA" node buscar-nfce.mjs
+    - node buscar-nfce.mjs
   rules:
     - if: '($CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "trigger") && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     # Build › Pipelines › Executar pipeline (manual, na main): roda a busca e publica o site

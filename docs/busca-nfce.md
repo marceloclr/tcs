@@ -22,7 +22,7 @@ O mestre de obras pode mandar só o **código da nota**: o QR Code, o código de
 1. **Conta de serviço do Firebase:** console do Firebase › projeto `thiago-17d18` › ⚙ Configurações do projeto › **Contas de serviço** › **Gerar nova chave privada**. Baixa um JSON; guarde-o fora do repositório.
 2. **Variável no GitLab:** projeto `marceloclr/tcs` › Settings › CI/CD › **Variables** › Add variable:
    - Key: `FIREBASE_SA`;
-   - Type: **File**;
+   - Type: **File** ou **Variable** (o script aceita os dois: o caminho do arquivo ou o próprio JSON);
    - Value: o conteúdo inteiro do JSON;
    - marque **Protect variable**. Mascarar não é possível com o JSON, mas a variável protegida só chega a pipelines da `main`.
 3. **Bloquear variáveis de pipeline:** Settings › CI/CD › Variables › **Minimum role to use pipeline variables** = **No one allowed**. Assim, quem tiver o token de trigger (passo 5) não consegue mudar o comportamento do job.
@@ -38,6 +38,11 @@ O mestre de obras pode mandar só o **código da nota**: o QR Code, o código de
    - o token fica em `config/busca`, lido só por quem confere a fila;
    - para retirar o botão, deixe o campo vazio. Para trocar o token, revogue o antigo no GitLab.
 6. Publique as regras do Firestore de novo (`firestore.rules`: capturas só com o código e `config/busca`).
+
+## Trocar a chave (se ela vazar num log ou sair do controle)
+1. Console do Google Cloud › projeto `thiago-17d18` › IAM e administrador › **Contas de serviço** › `firebase-adminsdk-…` › aba **Chaves**: exclua a chave antiga (o `private_key_id` aparece no JSON).
+2. Gere uma nova (Firebase › Configurações do projeto › Contas de serviço › Gerar nova chave privada) e troque o valor de `FIREBASE_SA` no GitLab.
+3. No GitLab, apague o log do job que mostrou a chave: página do job › **Apagar o log do job** (ícone de lixeira).
 
 ## Cota
 - O GitLab Free tem **400 minutos de CI por mês**.
