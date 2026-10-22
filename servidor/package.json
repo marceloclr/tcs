@@ -1,0 +1,12 @@
+{
+  "name": "tcs-servidor",
+  "private": true,
+  "type": "module",
+  "description": "Busca automática da NFC-e para as capturas da obra (job buscar-nfce do GitLab CI).",
+  "scripts": {
+    "buscar": "node buscar-nfce.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.5.0"
+  }
+}

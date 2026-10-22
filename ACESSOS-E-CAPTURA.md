@@ -57,9 +57,13 @@ A aba **Usuários e acessos** aparece só para administradores.
 >
 > **Toda vez que chegar uma nota**
 > 1. Toque no ícone **Notas TCS**.
-> 2. Toque em **📷 Fotografar nota**. Pegue a **nota inteira**, em **lugar claro**, e tire a foto.
-> 3. Toque no nome da **obra** (se for uma só, ela já vem marcada).
-> 4. Toque em **Enviar**. Vai aparecer: **"Nota enviada! O escritório vai conferir."**
+> 2. Toque em **🔍 Ler código da nota** e aponte a câmera para o **QR Code** (cupom) ou para o **código de barras** (nota grande). Quando o celular ler, aparece **"Código da nota lido"**.
+>    - Não leu? Toque em **⌨️ Digitar os números** e digite os 44 números que ficam embaixo do código de barras.
+> 3. Se puder, toque em **📷 Fotografar a nota também** (é o comprovante de que a nota chegou).
+> 4. Toque no nome da **obra** (se for uma só, ela já vem marcada).
+> 5. Toque em **Enviar**. Vai aparecer: **"Nota enviada! O escritório vai conferir."**
+>
+> **Sem código na nota?** Toque em **📷 Fotografar nota**, pegue a **nota inteira**, em **lugar claro**, e siga do passo 4.
 >
 > **Se precisar**
 > - **Nota comprida ou com verso:** antes de enviar, toque em **➕ Mais uma foto desta nota**.
@@ -78,8 +82,10 @@ A aba **Usuários e acessos** aparece só para administradores.
 Em **Estoque › Recebidas da obra** (o número ao lado mostra quantas aguardam). Aparece para administradores e para quem tem escrita no projeto da nota.
 
 - **A conferir:** notas pendentes ou em conferência, com obra, quem enviou, fotos, observações (faltou material, veio avariado) e o tempo de espera. Acima de 48 horas, a linha fica destacada.
-- **Ver fotos:** mostra as fotos enviadas.
-- **Conferir:** baixa as fotos, lê código de barras, QR Code e texto, e abre a conferência com o **projeto indicado pela obra** (pode trocar, entre os projetos em que você tem escrita) e o aviso do que a obra informou. Nada é gravado antes de você confirmar.
+- **Só código:** a obra mandou só o código da nota, sem foto (coluna Fotos).
+- **Busca na SEFAZ:** situação da busca automática da NFC-e. Os selos são **na fila**, **Dados da SEFAZ prontos** e **Busca falhou** (com o motivo). A NF-e aparece como **sem busca automática**. O botão **Buscar agora na SEFAZ** dispara a busca sem esperar a rodada de hora em hora. Detalhes em [`docs/busca-nfce.md`](docs/busca-nfce.md).
+- **Ver fotos:** mostra as fotos enviadas, quando houver.
+- **Conferir:** usa os dados trazidos da SEFAZ, quando a busca já rodou, e baixa as fotos (código de barras, QR Code e texto). Só com a chave e sem busca, abre a nota com número, série e CNPJ da chave, para completar pela consulta ou à mão. Em todos os casos, abre a conferência com o **projeto indicado pela obra** (pode trocar, entre os projetos em que você tem escrita) e o aviso do que a obra informou. Nada é gravado antes de você confirmar.
 - **Confirmar entrada das notas:** a nota é lançada e vinculada ao projeto; a captura passa a **Lançada**, ligada à nota. As fotos ficam como **comprovante de recebimento**: na nota, botão **Fotos da obra**.
 - **Descartar:** pede o motivo (por exemplo: foto repetida, não é nota, nota de outra obra).
 - **Nota repetida:** se a chave já foi lançada, o sistema avisa e oferece **Descartar como repetida**.
@@ -139,7 +145,7 @@ No painel **A partir do link de consulta**, em Importar notas, ou pelo botão **
 
 ## 11. Próximos passos (fora do escopo desta entrega)
 
-- **Proxy leve** (Cloud Function no plano Blaze ou Cloudflare Worker) para buscar as páginas de consulta e aplicar os leitores por origem, sem o passo manual de colar ou salvar.
+- **Busca automática de outros estados:** a NFC-e do Ceará já é buscada pelo job do GitLab CI (22/10/2026, [`docs/busca-nfce.md`](docs/busca-nfce.md)). Outros estados entram quando houver uma nota real para escrever o leitor.
 - **E-mail dedicado** (ex.: notas@empresa) monitorado por Google Apps Script, alimentando a fila `capturas` com fotos, PDFs e principalmente os XMLs enviados pelos fornecedores.
 - **WhatsApp Business (API oficial)** com robô que recebe a foto, pergunta a obra com botões e encaminha para a fila.
 - **Distribuição DF-e da SEFAZ** com certificado digital A1, para baixar sozinho os XMLs das NF-e emitidas contra o CNPJ, usando a foto da obra só como comprovante de recebimento.

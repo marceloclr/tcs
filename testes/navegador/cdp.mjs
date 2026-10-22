@@ -17,6 +17,7 @@ await cmd('Emulation.setDeviceMetricsOverride', { width: +w, height: +h, deviceS
 if (process.env.TEMA) await cmd('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: process.env.TEMA === 'escuro' ? 'dark' : 'light' }] });
 if (process.env.INIT) await cmd('Page.addScriptToEvaluateOnNewDocument', { source: fs.readFileSync(process.env.INIT, 'utf8') });
 await cmd('Page.navigate', { url });
+await cmd('Page.bringToFront'); // aba em segundo plano não toca vídeo (câmera do 15-codigo.js)
 await new Promise(r => setTimeout(r, +(process.env.ESPERA || 2500)));
 if (jsFile && jsFile !== '-') { const r = await cmd('Runtime.evaluate', { expression: fs.readFileSync(jsFile, 'utf8'), awaitPromise: true, returnByValue: true });
   console.log('RESULTADO:', JSON.stringify(r.result.result?.value ?? r.result.exceptionDetails?.exception?.description ?? r.result, null, 1)); }

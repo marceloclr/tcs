@@ -84,6 +84,11 @@ service cloud.firestore {
       allow get: if ativo();
       allow write: if admin();
     }
+    // Gatilho do botão "Buscar agora" (token de trigger do GitLab): lido por quem confere a fila, gravado só por administradores.
+    match /config/busca {
+      allow get: if escritor();
+      allow write: if admin();
+    }
     match /solicitacoes/{email} {
       allow get: if (logado() && eu() == email) || admin();
       allow list, delete: if admin();
@@ -212,11 +217,20 @@ service cloud.firestore {
 
     // ==== #REGRAS-CAPTURAS: START ====
     // Capturas da obra: o mestre cria para os projetos concedidos; o escritório com escrita no projeto confere.
+    // A captura traz fotos, ou só o código da nota (chave de 44 dígitos ou link do QR); nunca chega vazia.
+    // O campo 'busca' é preenchido só pelo job buscar-nfce do GitLab CI (conta de serviço, fora das regras).
+    function temFotoOuCodigo(d) {
+      return (d.get('fotos', []) is list && d.get('fotos', []).size() > 0)
+        || (d.get('chave', '') is string && d.get('chave', '').matches('[0-9]{44}'))
+        || (d.get('consultaUrl', '') is string && d.get('consultaUrl', '').matches('https?://.+'));
+    }
     match /capturas/{id} {
       allow create: if (obra() || admin()) && request.resource.data.autor == eu()
         && (admin() || concedido(request.resource.data.projectId, request.resource.data.clientId))
         && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId)
-        && request.resource.data.status == 'pendente';
+        && request.resource.data.status == 'pendente'
+        && !('busca' in request.resource.data)
+        && temFotoOuCodigo(request.resource.data);
       allow read: if (ativo() && resource.data.autor == eu()) || le(resource.data.projectId, resource.data.clientId);
       allow update: if grava(resource.data.projectId, resource.data.clientId)
         && request.resource.data.autor == resource.data.autor;

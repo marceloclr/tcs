@@ -1,6 +1,6 @@
-
 stages:
   - deploy
+  - buscar
 
 create-pages:
   stage: deploy
@@ -11,4 +11,26 @@ create-pages:
     - if [ -d libs ]; then cp -r libs public/; fi
   pages: true
   rules:
+    # o agendamento e o "Buscar agora" rodam só a busca, sem publicar o site de novo
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "trigger"'
+      when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+# Busca dos dados da NFC-e das capturas da obra (servidor/buscar-nfce.mjs). Roteiro em docs/busca-nfce.md.
+# FIREBASE_SA: variável de CI do tipo arquivo, protegida e mascarada, com a chave da conta de serviço do Firebase.
+buscar-nfce:
+  stage: buscar
+  image: node:22-alpine
+  cache:
+    key: servidor-$CI_COMMIT_REF_SLUG
+    paths:
+      - servidor/node_modules/
+  variables:
+    GIT_DEPTH: "1"
+  script:
+    - cd servidor
+    - npm install --no-fund --no-audit --omit=dev
+    - GOOGLE_APPLICATION_CREDENTIALS="$FIREBASE_SA" node buscar-nfce.mjs
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "trigger") && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  timeout: 10 minutes

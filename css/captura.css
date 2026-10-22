@@ -7,7 +7,7 @@
 .topo-icone{width:34px;height:34px;border-radius:8px}.topo-quem{margin-left:auto;font-weight:400;font-size:13px;opacity:.85;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 main{max-width:560px;margin:0 auto;padding:16px}
 .tela{display:none}.tela.ativa{display:block}
-.botao{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:64px;margin:12px 0;padding:14px 18px;border-radius:14px;border:3px solid var(--azul);background:var(--carta);color:var(--azul);font:700 20px/1.2 inherit;cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent}
+.botao{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:64px;margin:12px 0;padding:14px 18px;border-radius:14px;border:3px solid var(--azul);background:var(--carta);color:var(--azul);font-family:inherit;font-weight:700;font-size:20px;line-height:1.2;cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent}
 .botao:focus-visible{outline:4px solid #f0a020;outline-offset:2px}
 .botao.principal{background:var(--azul);color:#fff}
 @media (prefers-color-scheme:dark){.botao.principal{background:#2c5a8c;border-color:#2c5a8c}}
@@ -39,4 +39,15 @@ h2{font-size:22px;margin:22px 0 4px}.grande{font-size:21px;font-weight:600}.dica
 .pronto{text-align:center;font-size:24px;font-weight:700;padding:36px 8px}.pronto .icone{display:block;font-size:72px;line-height:1.1}.pronto p{font-size:19px;font-weight:400}
 .aviso-grande{font-size:20px;padding:18px;border-radius:14px;background:var(--carta);border:3px solid var(--linha);margin-top:12px}.aviso-grande strong{display:block;font-size:22px;margin-bottom:6px}
 .versao{text-align:center;font:11px ui-monospace,monospace;color:var(--tinta2);opacity:.6}
+.visor{position:relative;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:3/4;max-height:58vh;margin:8px auto;border:3px solid var(--linha)}
+.visor video{display:block;width:100%;height:100%;object-fit:cover}
+.mira{position:absolute;inset:22% 10%;border:4px solid #fff;border-radius:12px;box-shadow:0 0 0 2000px rgba(0,0,0,.35);pointer-events:none}
+.codigo-status{text-align:center;font-weight:600;min-height:1.45em;margin:8px 0}
+.digitar label{display:block;font-size:19px;margin:8px 0}
+.digitar input{width:100%;min-height:64px;padding:10px 14px;border:3px solid var(--azul);border-radius:12px;background:var(--carta);color:var(--tinta);font:600 22px/1.3 ui-monospace,monospace;letter-spacing:.04em}
+.digitar input:focus-visible{outline:4px solid #f0a020;outline-offset:2px}
+.contador{margin:6px 0 0;color:var(--tinta2);font-size:16px}
+.codigo-lido{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start;background:var(--verde-claro);color:var(--tinta);border:3px solid var(--verde);border-radius:14px;padding:14px;margin-bottom:12px}
+.codigo-lido .icone{font-size:34px;line-height:1}.codigo-lido strong{display:block;color:var(--verde);font-size:20px}.codigo-lido p{margin:4px 0 0;font-size:17px}
+.codigo-lido .botao{grid-column:1/-1;min-height:52px;margin:8px 0 0;font-size:17px}
 /* ==== #CSS-CAPTURA: END ==== */

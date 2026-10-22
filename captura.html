@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Notas TCS - V-21102026-1307</title>
+<title>Notas TCS - V-22102026-1010</title>
 <meta name="theme-color" content="#173B68">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="icones/notas-tcs.svg">
@@ -28,7 +28,8 @@
 
  <section id="telaFoto" class="tela">
   <div class="guia" aria-hidden="true"><div class="guia-moldura"><span></span><span></span><span></span><span></span><div class="guia-nota"></div></div></div>
-  <p class="dica">Nota inteira na foto, em lugar claro.</p>
+  <button class="botao principal enorme" id="lerCodigo" title="Abre a câmera para ler o QR Code ou o código de barras da nota; o escritório busca os dados sozinho"><span class="icone" aria-hidden="true">🔍</span> Ler código da nota</button>
+  <p class="dica">Ou fotografe a nota inteira, em lugar claro.</p>
   <label class="botao principal enorme" title="Abre a câmera para fotografar a nota">
    <span class="icone" aria-hidden="true">📷</span> Fotografar nota
    <input type="file" accept="image/*" capture="environment" id="camera" hidden>
@@ -39,10 +40,26 @@
   </label>
  </section>
 
+ <section id="telaCodigo" class="tela">
+  <p class="dica">Aponte para o <strong>QR Code</strong> ou para o <strong>código de barras</strong> da nota.</p>
+  <div class="visor" id="visorCaixa"><video id="visor" playsinline muted autoplay></video><div class="mira" aria-hidden="true"></div></div>
+  <p class="codigo-status" id="codigoStatus" role="status">Abrindo a câmera…</p>
+  <button class="botao secundario" id="digitarAbrir" title="Digita os 44 números da chave de acesso, impressos embaixo do código de barras"><span class="icone" aria-hidden="true">⌨️</span> Digitar os números</button>
+  <div class="digitar" id="digitarCaixa" hidden>
+   <label for="digitar">Os 44 números da <strong>chave de acesso</strong> (embaixo do código de barras):</label>
+   <input id="digitar" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="0000 0000 0000 …">
+   <p class="contador" id="digitarConta">0 de 44 números</p>
+   <p class="erro" id="digitarErro"></p>
+   <button class="botao principal" id="digitarOk" title="Confere os números e segue para escolher a obra">Usar estes números</button>
+  </div>
+  <button class="botao texto" id="codigoVoltar" title="Volta para a tela inicial sem ler o código">Voltar</button>
+ </section>
+
  <section id="telaConferir" class="tela">
+  <div id="codigoLido"></div>
   <div id="fotos" class="fotos"></div>
   <label class="botao secundario" title="Abre a câmera de novo para fotografar outra parte da mesma nota (nota comprida ou verso)">
-   <span class="icone" aria-hidden="true">➕</span> Mais uma foto desta nota
+   <span class="icone" aria-hidden="true">➕</span> <span id="maisFotoTexto">Mais uma foto desta nota</span>
    <input type="file" accept="image/*" capture="environment" id="cameraMais" hidden>
   </label>
   <h2>Qual obra?</h2>
@@ -57,7 +74,7 @@
 
  <section id="telaPronto" class="tela">
   <div class="pronto" id="prontoTexto"></div>
-  <button class="botao principal enorme" id="outra" title="Volta para fotografar a próxima nota"><span class="icone" aria-hidden="true">📷</span> Fotografar outra</button>
+  <button class="botao principal enorme" id="outra" title="Volta para a tela inicial para mandar a próxima nota"><span class="icone" aria-hidden="true">➡️</span> Próxima nota</button>
  </section>
 </main>
 <p class="versao" id="versao"></p>

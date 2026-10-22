@@ -67,6 +67,12 @@ async function consultaParaConferencia(texto,{origem,url,tipo='material'}){const
   _conferir:true,_fontes:fontes,_conf:r.confianca,_codigos:url?{url,lidos:0}:{lidos:0},_avisos:[`Lido com: ${r.adaptador.nome} (confiança ${r.confianca}%). ${r.observacao}`]};
  draft.push(inv);renderPreview();return {acao:'nova',inv,r}}
 
+// Página da nota trazida pela busca automática (job buscar-nfce, campo busca.html da captura) → texto para os adaptadores.
+// DOMParser não executa scripts; blocos e células viram quebras de linha, como no texto copiado da página.
+function htmlParaTexto(html){const d=new DOMParser().parseFromString(String(html||''),'text/html');d.querySelectorAll('script,style').forEach(x=>x.remove());
+ d.querySelectorAll('br,p,div,tr,li,h1,h2,h3,h4,h5,h6,table,td,th').forEach(x=>x.after(d.createTextNode('\n')));d.querySelectorAll('span,label,strong,b').forEach(x=>x.after(d.createTextNode(' ')));
+ return (d.body?.textContent||'').replace(/\u00a0/g,' ').replace(/[ \t]+/g,' ').replace(/ *\n[ \n]*/g,'\n').trim()}
+
 // ---------- Painel "A partir do link de consulta" ----------
 function consultaMsg(h,t=''){$('#consultaMsg').innerHTML=h?`<div class="notice ${t}">${h}</div>`:''}
 function consultaRenderOrigem(){const url=$('#consultaUrl')?.value.trim();const el=$('#consultaOrigem');if(!el)return;if(!url){el.innerHTML='';return}const o=consultaOrigem(url);el.innerHTML=`<span class="pill ${o.tipo==='desconhecida'?'warn':''}">${esc(o.rotulo)}</span> ${consultaBotao(url)} <span class="hint">${esc(consultaDica(o))}</span>`}

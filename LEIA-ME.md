@@ -96,3 +96,14 @@ Não foram testados o OCR de PDF digitalizado nem PDFs reais de NFS-e de cada pr
 - **Como funciona:** [`js/atividades.js`](js/atividades.js). Toda gravação passa por `txWrite`; o log descreve as operações comparando com os dados anteriores, então uma tela nova já entra no log sem código extra. As regras ficam na coleção `atividades` de [`firestore.rules`](firestore.rules).
 - **Baixas antigas,** anteriores a 21/10/2026, não têm o responsável gravado: o relatório mostra o e-mail de quem as enviou à nuvem, quando houver.
 - **Publicação:** as regras novas precisam ser publicadas no console do Firebase (Firestore Database › Regras). Até lá, as atividades ficam guardadas em cada navegador e sobem assim que as regras forem publicadas.
+
+## Código da nota pelo celular e busca automática da NFC-e (22/10/2026)
+- **Tela da obra:** botão **🔍 Ler código da nota**.
+  - A câmera ao vivo lê o QR Code ou o código de barras.
+  - Ou toque em **Digitar os números**: o celular confere o dígito verificador da chave antes de aceitar.
+  - A foto da nota passa a ser opcional; quando tirada, vira o comprovante de recebimento.
+- **Busca automática:** o job `buscar-nfce` do GitLab CI ([`servidor/buscar-nfce.mjs`](servidor/buscar-nfce.mjs)) roda de hora em hora, das 7 às 18 h, e consulta a NFC-e na SEFAZ-CE (pelo link do QR ou só pela chave).
+  - A fila mostra **Dados da SEFAZ prontos**, e **Conferir** abre a nota com emitente, data, itens e total.
+  - A NF-e (modelo 55) não tem busca automática: segue pela foto ou pelo XML.
+- **Buscar agora:** botão na fila que dispara o job sem esperar a rodada, depois de o administrador gravar o token de trigger.
+- **Implantação** (conta de serviço, variável `FIREBASE_SA`, agendamento, token e cota de minutos): [`docs/busca-nfce.md`](docs/busca-nfce.md). As regras do Firestore mudaram (captura só com o código e `config/busca`): publique de novo no console.

@@ -1,12 +1,14 @@
 // ==== #JS-CAPTURA: START ====
 // Tela "Notas da obra" (captura.html), para o papel Obra (e administradores, para teste).
-// Fluxo: Fotografar nota → Qual obra? → Enviar. A foto é comprimida no celular (JPEG, lado maior 2400 px, qualidade 0,85),
+// Fluxo: Ler código da nota (QR, código de barras ou os 44 números) ou Fotografar nota → Qual obra? → Enviar.
+// Só com o código, o job buscar-nfce do GitLab CI busca os dados da NFC-e na SEFAZ (servidor/buscar-nfce.mjs); a foto vira opcional. A foto é comprimida no celular (JPEG, lado maior 2400 px, qualidade 0,85),
 // o código de barras ou o QR é lido em silêncio, e a nota vai para a fila "capturas" do escritório.
 // Sem internet, a nota fica guardada neste celular (IndexedDB 'tcs-captura') e é enviada sozinha quando a conexão voltar.
-const Cap={user:null,perfil:null,projetos:[],fotos:[],obra:'',faltou:false,avariado:false,ocupado:false,unsubs:[],enviando:false};
+const Cap={user:null,perfil:null,projetos:[],fotos:[],codigo:null,obra:'',faltou:false,avariado:false,ocupado:false,unsubs:[],enviando:false};
 const CAP_PROJ_KEY='tcs-captura-projetos';
-const telas=['telaCarregando','telaEntrar','telaAviso','telaFoto','telaConferir','telaPronto'];
-function mostrar(id){telas.forEach(t=>$('#'+t).classList.toggle('ativa',t===id));window.scrollTo(0,0)}
+const Visor={stream:null,timer:0,det:null,zxing:null,ocupado:false};
+const telas=['telaCarregando','telaEntrar','telaAviso','telaFoto','telaCodigo','telaConferir','telaPronto'];
+function mostrar(id){if(id!=='telaCodigo')visorParar();telas.forEach(t=>$('#'+t).classList.toggle('ativa',t===id));window.scrollTo(0,0)}
 $('#versao').textContent=(document.title.match(/V-\d{8}-\d{4}/)||[''])[0];
 
 // ---------- Fila local (IndexedDB) ----------
@@ -27,13 +29,43 @@ async function fotoPreparar(file,origem){const img=await imagemCarregar(file,300
  return {id:uid(),blob:jpg.blob,largura:jpg.largura,altura:jpg.altura,url:URL.createObjectURL(jpg.blob),escura:q.escura,borrada:q.borrada,pequena:q.pequena,aceita:!(q.escura||q.borrada||q.pequena),chave:cod.chave||'',consultaUrl:cod.url||'',origem}}
 async function fotosReceber(files,origem){if(!files.length)return;Cap.ocupado=true;mostrar('telaCarregando');$('#telaCarregando p').textContent=files.length>1?'Preparando as fotos…':'Preparando a foto…';
  for(const f of files){try{Cap.fotos.push(await fotoPreparar(f,origem))}catch(e){alert(e.message||'Não deu para abrir esta foto. Tente de novo.')}}
- Cap.ocupado=false;if(!Cap.fotos.length){mostrar('telaFoto');return}if(Cap.projetos.length===1)Cap.obra=Cap.projetos[0].id;conferirRender();mostrar('telaConferir')}
-function conferirRender(){$('#fotos').innerHTML=Cap.fotos.map((f,i)=>`<div><div class="foto"><img src="${f.url}" alt="Foto ${i+1} da nota"><div class="moldura"></div><button class="botao secundario tirar" data-tirar="${i}" title="Apaga esta foto">Apagar</button></div>
+ Cap.ocupado=false;if(!Cap.fotos.length){mostrar(Cap.codigo?'telaConferir':'telaFoto');return}if(Cap.projetos.length===1)Cap.obra=Cap.projetos[0].id;conferirRender();mostrar('telaConferir')}
+function conferirRender(){const k=Cap.codigo&&chaveDecompor(Cap.codigo.chave);
+ $('#codigoLido').innerHTML=Cap.codigo?`<div class="codigo-lido"><span class="icone" aria-hidden="true">✅</span><div><strong>${Cap.codigo.origem==='digitado'?'Números da nota conferidos':'Código da nota lido'}</strong>${k?`<p>Nota nº ${esc(k.numero)}, série ${esc(k.serie)}${k.modelo===65?' (cupom NFC-e)':''}</p>`:''}<p>O escritório busca os dados da nota. A foto é opcional.</p></div><button class="botao secundario" id="codigoOutro" title="Lê o código de novo, se for de outra nota">Ler de novo</button></div>`:'';
+ $('#maisFotoTexto').textContent=Cap.codigo&&!Cap.fotos.length?'Fotografar a nota também (opcional)':'Mais uma foto desta nota';
+ $('#fotos').innerHTML=Cap.fotos.map((f,i)=>`<div><div class="foto"><img src="${f.url}" alt="Foto ${i+1} da nota"><div class="moldura"></div><button class="botao secundario tirar" data-tirar="${i}" title="Apaga esta foto">Apagar</button></div>
   ${f.aceita?'':`<div class="alerta-foto">${f.pequena?'A foto veio pequena (do WhatsApp?) e o escritório não vai conseguir ler. Fotografe a nota aqui pelo Notas TCS.':f.escura?'A foto ficou escura.':'A foto ficou tremida.'}<div class="botoes"><label class="botao principal" title="Abre a câmera para fotografar de novo">Tirar de novo<input type="file" accept="image/*" capture="environment" data-refazer="${i}" hidden></label><button class="botao secundario" data-usar="${i}" title="Envia esta foto mesmo assim">Usar assim mesmo</button></div></div>`}</div>`).join('');
  $('#obras').innerHTML=Cap.projetos.length?Cap.projetos.map(p=>`<button class="botao obra" data-obra="${esc(p.id)}" aria-pressed="${Cap.obra===p.id}" title="Escolhe esta obra">${esc(p.name)}</button>`).join(''):'<p class="erro">Nenhuma obra liberada para você. Fale com o escritório.</p>';
  $('#faltou').setAttribute('aria-pressed',Cap.faltou);$('#avariado').setAttribute('aria-pressed',Cap.avariado);
- $('#enviar').disabled=!Cap.obra||!Cap.fotos.length||Cap.fotos.some(f=>!f.aceita)}
-function limparCaptura(){Cap.fotos.forEach(f=>URL.revokeObjectURL(f.url));Cap.fotos=[];Cap.obra='';Cap.faltou=false;Cap.avariado=false}
+ $('#enviar').disabled=!Cap.obra||!(Cap.fotos.length||Cap.codigo)||Cap.fotos.some(f=>!f.aceita)}
+function limparCaptura(){Cap.fotos.forEach(f=>URL.revokeObjectURL(f.url));Cap.fotos=[];Cap.codigo=null;Cap.obra='';Cap.faltou=false;Cap.avariado=false}
+
+// ---------- Código da nota: câmera ao vivo ou os 44 números ----------
+// O QR da NFC-e traz o link da consulta (com a chave); o código de barras do DANFE traz a chave. Boleto e PIX são recusados.
+function visorParar(){clearTimeout(Visor.timer);Visor.timer=0;if(Visor.stream){Visor.stream.getTracks().forEach(t=>t.stop());Visor.stream=null}$('#visor').srcObject=null}
+// Um quadro do vídeo da câmera (ou um canvas, nos testes) → códigos lidos, no formato de codigosLer.
+async function quadroLer(video){const achados=[];
+ if(!Visor.det&&!Visor.zxing){if('BarcodeDetector' in window){try{const fmts=await BarcodeDetector.getSupportedFormats();const quer=['qr_code','code_128','itf'].filter(f=>fmts.includes(f));if(quer.length)Visor.det=new BarcodeDetector({formats:quer})}catch(e){}}
+  if(!Visor.det){const Z=await loadLibrary(...LIB_ZXING);const hints=new Map();hints.set(Z.DecodeHintType.POSSIBLE_FORMATS,[Z.BarcodeFormat.QR_CODE,Z.BarcodeFormat.CODE_128,Z.BarcodeFormat.ITF]);const leitor=new Z.MultiFormatReader();leitor.setHints(hints);Visor.zxing={Z,leitor}}}
+ if(Visor.det){for(const r of await Visor.det.detect(video))achados.push({formato:r.format.replace(/[^a-z0-9]/gi,'').toLowerCase(),texto:r.rawValue});return achados}
+ const {Z,leitor}=Visor.zxing;const c=document.createElement('canvas');const vw=video.videoWidth||video.width,vh=video.videoHeight||video.height;const k=Math.min(1,1280/Math.max(vw,vh));c.width=Math.round(vw*k);c.height=Math.round(vh*k);c.getContext('2d').drawImage(video,0,0,c.width,c.height);
+ try{const r=leitor.decodeWithState(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.HTMLCanvasElementLuminanceSource(c))));achados.push({formato:String(Z.BarcodeFormat[r.getBarcodeFormat()]).replace(/[^a-z0-9]/gi,'').toLowerCase(),texto:r.getText()})}catch(e){}finally{leitor.reset?.()}
+ return achados}
+async function visorAbrir(){mostrar('telaCodigo');$('#digitarCaixa').hidden=true;$('#digitarErro').textContent='';$('#visorCaixa').hidden=false;$('#codigoStatus').textContent='Abrindo a câmera…';
+ if(!navigator.mediaDevices?.getUserMedia){digitarAbrir('Este celular não abre a câmera aqui. Digite os números.');return}
+ try{Visor.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false});const v=$('#visor');v.srcObject=Visor.stream;await v.play()}
+ catch(e){visorParar();if(e.name==='AbortError')return;digitarAbrir(/NotAllowed|Permission/i.test(e.name)?'A câmera não foi liberada. Digite os números, ou libere a câmera nas configurações do Chrome.':'Não deu para abrir a câmera. Digite os números.');return}
+ $('#codigoStatus').textContent='Procurando o código…';const passo=async()=>{if(!Visor.stream)return;const v=$('#visor');
+  if(v.readyState>=2&&!Visor.ocupado){Visor.ocupado=true;try{const r=codigosResumo(await quadroLer(v));
+   if(r.chave){codigoAceitar({chave:r.chave,url:r.url||'',origem:'codigo'});return}
+   if(r.descartes.length)$('#codigoStatus').textContent='Esse é '+(/pix/i.test(r.descartes[0])?'o QR do PIX':'o código do boleto')+', não o da nota. Procure o código da nota fiscal.';
+   else if(r.lidos)$('#codigoStatus').textContent='Esse código não é da nota fiscal. Procure o QR Code ou o código de barras da nota.'}catch(e){console.warn('Leitura do código:',e)}finally{Visor.ocupado=false}}
+  Visor.timer=setTimeout(passo,250)};passo()}
+function digitarAbrir(motivo){visorParar();$('#visorCaixa').hidden=true;$('#digitarCaixa').hidden=false;$('#codigoStatus').textContent=motivo||'';$('#digitar').focus()}
+function digitarConta(){const d=$('#digitar').value.replace(/\D/g,'');$('#digitarConta').textContent=`${d.length} de 44 números`;$('#digitarErro').textContent='';return d}
+function digitarUsar(){const d=digitarConta();if(d.length!==44){$('#digitarErro').textContent=d.length<44?`Faltam ${44-d.length} números.`:`Tem ${d.length-44} números a mais.`;return}
+ if(!chaveValida(d)){$('#digitarErro').textContent='Algum número está errado. Confira com a nota e corrija.';return}codigoAceitar({chave:d,url:'',origem:'digitado'})}
+function codigoAceitar(c){visorParar();navigator.vibrate?.(120);Cap.codigo=c;if(Cap.projetos.length===1&&!Cap.obra)Cap.obra=Cap.projetos[0].id;conferirRender();mostrar('telaConferir')}
 
 // ---------- Envio ----------
 function base64(blob){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=()=>rej(r.error);r.readAsDataURL(blob)})}
@@ -45,15 +77,15 @@ async function capturaEnviar(item){for(const [i,f] of item.fotos.entries()){cons
  // reenvio depois de uma queda: se a captura já chegou, não grava de novo
  if(await window.__fb.get('capturas',item.id).catch(()=>null))return;
  const obs=[item.faltou?'Faltou material':'',item.avariado?'Veio avariado':''].filter(Boolean);
- const chave=item.fotos.map(f=>f.chave).find(Boolean)||'',url=item.fotos.map(f=>f.consultaUrl).find(Boolean)||'';
+ const chave=item.codigo?.chave||item.fotos.map(f=>f.chave).find(Boolean)||'',url=item.codigo?.url||item.fotos.map(f=>f.consultaUrl).find(Boolean)||'';
  await window.__fb.commit([{op:'set',store:'capturas',id:item.id,data:{id:item.id,autor:item.autor,autorNome:item.autorNome,projectId:item.projectId,clientId:item.clientId,projetoNome:item.projetoNome,status:'pendente',capturadoEm:item.criadoEm,enviadoEm:new Date().toISOString(),faltouMaterial:!!item.faltou,veioAvariado:!!item.avariado,observacoes:obs,chave,consultaUrl:url,origem:item.origem,fotos:item.fotos.map((f,i)=>({ordem:i,largura:f.largura,altura:f.altura,bytes:f.blob.size,partes:Math.ceil(Math.ceil(f.blob.size/3)*4/PARTE)}))}},
   // log de atividades (js/atividades.js): o envio pela obra entra no mesmo lote, com id derivado da captura
-  {op:'set',store:'atividades',id:'cap-'+item.id,data:{id:'cap-'+item.id,em:new Date().toISOString(),emServidor:window.__fb.agora(),por:item.autor,nome:item.autorNome||item.autor,papel:Cap.perfil?.papel||'obra',cat:'obra',acao:'obra_envio',texto:`Enviou pela obra ${item.fotos.length} foto(s) de nota fiscal para ${item.projetoNome||'o projeto'}${obs.length?'. '+obs.join(', '):''}`,projetoId:item.projectId,clienteId:item.clientId,ref:'capturas/'+item.id,valor:null,aparelho:'tela da obra',offline:Date.now()-new Date(item.criadoEm).getTime()>120000}}])}
+  {op:'set',store:'atividades',id:'cap-'+item.id,data:{id:'cap-'+item.id,em:new Date().toISOString(),emServidor:window.__fb.agora(),por:item.autor,nome:item.autorNome||item.autor,papel:Cap.perfil?.papel||'obra',cat:'obra',acao:'obra_envio',texto:`Enviou pela obra ${item.codigo?'o código'+(item.fotos.length?` e ${item.fotos.length} foto(s)`:''):item.fotos.length+' foto(s)'} de nota fiscal para ${item.projetoNome||'o projeto'}${obs.length?'. '+obs.join(', '):''}`,projetoId:item.projectId,clienteId:item.clientId,ref:'capturas/'+item.id,valor:null,aparelho:'tela da obra',offline:Date.now()-new Date(item.criadoEm).getTime()>120000}}])}
 async function filaProcessar(){if(Cap.enviando||!navigator.onLine||!Cap.perfil||!window.__fb)return;const itens=(await filaTodos()).filter(i=>i.autor===Cap.user.email).sort((a,b)=>a.criadoEm.localeCompare(b.criadoEm));if(!itens.length){filaFaixa();return}
  Cap.enviando=true;filaFaixa();try{for(const it of itens){await capturaEnviar(it);await filaTirar(it.id)}}catch(e){console.error('Envio da nota adiado:',e)}finally{Cap.enviando=false;filaFaixa()}}
 window.addEventListener('online',()=>{filaFaixa();filaProcessar()});window.addEventListener('offline',filaFaixa);setInterval(filaProcessar,30000);
 async function enviar(){const p=Cap.projetos.find(x=>x.id===Cap.obra);if(!p)return;$('#enviar').disabled=true;
- const item={id:uid(),autor:Cap.user.email,autorNome:Cap.user.nome||'',projectId:p.id,clientId:p.clientId||'',projetoNome:p.name,criadoEm:new Date().toISOString(),faltou:Cap.faltou,avariado:Cap.avariado,origem:Cap.fotos.some(f=>f.origem==='compartilhado')?'compartilhado':'camera',fotos:Cap.fotos.map(f=>({blob:f.blob,largura:f.largura,altura:f.altura,chave:f.chave,consultaUrl:f.consultaUrl}))};
+ const item={id:uid(),autor:Cap.user.email,autorNome:Cap.user.nome||'',projectId:p.id,clientId:p.clientId||'',projetoNome:p.name,criadoEm:new Date().toISOString(),faltou:Cap.faltou,avariado:Cap.avariado,origem:Cap.codigo?Cap.codigo.origem:Cap.fotos.some(f=>f.origem==='compartilhado')?'compartilhado':'camera',codigo:Cap.codigo,fotos:Cap.fotos.map(f=>({blob:f.blob,largura:f.largura,altura:f.altura,chave:f.chave,consultaUrl:f.consultaUrl}))};
  await filaPor(item);limparCaptura();
  let enviado=false;if(navigator.onLine){$('#prontoTexto').innerHTML='<span class="roda"></span><p>Enviando…</p>';mostrar('telaPronto');try{Cap.enviando=true;await capturaEnviar(item);await filaTirar(item.id);enviado=true}catch(e){console.error('Envio adiado:',e)}finally{Cap.enviando=false}}
  $('#prontoTexto').innerHTML=enviado?'<span class="icone">✅</span>Nota enviada!<p>O escritório vai conferir.</p>':'<span class="icone">📦</span>Nota guardada no celular.<p>Ela vai ser enviada sozinha quando tiver internet. Pode fotografar a próxima.</p>';mostrar('telaPronto');filaFaixa()}
@@ -101,8 +133,16 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-obra],[dat
 $('#faltou').addEventListener('click',()=>{Cap.faltou=!Cap.faltou;conferirRender()});
 $('#avariado').addEventListener('click',()=>{Cap.avariado=!Cap.avariado;conferirRender()});
 $('#enviar').addEventListener('click',enviar);
-$('#cancelar').addEventListener('click',()=>{if(Cap.fotos.length&&!confirm('Apagar estas fotos sem enviar?'))return;limparCaptura();mostrar('telaFoto')});
-$('#outra').addEventListener('click',()=>{mostrar('telaFoto');$('#camera').click()});
+$('#cancelar').addEventListener('click',()=>{if((Cap.fotos.length||Cap.codigo)&&!confirm(Cap.fotos.length?'Apagar estas fotos sem enviar?':'Cancelar esta nota sem enviar?'))return;limparCaptura();mostrar('telaFoto')});
+$('#outra').addEventListener('click',()=>mostrar('telaFoto'));
+$('#lerCodigo').addEventListener('click',visorAbrir);
+$('#digitarAbrir').addEventListener('click',()=>digitarAbrir(''));
+$('#digitar').addEventListener('input',digitarConta);
+$('#digitar').addEventListener('keydown',e=>{if(e.key==='Enter')digitarUsar()});
+$('#digitarOk').addEventListener('click',digitarUsar);
+$('#codigoVoltar').addEventListener('click',()=>mostrar(Cap.fotos.length?'telaConferir':'telaFoto'));
+document.addEventListener('click',e=>{if(e.target.closest('#codigoOutro')){Cap.codigo=null;visorAbrir()}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&Visor.stream){visorParar();$('#codigoStatus').textContent='Câmera pausada.'}else if(!document.hidden&&$('#telaCodigo').classList.contains('ativa')&&$('#digitarCaixa').hidden)visorAbrir()});
 // Sessão: o Firebase guarda o login no celular; a pessoa entra uma vez só.
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(e=>console.warn('Service worker não registrado:',e.message));
 // ==== #JS-CAPTURA: END ====

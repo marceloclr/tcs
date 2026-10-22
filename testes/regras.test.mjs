@@ -115,8 +115,22 @@ test('obra: só nomes dos projetos concedidos e criação de capturas', async ()
   await assertSucceeds(getDocs(query(collection(db, 'projects'), where(documentId(), 'in', ['A1']))));
   await assertFails(getDoc(doc(db, 'projects/A2')));
   for (const p of ['allocations/a1', 'movements/sa1', 'notas_projeto/N1__A1', 'invoices/N2', 'products/P1', 'clients/A', 'chaves/N1']) await assertFails(getDoc(doc(db, p)));
-  await assertSucceeds(setDoc(doc(db, 'capturas/c1'), { autor: OBRA, projectId: 'A1', clientId: 'A', status: 'pendente' }));
-  await assertFails(setDoc(doc(db, 'capturas/c2'), { autor: OBRA, projectId: 'A2', clientId: 'A', status: 'pendente' }));
+  const foto = [{ ordem: 0, largura: 10, altura: 10, bytes: 3, partes: 1 }];
+  await assertSucceeds(setDoc(doc(db, 'capturas/c1'), { autor: OBRA, projectId: 'A1', clientId: 'A', status: 'pendente', fotos: foto }));
+  await assertFails(setDoc(doc(db, 'capturas/c2'), { autor: OBRA, projectId: 'A2', clientId: 'A', status: 'pendente', fotos: foto }));
+  // só o código da nota (chave ou link do QR), sem foto; vazia ou com 'busca' preenchida pela obra, não
+  const CH = '23261007012345000123650010000012341000012340';
+  await assertSucceeds(setDoc(doc(db, 'capturas/c3'), { autor: OBRA, projectId: 'A1', clientId: 'A', status: 'pendente', fotos: [], chave: CH, consultaUrl: '' }));
+  await assertSucceeds(setDoc(doc(db, 'capturas/c4'), { autor: OBRA, projectId: 'A1', clientId: 'A', status: 'pendente', fotos: [], chave: '', consultaUrl: 'http://nfce.sefaz.ce.gov.br/pages/ShowNFCe.html?p=' + CH + '|2|1|1|ABC' }));
+  await assertFails(setDoc(doc(db, 'capturas/c5'), { autor: OBRA, projectId: 'A1', clientId: 'A', status: 'pendente', fotos: [], chave: '123', consultaUrl: '' }));
+  await assertFails(setDoc(doc(db, 'capturas/c6'), { autor: OBRA, projectId: 'A1', clientId: 'A', status: 'pendente', fotos: [], chave: CH, busca: { status: 'ok', html: '<p>falsa</p>' } }));
+  // gatilho do "Buscar agora": quem confere lê; a obra e quem só lê, não; só o administrador grava
+  await env.withSecurityRulesDisabled(c => setDoc(doc(c.firestore(), 'config/busca'), { gatilhoToken: 'x', projeto: '1' }));
+  await assertFails(getDoc(doc(db, 'config/busca')));
+  await assertFails(getDoc(doc(ctx(LEI), 'config/busca')));
+  await assertSucceeds(getDoc(doc(ctx(ESC), 'config/busca')));
+  await assertFails(setDoc(doc(ctx(ESC), 'config/busca'), { gatilhoToken: 'y' }));
+  await assertSucceeds(setDoc(doc(ctx(ADM), 'config/busca'), { gatilhoToken: 'y', projeto: '1' }));
   await assertFails(updateDoc(doc(db, 'capturas/c1'), { status: 'lancada' }));
   await assertSucceeds(getDocs(query(collection(db, 'capturas'), where('autor', '==', OBRA))));
   await assertSucceeds(setDoc(doc(db, 'capturas_fotos/f1'), { autor: OBRA, capturaId: 'c1', projectId: 'A1', clientId: 'A', parte: 0, tipo: 'image/jpeg', dados: 'abc' }));
