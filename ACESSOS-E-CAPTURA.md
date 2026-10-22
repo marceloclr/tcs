@@ -83,7 +83,10 @@ Em **Estoque › Recebidas da obra** (o número ao lado mostra quantas aguardam)
 
 - **A conferir:** notas pendentes ou em conferência, com obra, quem enviou, fotos, observações (faltou material, veio avariado) e o tempo de espera. Acima de 48 horas, a linha fica destacada.
 - **Só código:** a obra mandou só o código da nota, sem foto (coluna Fotos).
-- **Busca na SEFAZ:** situação da busca automática da NFC-e. Os selos são **na fila**, **Dados da SEFAZ prontos** e **Busca falhou** (com o motivo). A NF-e aparece como **sem busca automática**. O botão **Buscar agora na SEFAZ** dispara a busca sem esperar a rodada de hora em hora. Detalhes em [`docs/busca-nfce.md`](docs/busca-nfce.md).
+- **Busca na SEFAZ:** situação da busca automática da NFC-e. Os selos são **na fila**, **Dados da SEFAZ prontos** e **Busca falhou** (com o motivo). A NF-e aparece como **sem busca automática**. No topo da fila, o quadro **Busca automática na SEFAZ** mostra:
+  - a frequência: de hora em hora, das 7h às 18h, de segunda a sábado;
+  - um **relógio ao vivo** com o tempo até a próxima busca, em MM:SS, ou em HH:MM:SS quando falta mais de uma hora. Durante a busca, ele mostra "buscando";
+  - o botão **Buscar agora**, que dispara a busca na hora. O administrador grava o token em **Configurar token**. Detalhes em [`docs/busca-nfce.md`](docs/busca-nfce.md).
 - **Ver fotos:** mostra as fotos enviadas, quando houver.
 - **Conferir:** usa os dados trazidos da SEFAZ, quando a busca já rodou, e baixa as fotos (código de barras, QR Code e texto). Só com a chave e sem busca, abre a nota com número, série e CNPJ da chave, para completar pela consulta ou à mão. Em todos os casos, abre a conferência com o **projeto indicado pela obra** (pode trocar, entre os projetos em que você tem escrita) e o aviso do que a obra informou. Nada é gravado antes de você confirmar.
 - **Confirmar entrada das notas:** a nota é lançada e vinculada ao projeto; a captura passa a **Lançada**, ligada à nota. As fotos ficam como **comprovante de recebimento**: na nota, botão **Fotos da obra**.

@@ -85,12 +85,30 @@ async function emitentePorCnpj(cnpj){if(cnpjCache.has(cnpj))return cnpjCache.get
   const j=await r.json();const e=j.razao_social?{nome:j.razao_social,fantasia:j.nome_fantasia||''}:null;cnpjCache.set(cnpj,e);return e}catch(e){return null}}
 // Botão "Buscar agora": dispara o pipeline do GitLab (trigger) em vez de esperar o agendamento de hora em hora.
 // O token fica em config/busca, lido só por quem confere a fila; no GitLab, as variáveis de pipeline ficam bloqueadas (docs/busca-nfce.md).
+// Agenda do job no GitLab (Pipeline schedule "0 7-18 * * 1-6", fuso de São Paulo = Fortaleza, UTC−3): de hora em hora, das 7 às 18 h, de segunda a sábado.
+// O GitLab costuma começar 1 a 2 minutos depois da hora cheia, e a busca leva cerca de 1 minuto: por isso a janela "buscando" de 4 minutos.
+const BUSCA_AGENDA={horas:[7,18],dias:[1,6],fusoMin:-180,janelaMin:4};
+function buscaRodadas(agora=Date.now()){const H=36e5,off=BUSCA_AGENDA.fusoMin*6e4;const vale=t=>{const d=new Date(t+off);const h=d.getUTCHours(),w=d.getUTCDay();return h>=BUSCA_AGENDA.horas[0]&&h<=BUSCA_AGENDA.horas[1]&&w>=BUSCA_AGENDA.dias[0]&&w<=BUSCA_AGENDA.dias[1]};
+ const cheia=Math.floor(agora/H)*H;let ant=null,prox=null;for(let t=cheia;t>cheia-8*24*H&&ant===null;t-=H)if(vale(t))ant=t;for(let t=cheia+H;t<cheia+8*24*H&&prox===null;t+=H)if(vale(t))prox=t;return {ant,prox}}
+const doisDig=n=>String(n).padStart(2,'0');
+function buscaRelogioTexto(agora=Date.now()){const {ant,prox}=buscaRodadas(agora);const jan=BUSCA_AGENDA.janelaMin*6e4;
+ if(Fila.pedidaEm&&agora-Fila.pedidaEm<jan)return {relogio:'buscando',quando:'Buscar agora pedido às '+new Date(Fila.pedidaEm).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'; os dados chegam em 1 a 3 min',ativo:true};
+ if(ant!==null&&agora-ant<jan)return {relogio:'buscando',quando:'rodada das '+new Date(ant).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+' em andamento',ativo:true};
+ const seg=Math.max(0,Math.ceil((prox-agora)/1000)),h=Math.floor(seg/3600),m=Math.floor(seg%3600/60),ss=seg%60;
+ const dia=new Date(prox).toLocaleDateString('pt-BR',{weekday:'long'}),hoje=new Date(prox).toDateString()===new Date(agora).toDateString();
+ return {relogio:(h?doisDig(h)+':':'')+doisDig(m)+':'+doisDig(ss),quando:(hoje?'às ':dia+' às ')+new Date(prox).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),ativo:false}}
+// Relógio ao vivo: só troca o texto do contador, sem redesenhar a fila.
+setInterval(()=>{const el=document.getElementById('buscaRelogio');if(!el)return;const r=buscaRelogioTexto();el.textContent=r.relogio;el.classList.toggle('ativo',r.ativo);const q=document.getElementById('buscaQuando');if(q)q.textContent=r.quando},1000);
 function filaBuscaHtml(abertas){const espera=abertas.filter(c=>buscaCobre(c)&&(!c.busca||(c.busca.status==='erro'&&(c.busca.tentativas||0)<3))).length;
- if(Fila.gatilho?.gatilhoToken)return espera?`<div class="row" style="gap:8px;align-items:center;margin:8px 0"><button class="btn sm" data-fila-buscar title="Pede ao GitLab para buscar agora os dados das NFC-e na SEFAZ, sem esperar a rodada de hora em hora. Leva de 1 a 3 minutos">Buscar agora na SEFAZ</button><span class="hint">${espera} nota(s) esperando a busca automática.</span></div>`:'';
- return Nuvem.perfil?.papel==='admin'?`<p class="hint">Busca automática da NFC-e: de hora em hora, das 7 às 18 h. <button class="btn sm" data-fila-gatilho title="Grava o token de trigger do GitLab para mostrar o botão Buscar agora na fila (roteiro em docs/busca-nfce.md)">Configurar "Buscar agora"</button></p>`:''}
-async function filaBuscarAgora(b){const g=Fila.gatilho;b.disabled=true;
+ const adm=Nuvem.perfil?.papel==='admin',pronto=!!Fila.gatilho?.gatilhoToken,r=buscaRelogioTexto();
+ return `<div class="busca-sefaz"><div class="busca-sefaz-info"><strong>Busca automática na SEFAZ: de hora em hora</strong>
+  <span>Das <b>7h às 18h</b>, de <b>segunda a sábado</b> (horário de Fortaleza), o sistema busca na SEFAZ os dados dos cupons (NFC-e) enviados pela obra. A NF-e se confere pela foto ou pelo XML.</span>
+  <span class="busca-sefaz-espera">${espera?`<b>${espera}</b> nota(s) esperando a próxima busca.`:'Nenhuma nota esperando busca.'}</span></div>
+ <div class="busca-sefaz-relogio" title="Contagem ao vivo até a próxima busca automática na SEFAZ (horas:minutos:segundos quando falta mais de uma hora)"><small>próxima busca em</small><span id="buscaRelogio" class="relogio${r.ativo?' ativo':''}" aria-live="off">${r.relogio}</span><small id="buscaQuando">${esc(r.quando)}</small></div>
+ <div class="busca-sefaz-acoes"><button class="btn primary" data-fila-buscar ${!pronto&&!adm?'disabled':''} title="${pronto?'Pede ao GitLab para buscar agora os dados das NFC-e na SEFAZ, sem esperar a próxima rodada. Leva de 1 a 3 minutos':adm?'Antes, grave o token de trigger do GitLab (roteiro em docs/busca-nfce.md)':'O administrador ainda não liberou o Buscar agora'}">Buscar agora</button>${adm?`<button class="btn sm" data-fila-gatilho title="Grava ou troca o token de trigger do GitLab usado pelo Buscar agora (roteiro em docs/busca-nfce.md)">${pronto?'Trocar token':'Configurar token'}</button>`:''}</div></div>`}
+async function filaBuscarAgora(b){const g=Fila.gatilho;if(!g?.gatilhoToken){if(Nuvem.perfil?.papel==='admin')return filaConfigurarGatilho();return}b.disabled=true;
  try{const f=new FormData();f.append('token',g.gatilhoToken);f.append('ref',g.ref||'main');const r=await fetch(`https://gitlab.com/api/v4/projects/${encodeURIComponent(g.projeto||'87585318')}/trigger/pipeline`,{method:'POST',body:f});
-  if(!r.ok)throw new Error('GitLab respondeu '+r.status);Fila.msg='Busca pedida ao GitLab. Os dados aparecem nesta fila em 1 a 3 minutos.'}
+  if(!r.ok)throw new Error('GitLab respondeu '+r.status);Fila.pedidaEm=Date.now();Fila.msg='Busca pedida ao GitLab. Os dados aparecem nesta fila em 1 a 3 minutos.'}
  catch(e){Fila.msg='<span class="erro-txt">Não foi possível pedir a busca: '+esc(e.message)+'. A rodada de hora em hora continua.</span>'}filaRender()}
 async function filaConfigurarGatilho(){const token=prompt('Token de trigger do pipeline (GitLab › Settings › CI/CD › Pipeline trigger tokens). Deixe vazio para retirar o botão:',Fila.gatilho?.gatilhoToken||'');if(token===null)return;
  try{await window.__fb.commit([{op:'set',store:'config',id:'busca',data:{gatilhoToken:token.trim(),projeto:'87585318',ref:'main',_atualizadoEm:new Date().toISOString(),_atualizadoPor:Nuvem.user.email}}]);Fila.gatilho={gatilhoToken:token.trim(),projeto:'87585318',ref:'main'};Fila.msg=token.trim()?'Botão "Buscar agora" configurado.':'Botão "Buscar agora" retirado.'}

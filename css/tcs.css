@@ -72,3 +72,14 @@ tr.atrasada td{background:#fffbeb}.atraso-txt{color:#92400e;font-weight:700}.aco
 
 /* Baixas de estoque e log de atividades */
 .bx-estornada td{color:#64748b;background:#fafafa}.bx-estornada td:first-child{border-left:3px solid #f59e0b}.atv-tabela td{font-size:13px;vertical-align:top}.atv-baixa td:first-child{border-left:3px solid #ef4444}.atv-estorno td:first-child{border-left:3px solid #f59e0b}
+
+/* Busca automática na SEFAZ (fila Recebidas da obra): frequência em destaque, relógio ao vivo e Buscar agora */
+.busca-sefaz{display:grid;grid-template-columns:1fr auto auto;gap:14px 20px;align-items:center;margin:12px 0;padding:14px 18px;border:1px solid #bfdbfe;border-left:5px solid var(--blue);border-radius:var(--radius);background:var(--blue-soft)}
+.busca-sefaz-info{display:flex;flex-direction:column;gap:4px}.busca-sefaz-info strong{font-size:16px;color:#1e3a8a}.busca-sefaz-info span{color:#334155}.busca-sefaz-espera{font-size:13px}
+.busca-sefaz-relogio{display:flex;flex-direction:column;align-items:center;min-width:150px;padding:8px 14px;border-radius:10px;background:#0f172a;color:#e2e8f0}
+.busca-sefaz-relogio small{font-size:11px;color:#94a3b8;text-align:center}
+.busca-sefaz-relogio .relogio{font:700 30px/1.15 ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;letter-spacing:.06em;color:#4ade80;font-variant-numeric:tabular-nums}
+.busca-sefaz-relogio .relogio.ativo{color:#fbbf24;font-size:20px;letter-spacing:.02em;animation:pisca 1.4s ease-in-out infinite}
+@keyframes pisca{50%{opacity:.45}}@media (prefers-reduced-motion:reduce){.busca-sefaz-relogio .relogio.ativo{animation:none}}
+.busca-sefaz-acoes{display:flex;flex-direction:column;gap:6px;align-items:stretch}.busca-sefaz-acoes .btn{white-space:nowrap}
+@media (max-width:760px){.busca-sefaz{grid-template-columns:1fr}.busca-sefaz-relogio{justify-self:start}}
