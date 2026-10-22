@@ -136,18 +136,23 @@ service cloud.firestore {
     }
     match /movements/{id} {
       allow read: if admin()
-        || (resource.data.type == 'SAIDA' && le(resource.data.projectId, resource.data.clientId))
+        || (resource.data.type in ['SAIDA', 'REQUISICAO'] && le(resource.data.projectId, resource.data.clientId))
         || (resource.data.type == 'ENTRADA' && escritor() && resource.data.get('escopo', '') == 'aberta');
       // Baixa (SAIDA): em nome de quem grava, com motivo; o estorno é uma saída negativa ligada à baixa (ver baixaValida).
       allow create: if (request.resource.data.type == 'SAIDA'
           && grava(request.resource.data.projectId, request.resource.data.clientId)
           && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId)
           && (baixaValida(id, request.resource.data) || admin()))  // administrador: restauração de backups antigos
+        || (request.resource.data.type == 'SAIDA' && consumoObraValido(id, request.resource.data))
+        || (request.resource.data.type == 'REQUISICAO'
+          && grava(request.resource.data.projectId, request.resource.data.clientId)
+          && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId)
+          && (requisicaoMovValida(request.resource.data) || admin()))
         || (request.resource.data.type == 'ENTRADA' && escritor());
       // Baixas não se alteram nem se apagam (a correção é o estorno). Só o reenvio idêntico (carimbo de envio) e o administrador
       // (restauração de backup) regravam uma baixa.
       allow update: if admin()
-        || (resource.data.type == 'SAIDA' && grava(resource.data.projectId, resource.data.clientId)
+        || (resource.data.type in ['SAIDA', 'REQUISICAO'] && grava(resource.data.projectId, resource.data.clientId)
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['_atualizadoEm', '_atualizadoPor']))
         || (resource.data.type == 'ENTRADA' && escritor()
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['escopo', '_atualizadoEm', '_atualizadoPor']));
@@ -165,6 +170,25 @@ service cloud.firestore {
       return d.get('criadoPor', '') == eu() && d.get('note', '') is string && d.get('note', '').size() >= 3
         && d.get('ajuste', false) == false && d.get('ajusteValor', 0) == 0
         && (d.get('estornoDe', '') == '' ? d.quantity is number && d.quantity > 0 : estornoValido(id, d));
+    }
+    // Requisição da obra (js/requisicoes.js e captura.html): entregue à obra (+) só com a requisição atendida no mesmo lote;
+    // devolvido ao estoque (−) só com a devolução recebida no mesmo lote. Sempre em nome de quem grava.
+    function requisicaoMovValida(d) {
+      return d.get('criadoPor', '') == eu() && d.quantity is number
+        && (d.quantity > 0
+            ? reqConfere(d.get('requisicaoId', '-'), d, 'requisicao', 'atendida')
+            : d.quantity < 0 && reqConfere(d.get('devolucaoId', '-'), d, 'devolucao', 'recebida'));
+    }
+    function reqConfere(rid, d, tipo, status) {
+      let r = getAfter(caminho('requisicoes', rid)).data;
+      return r.tipo == tipo && r.status == status && r.projectId == d.projectId && r.clientId == d.clientId;
+    }
+    // Consumo confirmado pelo mestre: baixa (SAIDA) ligada a uma requisição atendida dele, na obra concedida.
+    function consumoObraValido(id, d) {
+      return obra() && d.get('requisicaoId', '') != '' && d.get('estornoDe', '') == '' && baixaValida(id, d)
+        && concedido(d.projectId, d.clientId) && clienteDoProjeto(d.projectId, d.clientId)
+        && getAfter(caminho('requisicoes', d.requisicaoId)).data.autor == eu()
+        && reqConfere(d.requisicaoId, d, 'requisicao', 'atendida');
     }
     function estornoValido(id, d) {
       let o = get(caminho('movements', d.estornoDe)).data;
@@ -200,6 +224,38 @@ service cloud.firestore {
     match /products/{id} {
       allow read: if escritorio();
       allow create, update: if escritor();
+      allow delete: if admin();
+    }
+    // Tabela de materiais padronizados (js/materiais.js): o mestre lê para pedir; quem tem escrita cadastra.
+    match /materiais/{id} {
+      allow read: if ativo();
+      allow create, update: if escritor();
+      allow delete: if admin();
+    }
+    // Requisições e devoluções da obra. O mestre (ou o escritório) cria para a obra concedida, sempre pendente. O autor cancela
+    // a pendente e, depois de atendida, grava só o consumo confirmado. Quem tem escrita no projeto atende, recusa, confirma a
+    // devolução e marca o que voltou (devolvido); autor, obra, tipo e código não mudam.
+    function reqFixos() { return request.resource.data.diff(resource.data).affectedKeys().hasAny(['autor', 'projectId', 'clientId', 'tipo', 'codigo', 'criadoEm']) == false; }
+    function reqMuda(campos) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(campos); }
+    match /requisicoes/{id} {
+      allow create: if (obra() || escritorio()) && request.resource.data.autor == eu() && request.resource.data.id == id
+        && request.resource.data.status == 'pendente' && request.resource.data.tipo in ['requisicao', 'devolucao']
+        && (admin() || concedido(request.resource.data.projectId, request.resource.data.clientId))
+        && clienteDoProjeto(request.resource.data.projectId, request.resource.data.clientId)
+        && request.resource.data.itens is list && request.resource.data.itens.size() > 0 && request.resource.data.itens.size() <= 60
+        && !('consumo' in request.resource.data) && !('devolvido' in request.resource.data) && !('atendidoPor' in request.resource.data);
+      allow read: if (ativo() && resource.data.autor == eu()) || le(resource.data.projectId, resource.data.clientId);
+      allow update: if reqFixos() && (
+        (resource.data.autor == eu() && resource.data.status == 'pendente' && request.resource.data.status == 'cancelada'
+          && reqMuda(['status', 'canceladoEm', '_atualizadoEm', '_atualizadoPor']))
+        || (resource.data.autor == eu() && resource.data.tipo == 'requisicao' && resource.data.status == 'atendida'
+          && request.resource.data.status == 'atendida' && reqMuda(['consumo', 'consumoEm', '_atualizadoEm', '_atualizadoPor']))
+        || (grava(resource.data.projectId, resource.data.clientId) && (
+          (resource.data.status == 'pendente' && request.resource.data.get('atendidoPor', '') == eu()
+            && ((resource.data.tipo == 'requisicao' && request.resource.data.status in ['atendida', 'recusada'])
+             || (resource.data.tipo == 'devolucao' && request.resource.data.status in ['recebida', 'recusada'])))
+          || (resource.data.tipo == 'requisicao' && resource.data.status == 'atendida' && request.resource.data.status == 'atendida'
+            && reqMuda(['devolvido', '_atualizadoEm', '_atualizadoPor'])))));
       allow delete: if admin();
     }
     // ==== #REGRAS-DADOS: END ====

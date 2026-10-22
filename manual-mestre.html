@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Manual do mestre de obras - V-22102026-1335</title>
+<title>Manual do mestre de obras - V-22102026-1920</title>
 <meta name="description" content="Como mandar a nota fiscal da obra para o escritório pelo celular, com o Notas TCS.">
 <link rel="icon" type="image/svg+xml" href="icones/notas-tcs.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,7 +30,8 @@
   <li><a href="#varias-obras"><b>3</b>Nota de mais de uma obra</a></li>
   <li><a href="#sem-codigo"><b>4</b>Nota sem código</a></li>
   <li><a href="#sem-internet"><b>5</b>Sem internet</a></li>
-  <li><a href="#problemas"><b>6</b>Deu problema?</a></li>
+  <li><a href="#material"><b>6</b>Pedir e devolver material</a></li>
+  <li><a href="#problemas"><b>7</b>Deu problema?</a></li>
   <li><a href="#resumo"><b>✓</b>Resumo</a></li>
  </ol>
  <div class="extra"><a class="btn primario" href="mestre">Abrir o Notas TCS</a><a class="btn" href="manuais/manual-mestre.pdf" download>Baixar o cartaz em PDF</a></div>
@@ -47,7 +48,8 @@
   <li><a href="#varias-obras"><b>3</b>Nota de mais de uma obra</a></li>
   <li><a href="#sem-codigo"><b>4</b>Nota sem código</a></li>
   <li><a href="#sem-internet"><b>5</b>Sem internet</a></li>
-  <li><a href="#problemas"><b>6</b>Deu problema?</a></li>
+  <li><a href="#material"><b>6</b>Pedir e devolver material</a></li>
+  <li><a href="#problemas"><b>7</b>Deu problema?</a></li>
  </ul>
 </section>
 
@@ -327,9 +329,49 @@
  <a class="voltar" href="#indice">↑ Voltar ao índice</a>
 </section>
 
-<!-- ============ 6. PROBLEMAS ============ -->
+<!-- ============ 6. MATERIAL DA OBRA ============ -->
+<section class="bloco" id="material" style="--acento:var(--ocre)">
+ <h2>6. Pedir e devolver material</h2>
+ <p class="sub">O material sai do estoque da obra em três passos: você <b>pede</b>, o escritório <b>entrega</b> e você <b>confirma o que usou</b>. Só o que você confirma vira gasto da obra.</p>
+ <div class="passo sem-figura">
+  <div>
+   <h3><span class="n">📦</span>Toque em "Pedir material"</h3>
+   <ul>
+    <li>Escolha a <b>obra</b> (se tiver mais de uma).</li>
+    <li>Busque o material pelo nome (ex.: <i>cimento</i>) e toque nele. Use <b>−</b> e <b>+</b> ou digite a quantidade. A unidade aparece ao lado (SC, M3, UN…).</li>
+    <li>Pode pôr vários materiais no mesmo pedido e escrever uma observação.</li>
+    <li>Toque em <b>Enviar pedido</b>. O escritório separa e entrega.</li>
+   </ul>
+   <div class="dica"><span>👉</span><span>O material não está na lista? Fale com o escritório: os nomes vêm da tabela de materiais do estoque.</span></div>
+  </div>
+ </div>
+ <div class="passo sem-figura">
+  <div>
+   <h3><span class="n">✔</span>Usou? Toque em "Na obra" e em "Usei"</h3>
+   <p>Em <b>Na obra</b> aparece o material que o escritório entregou e que você ainda não confirmou. Ponha a quantidade que <b>foi usada</b> e toque em <b>✔ Usei</b>.</p>
+   <p>Exemplo: pediu <b>5 sacos</b> de cimento e usou <b>3</b>: ponha 3 e toque em Usei. Ficam 2 com a obra.</p>
+  </div>
+ </div>
+ <div class="passo sem-figura">
+  <div>
+   <h3><span class="n">↩</span>Sobrou? Devolva</h3>
+   <p>Em <b>Na obra</b>, ponha a quantidade que vai voltar (no exemplo, <b>2</b>) e toque em <b>↩ Devolver</b>. Leve o material ao estoque: quando o escritório confirmar que recebeu, ele volta para o estoque.</p>
+   <div class="dica atencao"><span>⚠️</span><span>Enquanto você não tocar em Usei nem em Devolver, o material continua <b>com a obra</b> (requisitado). Confirme o uso no mesmo dia, para o gasto da obra ficar certo.</span></div>
+  </div>
+ </div>
+ <div class="passo sem-figura">
+  <div>
+   <h3><span class="n">📋</span>Meus pedidos</h3>
+   <p>Mostra cada pedido e devolução com a situação: <b>Aguardando o escritório</b>, <b>Entregue</b> (com quanto foi entregue, usado e devolvido), <b>Recusado</b> (com o motivo) ou <b>Cancelado</b>. Enquanto estiver aguardando, você pode cancelar.</p>
+   <p>Sem internet, o pedido fica guardado no celular (<b>📶 Guardado no celular</b>) e vai sozinho quando a internet voltar.</p>
+  </div>
+ </div>
+ <a class="voltar" href="#indice">↑ Voltar ao índice</a>
+</section>
+
+<!-- ============ 7. PROBLEMAS ============ -->
 <section class="bloco" id="problemas" style="--acento:var(--ferrugem)">
- <h2>6. Deu problema?</h2>
+ <h2>7. Deu problema?</h2>
  <table>
   <thead><tr><th>O que aparece</th><th>O que fazer</th></tr></thead>
   <tbody>
@@ -357,6 +399,7 @@
   <li>Toque na <b>obra</b> (ou nas obras).</li>
   <li>Toque em <b>Enviar</b>.</li>
  </ol>
+ <p><b>Material:</b> 📦 <b>Pedir material</b> → o escritório entrega → em <b>Na obra</b>, toque em <b>✔ Usei</b> no que usou e em <b>↩ Devolver</b> no que sobrou.</p>
 </section>
 
 <p class="rodape">Notas TCS · manual do mestre de obras · <a href="mestre">abrir o aplicativo</a></p>

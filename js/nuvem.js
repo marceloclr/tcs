@@ -26,7 +26,7 @@ function planoEscuta(p,email){const P=[];const add=(store,filtros)=>P.push({k:st
  fatias(pl).forEach(f=>add('projects',[['__id__','in',f]]));fatias(cl).forEach(f=>add('projects',[['clientId','in',f]]));
  if(p.papel!=='escritorio')return P;
  fatias(p.clv||[]).forEach(f=>add('clients',[['__id__','in',f]]));
- porProj('allocations');porProj('notas_projeto');porProj('movements',[['type','==','SAIDA']]);porProj('quotes');add('quotes',[['criadoPor','==',email]]);add('products');
+ porProj('allocations');porProj('notas_projeto');porProj('movements',[['type','==','SAIDA']]);porProj('movements',[['type','==','REQUISICAO']]);porProj('quotes');add('quotes',[['criadoPor','==',email]]);add('products');add('materiais');
  if(escritorVigente(p)){add('invoices',[['escopo','==','aberta']]);add('allocations',[['escopo','==','aberta']]);add('movements',[['type','==','ENTRADA'],['escopo','==','aberta']])}
  return P}
 // Baixa feita no modo offline, sem login (nunca foi à nuvem): fica em nome de quem entra depois neste navegador.

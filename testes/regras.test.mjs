@@ -305,3 +305,70 @@ test('ajuste de estoque: só administradores, e não se estorna', async () => {
   await assertFails(setDoc(doc(ctx(ESC), 'movements/est-aj3'), baixa(ESC, { estornoDe: 'aj3', quantity: -1, note: 'desfazer ajuste' })));
   await assertFails(updateDoc(doc(ctx(ESC), 'movements/aj3'), { note: 'outro' }));
 });
+
+// ---------- Materiais, requisição e devolução da obra (estoque → requisitado → consumido) ----------
+const REQ = (id, extra = {}) => ({ id, codigo: 'REQ-' + id, tipo: 'requisicao', projectId: 'A1', clientId: 'A', autor: OBRA, autorNome: 'Mestre', criadoEm: '2026-10-22T10:00:00Z', status: 'pendente', obs: '', itens: [{ materialId: 'M1', nome: 'Cimento', unidade: 'SC', pedida: 5 }], ...extra });
+const ATENDIDA = id => REQ(id, { status: 'atendida', atendidoPor: ESC, itens: [{ materialId: 'M1', nome: 'Cimento', unidade: 'SC', pedida: 5, atendida: 5, partes: [{ productId: 'P1', qtd: 5, unitCost: 40 }] }] });
+const semRegras = f => env.withSecurityRulesDisabled(c => f(c.firestore()));
+test('materiais: o mestre lê e não grava; o escritório com escrita grava', async () => {
+  await semRegras(db => setDoc(doc(db, 'materiais/M1'), { id: 'M1', nome: 'Cimento CP II 50 kg', unidade: 'SC', ativo: true }));
+  await assertSucceeds(getDocs(query(collection(ctx(OBRA), 'materiais'), where('ativo', '==', true))));
+  await assertFails(setDoc(doc(ctx(OBRA), 'materiais/M2'), { id: 'M2', nome: 'Areia', unidade: 'M3', ativo: true }));
+  await assertFails(setDoc(doc(ctx(LEI), 'materiais/M2'), { id: 'M2', nome: 'Areia', unidade: 'M3', ativo: true }));
+  await assertSucceeds(setDoc(doc(ctx(ESC), 'materiais/M2'), { id: 'M2', nome: 'Areia', unidade: 'M3', ativo: true }));
+  await assertFails(deleteDoc(doc(ctx(ESC), 'materiais/M2')));
+});
+test('requisição: o mestre cria só na obra concedida, pendente e em nome dele, e cancela a própria', async () => {
+  const db = ctx(OBRA);
+  await assertSucceeds(setDoc(doc(db, 'requisicoes/R1'), REQ('R1')));
+  await assertFails(setDoc(doc(db, 'requisicoes/R2'), REQ('R2', { projectId: 'B1', clientId: 'B' })));
+  await assertFails(setDoc(doc(db, 'requisicoes/R3'), REQ('R3', { autor: ESC })));
+  await assertFails(setDoc(doc(db, 'requisicoes/R4'), REQ('R4', { status: 'atendida' })));
+  await assertFails(setDoc(doc(db, 'requisicoes/R5'), REQ('R5', { itens: [] })));
+  await assertSucceeds(getDocs(query(collection(db, 'requisicoes'), where('autor', '==', OBRA))));
+  // o mestre não atende o próprio pedido nem muda os itens
+  await assertFails(updateDoc(doc(db, 'requisicoes/R1'), { status: 'atendida', atendidoPor: OBRA }));
+  await assertFails(updateDoc(doc(db, 'requisicoes/R1'), { itens: [{ materialId: 'M1', nome: 'Cimento', unidade: 'SC', pedida: 50 }] }));
+  await assertSucceeds(updateDoc(doc(db, 'requisicoes/R1'), { status: 'cancelada', canceladoEm: '2026-10-22T11:00:00Z' }));
+  await assertFails(updateDoc(doc(db, 'requisicoes/R1'), { status: 'pendente' }));
+});
+test('atender: o escritório com escrita entrega (REQUISICAO +) no mesmo lote; leitor e outra obra não', async () => {
+  await semRegras(db => setDoc(doc(db, 'requisicoes/R1'), REQ('R1')));
+  const mov = (id, extra = {}) => ({ id, type: 'REQUISICAO', requisicaoId: 'R1', productId: 'P1', projectId: 'A1', clientId: 'A', quantity: 5, unitCost: 40, criadoPor: ESC, note: 'Entregue à obra', ...extra });
+  const lote = (db, m, r) => { const b = writeBatch(db); b.set(doc(db, 'movements/' + m.id), m); b.update(doc(db, 'requisicoes/R1'), r); return b.commit(); };
+  // sem atender a requisição no mesmo lote, o movimento não passa
+  await assertFails(setDoc(doc(ctx(ESC), 'movements/q0'), mov('q0')));
+  await assertFails(lote(ctx(LEI), mov('q1', { criadoPor: LEI }), { status: 'atendida', atendidoPor: LEI }));
+  await assertFails(lote(ctx(ESC), mov('q2', { criadoPor: OBRA }), { status: 'atendida', atendidoPor: ESC }));
+  await assertSucceeds(lote(ctx(ESC), mov('q3'), { status: 'atendida', atendidoPor: ESC, itens: ATENDIDA('R1').itens }));
+  await assertSucceeds(getDocs(query(collection(ctx(ESC), 'movements'), where('type', '==', 'REQUISICAO'), where('projectId', 'in', ['A1']))));
+  await assertFails(getDocs(query(collection(ctx(OBRA), 'movements'), where('type', '==', 'REQUISICAO'), where('projectId', 'in', ['A1']))));
+  // atendida não volta a pendente nem é recusada depois
+  await assertFails(updateDoc(doc(ctx(ESC), 'requisicoes/R1'), { status: 'recusada', atendidoPor: ESC }));
+});
+test('consumo: só o mestre autor da requisição atendida baixa (SAIDA com requisicaoId) e marca o consumo', async () => {
+  await semRegras(async db => { await setDoc(doc(db, 'requisicoes/R1'), ATENDIDA('R1')); await setDoc(doc(db, 'requisicoes/R2'), REQ('R2')); await setDoc(doc(db, 'requisicoes/R3'), ATENDIDA('R3')); await setDoc(doc(db, 'usuarios/outro@x.com'), { email: 'outro@x.com', papel: 'obra', ativo: true, acessos: { 'p:A1': { n: 'L', ate: null } } }); });
+  const con = (id, extra = {}) => ({ id, type: 'SAIDA', requisicaoId: 'R1', productId: 'P1', projectId: 'A1', clientId: 'A', quantity: 3, unitCost: 40, note: 'Uso confirmado pela obra', criadoPor: OBRA, ...extra });
+  const lote = (db, m, rid = 'R1') => { const b = writeBatch(db); b.set(doc(db, 'movements/' + m.id), m); b.update(doc(db, 'requisicoes/' + rid), { consumo: { '0_0': 3 }, consumoEm: '2026-10-22T12:00:00Z' }); return b.commit(); };
+  await assertSucceeds(lote(ctx(OBRA), con('c1')));
+  await assertFails(lote(ctx(OBRA), con('c2', { requisicaoId: 'R2' }), 'R2'));                 // requisição ainda pendente
+  await assertFails(setDoc(doc(ctx(OBRA), 'movements/c3'), con('c3', { requisicaoId: '' })));   // baixa direta: o mestre não pode
+  await assertFails(setDoc(doc(ctx(OBRA), 'movements/c4'), con('c4', { quantity: -3 })));
+  await assertFails(lote(ctx('outro@x.com'), con('c5', { criadoPor: 'outro@x.com', requisicaoId: 'R3' }), 'R3')); // não é o autor
+  // o mestre só mexe no consumo; o escritório não grava consumo
+  await assertFails(updateDoc(doc(ctx(OBRA), 'requisicoes/R1'), { devolvido: { '0_0': 2 } }));
+  await assertFails(updateDoc(doc(ctx(ESC), 'requisicoes/R1'), { consumo: { '0_0': 5 } }));
+});
+test('devolução: o mestre registra; o escritório recebe (REQUISICAO −) e marca o devolvido na origem', async () => {
+  await semRegras(db => setDoc(doc(db, 'requisicoes/R1'), ATENDIDA('R1')));
+  const DEV = { ...REQ('D1'), codigo: 'DEV-D1', tipo: 'devolucao', itens: [{ materialId: 'M1', nome: 'Cimento', unidade: 'SC', pedida: 2, partes: [{ requisicaoId: 'R1', i: 0, p: 0, productId: 'P1', qtd: 2 }] }] };
+  await assertSucceeds(setDoc(doc(ctx(OBRA), 'requisicoes/D1'), DEV));
+  const mov = (id, extra = {}) => ({ id, type: 'REQUISICAO', requisicaoId: 'R1', devolucaoId: 'D1', productId: 'P1', projectId: 'A1', clientId: 'A', quantity: -2, unitCost: 40, criadoPor: ESC, note: 'Devolvido ao estoque', ...extra });
+  const lote = (db, m, status) => { const b = writeBatch(db); b.set(doc(db, 'movements/' + m.id), m); b.update(doc(db, 'requisicoes/D1'), { status, atendidoPor: ESC }); b.update(doc(db, 'requisicoes/R1'), { devolvido: { '0_0': 2 } }); return b.commit(); };
+  await assertFails(lote(ctx(ESC), mov('d1'), 'recusada'));            // devolução recusada não volta ao estoque
+  await assertFails(lote(ctx(LEI), mov('d2', { criadoPor: LEI }), 'recebida'));
+  await assertSucceeds(lote(ctx(ESC), mov('d3'), 'recebida'));
+  // devolução não pode virar "atendida"; requisição não pode virar "recebida"
+  await semRegras(db => setDoc(doc(db, 'requisicoes/R9'), REQ('R9')));
+  await assertFails(updateDoc(doc(ctx(ESC), 'requisicoes/R9'), { status: 'recebida', atendidoPor: ESC }));
+});

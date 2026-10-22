@@ -54,6 +54,12 @@ O app real, ligado aos emuladores (`?emulador=1`, só funciona em localhost), co
        - troca da Obra 2 pela Obra 3;
        - separação por produto, com o excesso recusado;
        - nota lançada vinculada conforme a separação.
+   - `19-materiais-requisicao.js` (depois do `1-admin.js`), em cinco partes pelo `INIT` (`window.PARTE=...`):
+     - `esc1` em `index.html?emulador=1` (8767): duas notas de cimento de fornecedores diferentes, material criado, duplicado recusado, sugestão e vínculo, saldo somado por material;
+     - `obra1` em `captura.html?emulador=1` (8768): pedido de 5 SC; pedido sem internet guardado e enviado depois; cancelamento;
+     - `esc2`: atendimento FIFO (estoque −5, requisitado +5, sem custo) e excesso recusado;
+     - `obra2`: uso de 3 confirmado e devolução de 2;
+     - `esc3`: devolução recebida (estoque 13, requisitado 0, consumido 3, apropriado 3 × custo), fechamento estoque + apropriado = pago e log de atividades.
    - `10-fila.js` em 8767 (depois do `7-captura.js`): fila do escritório, cartão e destaque de 48 h, conferir com o projeto indicado, lançar, fotos como comprovante, descartar com motivo e XML da mesma chave substituindo os dados da foto.
 
 Variáveis do `cdp.mjs`: `CDP_PORTA` (9446), `ESPERA` (ms antes de rodar o script), `FIM` (ms antes de fechar), `INIT` (script injetado antes da página) e `TEMA=claro|escuro` força o tema; o script pode chamar `console.log('__cdp_offline__')` e `console.log('__cdp_online__')` para derrubar e religar a rede da página.

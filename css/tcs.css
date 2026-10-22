@@ -116,3 +116,12 @@ tr.atrasada td{background:#fffbeb}.atraso-txt{color:#92400e;font-weight:700}.aco
 .fila-dist .setas{width:1%;white-space:nowrap;text-align:center;padding-left:2px;padding-right:2px}
 .fila-dist .seta{min-width:30px;padding:4px 6px;font-size:14px;line-height:1;margin:1px}
 .fila-dist output.restante{display:inline-block;min-width:90px;padding:6px 8px;border-radius:8px;background:var(--blue-soft);color:#1e3a8a;font-weight:700;font-variant-numeric:tabular-nums}
+/* ==== #CSS-MATERIAIS: START ==== tabela de materiais, vínculo, saldo por material e requisições da obra */
+.lv-material td{background:#f8fafc;font-weight:600}.lv-material td:first-child{padding-left:44px}
+.lv-sub td:first-child{padding-left:64px;font-weight:400}.lv-sub td{color:#475569;font-size:13px}
+.pos-req{color:#b45309}
+.link-btn{border:0;background:none;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left}.link-btn:hover strong{text-decoration:underline}
+.mat-lista{margin:6px 0 0;padding-left:18px}.mat-lista li{margin:4px 0}
+.mat-conf{margin:-10px 0 24px;padding:12px 14px;border:1px dashed #cbd5e1;border-radius:10px;background:#fbfdff}.mat-conf .row{margin-bottom:8px}
+.req-cartao .row{gap:8px}.req-cartao table{margin-top:8px}
+/* ==== #CSS-MATERIAIS: END ==== */

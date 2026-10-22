@@ -13,7 +13,10 @@ A versão aparece no canto inferior esquerdo, no formato `V-DDMMAAAA-HHMM`. Ela 
 | Clientes | Cadastro de clientes, com materiais, serviços, custo total e valor em estoque de cada um. |
 | Projetos | Projetos de cada cliente, com uma cor, uma situação (ativo ou encerrado) e os mesmos totais. |
 | Fornecedores | Busca por fornecedor ou prestador, com notas e itens. |
-| Estoque › Saldo | Grid hierárquica cliente → projeto → produto. Só materiais. |
+| Estoque › Saldo | Grid hierárquica cliente → projeto → **material** (ou produto do fornecedor), com as posições **Estoque**, **Requisitado** e **Consumido**. Só materiais. |
+| Estoque › Materiais | Tabela de materiais padronizados (nome, unidade, categoria), com os produtos de fornecedor vinculados e o saldo por obra; editar, juntar e desativar. |
+| Estoque › Vincular itens | Produtos das notas ainda sem material, com sugestão pelo nome; vínculo um a um, em lote ou criando o material. |
+| Estoque › Requisições da obra | Pedidos e devoluções do mestre: atender (estoque → requisitado), recusar, confirmar devolução (requisitado → estoque); abas Pendentes, Com a obra e Histórico; CSV. |
 | Estoque › Produtos e ajustes | Dados do produto (nome, EAN e unidade) e, por projeto, recebido, saldo, custo médio e valor em estoque. Administradores ajustam a quantidade (pela contagem) e o custo médio, com motivo; histórico dos ajustes. |
 | Estoque › Baixas de estoque | Cada baixa com data, produto, projeto, quantidade, valor, motivo, responsável e situação (ativa ou estornada). Filtros por período, projeto, responsável e situação; estorno com motivo; CSV. |
 | Estoque › Notas fiscais | Notas a vincular, em distribuição e vinculadas, com filtro Materiais/Serviços. |
@@ -123,3 +126,19 @@ Não foram testados o OCR de PDF digitalizado nem PDFs reais de NFS-e de cada pr
 
 ## App Android do mestre (APK)
 A tela do mestre também existe como app Android (TWA): https://marceloclr.gitlab.io/tcs/apk/notas-tcs.apk. Ele abre a mesma página `/tcs/mestre`, então as mudanças na tela chegam sozinhas. Como gerar de novo e onde fica a chave: `android/LEIA-ME.md`.
+
+## Materiais padronizados e requisição da obra (22/10/2026)
+- **Tabela de materiais** (coleção `materiais`, [`js/materiais.js`](js/materiais.js)): cada produto de fornecedor aponta para um material em `products.materialId` (de-para). Vinculado uma vez, vale para as próximas notas do mesmo produto. A conferência das notas mostra o material de cada item. A unidade é 1 para 1: unidade diferente só gera aviso.
+- **Três posições** por obra e material ([`js/paineis.js`](js/paineis.js), `stockTree`):
+  - **Estoque** = entrada − baixas diretas − requisitado;
+  - **Requisitado** = entregue à obra (movimentos `REQUISICAO`, menos as devoluções) − uso confirmado pelo mestre;
+  - **Consumido** = todas as baixas (`SAIDA`), inclusive o uso confirmado. Só o consumido é custo apropriado; estoque e requisitado ficam sob custódia.
+- **Fluxo** ([`js/requisicoes.js`](js/requisicoes.js) no escritório; [`js/captura.js`](js/captura.js) no celular):
+  1. o mestre pede (**📦 Pedir material**);
+  2. o escritório atende: `REQUISICAO` +, por produto, em ordem de entrada (FIFO);
+  3. o mestre confirma o uso (**Na obra › ✔ Usei**): `SAIDA` com `requisicaoId`, gravada por ele;
+  4. o que sobrar ele devolve (**↩ Devolver**), e o escritório confirma o recebimento: `REQUISICAO` −.
+- **Coleção `requisicoes`:** guarda o que foi entregue de cada produto (`itens[i].partes`), o consumo (`consumo`, gravado pelo mestre) e o devolvido (`devolvido`, gravado pelo escritório). Requisição e movimentos vão à nuvem num só lote, e as regras conferem a ligação entre eles.
+- **Sem internet**, o pedido do mestre fica na fila do próprio Firestore no celular e sobe sozinho.
+- **Regras novas** (`materiais`, `requisicoes`, `REQUISICAO` e consumo da obra em `movements`): publicadas com `cd testes && npx firebase deploy --only firestore:rules --project thiago-17d18 --config ../firebase.json`.
+- **Testes:** 26 regras (`testes/regras.test.mjs`) e o ciclo completo no navegador (`testes/navegador/19-materiais-requisicao.js`).

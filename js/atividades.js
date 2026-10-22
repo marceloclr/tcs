@@ -8,7 +8,7 @@
 //  - entrada, saída, modo offline, exportações e impressão: registrarAtividade onde acontecem.
 // Sem conexão, os registros esperam numa fila neste navegador (localStorage) e sobem no próximo login.
 const ATV_FILA = 'tcs_atividades_fila', ATV_MAX = 5000;
-const ATV_CAT = {sessao:'Entrada e saída', estoque:'Estoque e baixas', notas:'Notas fiscais', cadastros:'Clientes e projetos', catalogo:'Catálogo de produtos',
+const ATV_CAT = {sessao:'Entrada e saída', estoque:'Estoque e baixas', notas:'Notas fiscais', cadastros:'Clientes e projetos', catalogo:'Catálogo e materiais',
  orcamentos:'Pedidos de orçamento', obra:'Notas da obra', acessos:'Usuários e acessos', exportacao:'Exportações e impressões', dados:'Dados e segurança'};
 const ATV_IGNORAR = new Set(['notas_projeto', 'chaves']); // projeções derivadas: a nota e o rateio já descrevem a mudança
 
@@ -135,6 +135,21 @@ function atvDeOps(ops, opts = {}){
   else if(!v) lista.push({cat:'catalogo', acao:'produto_criado', texto:`Cadastrou o produto ${p.name}`});
   else{const d = atvDiferencas(v, p, {name:'Nome', barcode:'EAN', unit:'Unidade', stock:'Saldo'}); if(d) lista.push({cat:'catalogo', acao:'produto_alterado', texto:`Alterou o produto ${p.name}: ${d}`})}
  }
+ // de-para produto de fornecedor → material (vale também dentro do lançamento de notas)
+ for(const o of porStore.products || []){
+  if(o.op === 'delete') continue;
+  const p = o.obj, v = antigo('products', o.id), nomeMat = id => id ? ((state.materiais || []).find(m => m.id === id) || (porStore.materiais || []).find(x => x.id === id)?.obj)?.nome || id : '';
+  if((v?.materialId || '') !== (p.materialId || '')) lista.push({cat:'catalogo', acao: p.materialId ? 'material_vinculado' : 'material_desvinculado',
+   texto: p.materialId ? `Vinculou o produto ${p.name} ao material ${nomeMat(p.materialId)}${v?.materialId ? ' (antes: ' + nomeMat(v.materialId) + ')' : ''}` : `Desvinculou o produto ${p.name} do material ${nomeMat(v?.materialId)}`});
+ }
+ // tabela de materiais
+ for(const o of porStore.materiais || []){
+  const m = o.obj, v = antigo('materiais', o.id);
+  if(o.op === 'delete') lista.push({cat:'catalogo', acao:'material_excluido', texto:`Excluiu o material ${v?.nome || o.id}`});
+  else if(!v) lista.push({cat:'catalogo', acao:'material_criado', texto:`Cadastrou o material ${m.nome} (${m.unidade})${m.categoria ? ', categoria ' + m.categoria : ''}`});
+  else if(m.juntadoEm && !v.juntadoEm) lista.push({cat:'catalogo', acao:'material_juntado', texto:`Juntou o material ${m.nome} em ${(state.materiais || []).find(x => x.id === m.juntadoEm)?.nome || m.juntadoEm}`});
+  else{const d = atvDiferencas(v, m, {nome:'Nome', unidade:'Unidade', categoria:'Categoria', ativo:'Ativo'}); if(d) lista.push({cat:'catalogo', acao:'material_alterado', texto:`Alterou o material ${m.nome}: ${d}`})}
+ }
  // pedidos de orçamento
  for(const o of porStore.quotes || []){
   const q = o.obj, v = antigo('quotes', o.id);
@@ -143,7 +158,7 @@ function atvDeOps(ops, opts = {}){
   else lista.push({cat:'orcamentos', acao:'orcamento_alterado', texto:`Alterou o pedido de orçamento ${q.number}`, projetoId:q.projectId, clienteId:q.clientId});
  }
  // qualquer outra coleção (para nada escapar do log)
- for(const [s, l] of Object.entries(porStore)) if(!['movements', 'invoices', 'allocations', 'clients', 'projects', 'products', 'quotes'].includes(s))
+ for(const [s, l] of Object.entries(porStore)) if(!['movements', 'invoices', 'allocations', 'clients', 'projects', 'products', 'quotes', 'materiais'].includes(s))
   lista.push({cat:'dados', acao:'gravacao', texto:`${l.length} alteração(ões) em ${s}`});
  return lista;
 }
@@ -161,6 +176,12 @@ function atvDeCommit(ops){
    const de = c ? ` enviada por ${c.autor} (${atvProj(c.projectId)})` : '';
    const t = {em_conferencia:`Abriu para conferência a nota da obra${de}`, lancada:`Lançou a nota da obra${de}`, descartada:`Descartou a nota da obra${de}. Motivo: ${d.motivo || '—'}`}[d.status];
    if(t) registrarAtividade({cat:'obra', acao:'obra_' + d.status, texto:t, projetoId:c?.projectId, clienteId:c?.clientId, ref:'capturas/' + o.id});
+  }else if(o.store === 'requisicoes' && o.op === 'update' && d.status && d.atendidoPor){
+   const r = typeof Req !== 'undefined' ? Req.itens.get(o.id) : null, itens = d.itens || r?.itens || [];
+   const de = r ? ` ${r.codigo}, de ${r.autorNome || r.autor} (${atvProj(r.projectId)})` : '';
+   const lista = itens.map(it => `${it.nome}: ${num(d.status === 'recebida' ? it.recebida : d.status === 'atendida' ? it.atendida : it.pedida)} ${it.unidade}`).join('; ');
+   const t = {atendida:`Atendeu a requisição${de}: ${lista}. O material passou do estoque para o requisitado da obra`, recusada:`Recusou ${r?.tipo === 'devolucao' ? 'a devolução' : 'a requisição'}${de}. Motivo: ${d.motivoRecusa || '—'}`, recebida:`Recebeu a devolução${de}: ${lista}. O material voltou ao estoque`}[d.status];
+   if(t) registrarAtividade({cat:'estoque', acao:'requisicao_' + d.status, texto:t, projetoId:r?.projectId, clienteId:r?.clientId, ref:'requisicoes/' + o.id});
   }else if(o.store === 'usuarios' && o.op === 'update' && 'telefone' in d) registrarAtividade({cat:'acessos', acao:'telefone', texto:'Atualizou o próprio telefone de contato'});
  }
 }
