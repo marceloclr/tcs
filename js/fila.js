@@ -47,6 +47,8 @@ function filaAtualizar(id,campos){return window.__fb.commit([{op:'update',store:
 async function filaConferir(id){const c=Fila.itens.get(id);if(!c)return;if(draft.some(d=>d._captura===id)){go('import');$('#preview').scrollIntoView();return}
  const aviso=t=>filaMsg('<span class="spin"></span> '+esc(t));const repetida=key=>`<button class="btn sm" data-fila-descartar="${esc(id)}" data-motivo="Nota já lançada (chave repetida)" title="Descarta esta captura como repetida">Descartar como repetida</button>`;
  try{const temFoto=(c.fotos||[]).length>0,sefaz=c.busca?.status==='ok';if(!temFoto&&!chaveValida(c.chave)&&!sefaz)throw new Error('A captura não tem fotos nem chave da nota.');
+  // outra captura com a mesma chave já aberta na conferência (a obra mandou a mesma nota duas vezes)
+  const jaAberta=chaveValida(c.chave)&&draft.find(d=>d.key===c.chave);if(jaAberta){filaMsg(`A nota ${esc(jaAberta.number||c.chave)} desta captura já está na conferência, aberta por outra captura com a mesma chave. Confira só uma delas.`+repetida());return}
   if(c.status==='pendente')await filaAtualizar(id,{status:'em_conferencia',conferindoPor:Nuvem.user.email,conferenciaEm:new Date().toISOString()});
   let inv=null,fotos=[];
   if(temFoto){aviso('Baixando as fotos da obra…');fotos=await filaFotosDe(c);if(!fotos.length)throw new Error('As fotos da captura não chegaram.');
@@ -62,6 +64,7 @@ async function filaConferir(id){const c=Fila.itens.get(id);if(!c)return;if(draft
   // a página da SEFAZ nem sempre traz a chave legível: completa pela chave que a obra mandou
   if(inv&&!inv.key&&chaveValida(c.chave)){const k=chaveDecompor(c.chave);Object.assign(inv,{id:k.chave,key:k.chave,number:inv.number||k.numero,series:inv.series||k.serie,issuerDoc:inv.issuerDoc||k.cnpj});['key','number','series','issuerDoc'].forEach(f=>inv._fontes[f]={f:'chave',origem:'chave da obra'})}
   if(!inv){const dup=await chaveJaLancada(c.chave);if(dup){filaMsg(duplicadaHtml(c.chave,dup,'Captura da obra')+repetida());return}inv=notaDaChave(c)}
+  const outra=inv.key&&draft.find(d=>d!==inv&&d.key===inv.key);if(outra){if(inv._foto?.url)URL.revokeObjectURL(inv._foto.url);filaMsg(`A nota ${esc(inv.number||inv.key)} desta captura já está na conferência, aberta por outra captura com a mesma chave. Confira só uma delas.`+repetida());return}
   inv._captura=id;inv._projeto=podeGravarProjeto(c.projectId)?c.projectId:'';inv._fotosExtra=fotos.slice(1).map(f=>URL.createObjectURL(f));inv._avisos=inv._avisos||[];
   if((c.observacoes||[]).length)inv._avisos.unshift('A obra informou: '+c.observacoes.join(' e ')+'. Confira as quantidades com a nota.');
   if(fotos.length>1)inv._avisos.push(`A obra enviou ${fotos.length} fotos desta nota; a leitura usou a primeira. As outras aparecem abaixo da foto principal.`);
