@@ -6,3 +6,6 @@ window.TCS_FIREBASE_CONFIG={apiKey:"AIzaSyDb5XrbCVCwdGfS95_uOPgEJaMemAAvytU",aut
 // esvazie as duas listas ([]) e publique as regras de novo: a partir daí, só um administrador cadastra pessoas.
 // Implantação concluída em 19/10/2026 (administrador: marceloclr@gmail.com). Lista vazia: só um administrador cadastra pessoas.
 window.TCS_ADMINS_INICIAIS=[];
+// Destinos do material no pedido da obra (onde vai ser usado). O administrador troca a lista em Usuários e acessos › Configurações
+// (config/geral.destinos); esta é a lista enquanto não houver uma gravada. "Outro" sempre aparece no fim, com texto livre.
+window.TCS_DESTINOS_PADRAO=['Laje','Fundação','Alvenaria','Hidráulico','Elétrico','Acabamento','Cobertura'];

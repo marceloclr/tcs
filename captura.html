@@ -5,11 +5,11 @@
 <!-- endereço curto /tcs/mestre (_redirects): com barra no fim, os caminhos relativos quebrariam; volta para o endereço sem a barra -->
 <script>if(/\/mestre\/$/.test(location.pathname))location.replace(location.pathname.replace(/\/$/,'')+location.search+location.hash)</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Notas TCS - V-23102026-1407</title>
+<title>Notas TCS - V-23102026-1418</title>
 <!-- tema escolhido no botão do topo (claro/escuro), aplicado antes de desenhar para não piscar -->
 <script>try{const t=localStorage.getItem('tcs-captura-tema');if(t==='claro'||t==='escuro')document.documentElement.dataset.tema=t}catch(e){}</script>
-<meta name="theme-color" content="#fffefc" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1f242a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="format-detection" content="telephone=no">
@@ -65,18 +65,26 @@
  </section>
 
  <section id="telaPedir" class="tela">
-  <h2 class="tela-titulo">Pedir material</h2>
+  <h2 class="tela-titulo" id="pedirTitulo">Pedir material</h2>
   <div id="pedirObra" class="obra-chips"></div>
-  <input id="pedirBusca" class="busca" type="search" placeholder="🔎 Buscar material…" autocomplete="off" enterkeyhint="search" aria-label="Buscar material na tabela">
-  <div id="pedirLista" class="mat-resultados" role="list"></div>
-  <h2>No pedido</h2>
-  <div id="pedirCarrinho" class="carrinho"></div>
-  <label class="obs-rotulo" for="pedirObs">Observação (opcional)</label>
-  <textarea id="pedirObs" class="obs" rows="2" placeholder="Ex.: para a laje do 2º pavimento; preciso até quinta"></textarea>
+  <!-- passo 1: estoque da obra, com a quantidade de cada material -->
+  <div id="pedirPasso1">
+   <p class="dica-obras">Material no estoque desta obra. Digite quanto precisa de cada um.</p>
+   <input id="pedirBusca" class="busca" type="search" placeholder="🔎 Buscar material…" autocomplete="off" enterkeyhint="search" aria-label="Buscar material na tabela">
+   <div id="pedirTabela" class="mat-tabela-caixa"></div>
+  </div>
+  <!-- passo 2: só o que tem quantidade, com o destino de cada material -->
+  <div id="pedirPasso2" hidden>
+   <p class="dica-obras">Confira o pedido e escolha onde cada material vai ser usado.</p>
+   <div id="pedirRevisao" class="mat-tabela-caixa"></div>
+   <label class="obs-rotulo" for="pedirObs">Observação (opcional)</label>
+   <textarea id="pedirObs" class="obs" rows="2" placeholder="Ex.: preciso até quinta"></textarea>
+  </div>
   <div class="empurra"></div>
   <div class="barra-acao">
-   <button class="botao principal enorme" id="pedirEnviar" disabled title="Envia o pedido ao escritório">Enviar pedido</button>
-   <button class="botao texto" id="pedirVoltar" title="Volta para a tela inicial; o pedido não é enviado">Voltar</button>
+   <button class="botao principal enorme" id="pedirRevisar" disabled title="Mostra só os materiais com quantidade, para escolher o destino de cada um">Revisar pedido</button>
+   <button class="botao principal enorme" id="pedirEnviar" hidden disabled title="Envia o pedido ao escritório">Enviar pedido</button>
+   <button class="botao texto" id="pedirVoltar" title="Volta sem enviar o pedido">Voltar</button>
   </div>
  </section>
 

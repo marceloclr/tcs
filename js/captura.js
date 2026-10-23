@@ -12,7 +12,7 @@ function mostrar(id){if(id!=='telaCodigo')visorParar();telas.forEach(t=>$('#'+t)
 $('#versao').textContent=(document.title.match(/V-\d{8}-\d{4}/)||[''])[0];
 // Tema claro/escuro (design system Papel e Tinta): sem escolha, segue o celular; o botão do topo fixa e guarda neste aparelho.
 function temaAtual(){const t=document.documentElement.dataset.tema;return t||(matchMedia('(prefers-color-scheme: dark)').matches?'escuro':'claro')}
-function temaCorBarra(){const c=temaAtual()==='escuro'?'#1f242a':'#fffefc';document.querySelectorAll('meta[name="theme-color"]').forEach(m=>{m.content=c;m.removeAttribute('media')})}
+function temaCorBarra(){const c=temaAtual()==='escuro'?'#020617':'#0f172a';document.querySelectorAll('meta[name="theme-color"]').forEach(m=>{m.content=c;m.removeAttribute('media')})}
 $('#tema').addEventListener('click',()=>{const t=temaAtual()==='escuro'?'claro':'escuro';document.documentElement.dataset.tema=t;try{localStorage.setItem('tcs-captura-tema',t)}catch(e){}temaCorBarra()});
 if(document.documentElement.dataset.tema)temaCorBarra();matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{if(!document.documentElement.dataset.tema)temaCorBarra()});
 
@@ -162,8 +162,8 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&Visor.stre
 // Três posições (escritório: js/requisicoes.js): ESTOQUE → REQUISITADO (o escritório atende o pedido e entrega) → CONSUMIDO
 // (o mestre confirma aqui o que usou). O que sobrar volta ao estoque pela devolução, confirmada pelo escritório.
 // Gravação direta no Firestore, com a cópia local dele: sem internet, o pedido fica guardado no celular e sobe sozinho.
-const Mt={materiais:[],reqs:new Map(),obra:'',carrinho:[],busca:'',unsubs:[],guardados:new Set()};// guardados: pedidos ainda não confirmados pelo servidor
-const MT_KEY='tcs-captura-materiais';
+const Mt={materiais:[],reqs:new Map(),obra:'',qtd:new Map(),destino:new Map(),passo:1,busca:'',saldo:null,saldoUnsub:null,destinos:null,unsubs:[],guardados:new Set()};// guardados: pedidos ainda não confirmados pelo servidor
+const MT_KEY='tcs-captura-materiais',MT_SALDO_KEY='tcs-captura-saldo-',MT_DEST_KEY='tcs-captura-destinos';
 const r4c=n=>Math.round(Number(n||0)*1e4)/1e4;
 const numc=n=>Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:3});
 // número digitado: com vírgula, o ponto é milhar (1.250,5); sem vírgula, o ponto é decimal (2.5)
@@ -171,6 +171,8 @@ const numDig=v=>{v=String(v||'').trim();return Number(v.includes(',')?v.replace(
 const normc=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 function materialEscutar(){Mt.unsubs.forEach(u=>u());Mt.unsubs=[];try{Mt.materiais=JSON.parse(localStorage.getItem(MT_KEY)||'[]')}catch(e){}
  const mapa=new Map();Mt.unsubs.push(window.__fb.listen('materiais',[['ativo','==',true]],ch=>{ch.forEach(c=>c.type==='removed'?mapa.delete(c.id):mapa.set(c.id,{...c.data,id:c.id}));Mt.materiais=[...mapa.values()].filter(m=>!m.juntadoEm).sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));try{localStorage.setItem(MT_KEY,JSON.stringify(Mt.materiais))}catch(e){}materialTelas()},e=>console.warn('Materiais:',e.message)));
+ try{Mt.destinos=JSON.parse(localStorage.getItem(MT_DEST_KEY)||'null')}catch(e){}
+ Mt.unsubs.push(window.__fb.listenDoc('config','geral',d=>{if(Array.isArray(d?.destinos)&&d.destinos.length){Mt.destinos=d.destinos;try{localStorage.setItem(MT_DEST_KEY,JSON.stringify(d.destinos))}catch(e){}}if($('#telaPedir').classList.contains('ativa'))pedirRender()},()=>{}));
  Mt.unsubs.push(window.__fb.listen('requisicoes',[['autor','==',Cap.user.email]],ch=>{ch.forEach(c=>c.type==='removed'?Mt.reqs.delete(c.id):Mt.reqs.set(c.id,{...c.data,id:c.id}));materialTelas()},e=>console.warn('Pedidos:',e.message)))}
 const mtLista=()=>[...Mt.reqs.values()].map(r=>({...r,_pendente:Mt.guardados.has(r.id)})).sort((a,b)=>String(b.criadoEm).localeCompare(String(a.criadoEm)));
 const mtChave=(i,p)=>i+'_'+p;
@@ -194,19 +196,46 @@ async function mtGravar(ops){const lista=ops.map(o=>o._a?mtAtv(o):o);const ids=l
 function mtCodigo(pref){const d=new Date(),z=n=>String(n).padStart(2,'0');return `${pref}-${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${Math.random().toString(36).slice(2,6).toUpperCase()}`}
 function mtPronto(icone,titulo,texto){$('#prontoTexto').innerHTML=`<span class="icone">${icone}</span>${titulo}<p>${texto}</p>`;mostrar('telaPronto')}
 
-// ---------- Pedir ----------
-function pedirRender(){mtObraChips($('#pedirObra'));const q=normc(Mt.busca).trim(),noCarr=new Set(Mt.carrinho.map(c=>c.materialId));
- const achados=Mt.materiais.filter(m=>!q||normc(m.nome+' '+(m.categoria||'')).includes(q));
- $('#pedirLista').innerHTML=!Mt.materiais.length?'<p class="dica-obras">A tabela de materiais ainda não chegou. Abra com internet uma vez.</p>':(q||Mt.carrinho.length<1)?achados.slice(0,40).map(m=>`<button class="mat-item${noCarr.has(m.id)?' no-pedido':''}" data-mt-add="${esc(m.id)}" role="listitem"><span>${esc(m.nome)}${m.categoria?`<small>${esc(m.categoria)}</small>`:''}</span><b>${noCarr.has(m.id)?'✓':'+'}</b><em>${esc(m.unidade)}</em></button>`).join('')+(achados.length>40?`<p class="dica-obras">Mais ${achados.length-40}: continue digitando.</p>`:'')+(!achados.length?'<p class="dica-obras">Nenhum material com esse nome. Fale com o escritório para cadastrar.</p>':''):'<p class="dica-obras">Busque para incluir mais um material.</p>';
- $('#pedirCarrinho').innerHTML=Mt.carrinho.length?Mt.carrinho.map((c,n)=>`<div class="carrinho-item"><div class="carrinho-nome">${esc(c.nome)}<small>${esc(c.unidade)}</small></div><div class="passo"><button data-mt-menos="${n}" aria-label="Menos">−</button><input inputmode="decimal" value="${numc(c.qtd)}" data-mt-qtd="${n}" aria-label="Quantidade de ${esc(c.nome)}"><button data-mt-mais="${n}" aria-label="Mais">+</button></div><button class="tirar-item" data-mt-tirar="${n}" aria-label="Tirar ${esc(c.nome)} do pedido">×</button></div>`).join(''):'<p class="dica-obras">Nenhum material ainda: busque acima e toque para incluir.</p>';
- $('#pedirEnviar').disabled=!Mt.carrinho.length||!Mt.obra||Mt.carrinho.some(c=>!(c.qtd>0))}
-async function pedirEnviar(){const p=mtObraAtual();if(!p||!Mt.carrinho.length)return;$('#pedirEnviar').disabled=true;const id=uid(),codigo=mtCodigo('REQ');
- const itens=Mt.carrinho.map(c=>({materialId:c.materialId,nome:c.nome,unidade:c.unidade,pedida:r4c(c.qtd)}));
+// ---------- Pedir: tabela do estoque da obra → revisão com o destino → envio ----------
+// O estoque vem de saldos_obra/{obra} (js/saldo-obra.js): o disponível por material, sem valores, gravado pelo escritório.
+// Sem internet, vale a última cópia guardada neste celular. Quantidade só positiva e até o disponível.
+const OUTRO='Outro';
+const mtDestinos=()=>[...(Mt.destinos||window.TCS_DESTINOS_PADRAO||[]).filter(d=>d&&d!==OUTRO),OUTRO];
+function mtSaldoEscutar(pid){if(Mt.saldo?.pid===pid&&Mt.saldoUnsub)return;Mt.saldoUnsub?.();Mt.saldoUnsub=null;
+ let guardado=null;try{guardado=JSON.parse(localStorage.getItem(MT_SALDO_KEY+pid)||'null')}catch(e){}
+ Mt.saldo={pid,itens:guardado?.itens||[],atualizadoEm:guardado?.atualizadoEm||'',chegou:!!guardado};if(!pid||!window.__fb)return;
+ Mt.saldoUnsub=window.__fb.listenDoc('saldos_obra',pid,(d,meta)=>{if(Mt.saldo?.pid!==pid||(meta.fromCache&&!d))return;
+  Mt.saldo={pid,itens:d?.itens||[],atualizadoEm:d?.atualizadoEm||'',chegou:true};try{localStorage.setItem(MT_SALDO_KEY+pid,JSON.stringify({itens:Mt.saldo.itens,atualizadoEm:Mt.saldo.atualizadoEm}))}catch(e){}
+  for(const [mid,q] of Mt.qtd){const s=Mt.saldo.itens.find(x=>x.materialId===mid);if(!s)Mt.qtd.delete(mid);else if(q>s.disponivel)Mt.qtd.set(mid,r4c(s.disponivel))}
+  if($('#telaPedir').classList.contains('ativa'))pedirRender()},e=>{console.warn('Estoque da obra:',e.message);if(Mt.saldo?.pid===pid){Mt.saldo.chegou=true;Mt.saldo.erro=true;pedirRender()}})}
+const mtNoPedido=()=>(Mt.saldo?.itens||[]).filter(s=>(Mt.qtd.get(s.materialId)||0)>0).map(s=>({...s,qtd:Mt.qtd.get(s.materialId)}));
+function mtDestinoTexto(mid){const d=Mt.destino.get(mid)||{};return d.sel===OUTRO?String(d.outro||'').trim():d.sel||''}
+function pedirRender(){mtObraChips($('#pedirObra'));const p=mtObraAtual();if(p)mtSaldoEscutar(p.id);const dois=Mt.passo===2,lista=mtNoPedido();
+ $('#pedirPasso1').hidden=dois;$('#pedirPasso2').hidden=!dois;$('#pedirRevisar').hidden=dois;$('#pedirEnviar').hidden=!dois;
+ $('#pedirTitulo').textContent=dois?'Revisar pedido':'Pedir material';$('#pedirObra').classList.toggle('travado',dois);
+ if(!dois){const q=normc(Mt.busca).trim(),itens=(Mt.saldo?.itens||[]).filter(s=>!q||normc(s.nome+' '+(s.categoria||'')).includes(q));
+  $('#pedirTabela').innerHTML=!Mt.saldo?.chegou?'<div class="espera"><span class="roda"></span><p>Buscando o estoque da obra…</p></div>'
+   :!Mt.saldo.itens.length?`<div class="vazio"><span class="icone">📦</span><p>${Mt.saldo.erro?'Não deu para abrir o estoque desta obra.':'Nenhum material no estoque desta obra.'}</p><p class="dica-obras">${Mt.saldo.erro?'Confira a internet. Se continuar, avise o escritório.':'Fale com o escritório.'}</p></div>`
+   :`<table class="mat-tabela"><thead><tr><th>Material</th><th class="num">No estoque</th><th class="num">Quantidade</th></tr></thead><tbody>${itens.map(s=>{const v=Mt.qtd.get(s.materialId)||0;
+     return `<tr class="${v>0?'com-qtd':''}"><td><span class="mt-nome">${esc(s.nome)}</span>${s.categoria?`<small>${esc(s.categoria)}</small>`:''}</td><td class="num disp">${numc(s.disponivel)} <small>${esc(s.unidade)}</small></td><td class="num"><input class="qtd" inputmode="decimal" enterkeyhint="next" autocomplete="off" value="${v>0?numc(v):''}" placeholder="0" data-mt-qtd="${esc(s.materialId)}" aria-label="Quantidade de ${esc(s.nome)} (no estoque ${numc(s.disponivel)} ${esc(s.unidade)})"></td></tr>`}).join('')||'<tr><td colspan="3" class="dica-obras">Nenhum material com esse nome no estoque da obra.</td></tr>'}</tbody></table>`
+   +(Mt.saldo.atualizadoEm?`<p class="mat-atualizado">Estoque atualizado pelo escritório em ${new Date(Mt.saldo.atualizadoEm).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}${navigator.onLine?'':' · sem internet: última cópia'}</p>`:'');
+  const n=lista.length;$('#pedirRevisar').disabled=!n||!p;$('#pedirRevisar').textContent=n?`Revisar pedido (${n} ${n===1?'material':'materiais'})`:'Revisar pedido';return}
+ const opc=mtDestinos();
+ $('#pedirRevisao').innerHTML=`<table class="mat-tabela revisao"><thead><tr><th>Material</th><th class="num">Quantidade</th><th>Destino</th></tr></thead><tbody>${lista.map(s=>{const d=Mt.destino.get(s.materialId)||{};
+   return `<tr><td><span class="mt-nome">${esc(s.nome)}</span></td><td class="num"><b>${numc(s.qtd)}</b> <small>${esc(s.unidade)}</small></td><td><select class="destino${d.sel?'':' vazio'}" data-mt-dest="${esc(s.materialId)}" aria-label="Destino de ${esc(s.nome)}"><option value="">Escolha…</option>${opc.map(o=>`<option${o===d.sel?' selected':''}>${esc(o)}</option>`).join('')}</select>${d.sel===OUTRO?`<input class="destino-outro" data-mt-dest-outro="${esc(s.materialId)}" value="${esc(d.outro||'')}" placeholder="Onde?" maxlength="60" aria-label="Outro destino de ${esc(s.nome)}">`:''}</td></tr>`}).join('')}</tbody></table>`;
+ $('#pedirEnviar').disabled=!lista.length||lista.some(s=>mtDestinoTexto(s.materialId).length<2)}
+function pedirLimpar(){Mt.qtd.clear();Mt.destino.clear();Mt.passo=1;Mt.busca='';$('#pedirBusca').value='';$('#pedirObs').value=''}
+async function pedirEnviar(){const p=mtObraAtual(),lista=mtNoPedido();if(!p||!lista.length||lista.some(s=>mtDestinoTexto(s.materialId).length<2))return;$('#pedirEnviar').disabled=true;const id=uid(),codigo=mtCodigo('REQ');
+ const itens=lista.map(s=>({materialId:s.materialId,nome:s.nome,unidade:s.unidade,pedida:r4c(s.qtd),destino:mtDestinoTexto(s.materialId)}));
  const doc={id,codigo,tipo:'requisicao',projectId:p.id,clientId:p.clientId||'',projetoNome:p.name,autor:Cap.user.email,autorNome:Cap.user.nome||'',criadoEm:new Date().toISOString(),status:'pendente',obs:$('#pedirObs').value.trim(),itens};
- const r=await mtGravar([{op:'set',store:'requisicoes',id,data:doc},mtAtividade('obra_requisicao',`Pediu material para ${p.name} (${codigo}): ${itens.map(i=>numc(i.pedida)+' '+i.unidade+' de '+i.nome).join('; ')}`,p.id,p.clientId,'requisicoes/'+id)]);
+ const r=await mtGravar([{op:'set',store:'requisicoes',id,data:doc},mtAtividade('obra_requisicao',`Pediu material para ${p.name} (${codigo}): ${itens.map(i=>numc(i.pedida)+' '+i.unidade+' de '+i.nome+' ('+i.destino+')').join('; ')}`,p.id,p.clientId,'requisicoes/'+id)]);
  if(r==='erro'){$('#pedirEnviar').disabled=false;return}
- Mt.carrinho=[];Mt.busca='';$('#pedirBusca').value='';$('#pedirObs').value='';
+ pedirLimpar();
  mtPronto(r==='ok'?'📦':'📶',r==='ok'?'Pedido enviado!':'Pedido guardado no celular.',r==='ok'?`${codigo}. O escritório vai separar o material. Acompanhe em Meus pedidos.`:`${codigo}. Ele vai sozinho quando tiver internet.`)}
+// quantidade digitada: só positiva e até o que há no estoque da obra
+function mtQtdLer(i){const s=(Mt.saldo?.itens||[]).find(x=>x.materialId===i.dataset.mtQtd);if(!s)return;let v=r4c(Math.max(0,numDig(i.value)));const tr=i.closest('tr');
+ if(v>s.disponivel+1e-9){v=r4c(s.disponivel);i.value=numc(v);tr.dataset.aviso=`Máximo ${numc(v)} ${s.unidade}`;setTimeout(()=>delete tr.dataset.aviso,2500)}
+ v>0?Mt.qtd.set(s.materialId,v):Mt.qtd.delete(s.materialId);tr.classList.toggle('com-qtd',v>0);const n=mtNoPedido().length;$('#pedirRevisar').disabled=!n;$('#pedirRevisar').textContent=n?`Revisar pedido (${n} ${n===1?'material':'materiais'})`:'Revisar pedido'}
 
 // ---------- Na obra: usei / devolver ----------
 function naObraRender(){mtObraChips($('#naObraObra'));const l=mtNaObra(Mt.obra);
@@ -233,25 +262,24 @@ function pedidosRender(){const l=mtLista();
  $('#pedidosLista').innerHTML=l.length?l.map(r=>{const dev=r.tipo==='devolucao',[sit,cls]=MT_SIT[r.status]||[r.status,'neutro'],obra=Cap.projetos.find(p=>p.id===r.projectId)?.name||r.projetoNome||'';
   const itens=(r.itens||[]).map((it,i)=>{let det='';if(!dev&&r.status==='atendida'){let ent=0,con=0,devv=0,mao=0;(it.partes||[]).forEach((x,p)=>{const k=mtChave(i,p);ent+=Number(x.qtd)||0;con+=Number(r.consumo?.[k])||0;devv+=Number(r.devolvido?.[k])||0;mao+=mtEmMaos(r,i,p)});det=`<small>entregue ${numc(ent)} · usado ${numc(con)}${devv?` · devolvido ${numc(devv)}`:''}${mao>1e-9?` · <b>com a obra ${numc(mao)}</b>`:''}</small>`}
    else if(dev&&r.status==='recebida')det=`<small>recebido ${numc(it.recebida)}</small>`;
-   return `<li><span>${esc(it.nome)}${det}</span><b>${numc(it.pedida)} ${esc(it.unidade)}</b></li>`}).join('');
+   return `<li><span>${esc(it.nome)}${it.destino?`<small class="pedido-destino">${esc(it.destino)}</small>`:''}${det}</span><b>${numc(it.pedida)} ${esc(it.unidade)}</b></li>`}).join('');
   return `<div class="pedido ${cls}"><div class="pedido-cab"><span class="pedido-tipo">${dev?'↩ Devolução':'📦 Pedido'}</span><span class="pedido-sit">${r._pendente?'📶 Guardado no celular':sit}</span></div><div class="pedido-sub">${esc(r.codigo||'')} · ${esc(obra)} · ${new Date(r.criadoEm).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div><ul>${itens}</ul>${r.motivoRecusa?`<p class="pedido-motivo">Motivo: ${esc(r.motivoRecusa)}</p>`:''}${r.status==='pendente'&&!r._pendente?`<button class="botao texto" data-mt-cancelar="${esc(r.id)}">Cancelar ${dev?'devolução':'pedido'}</button>`:''}</div>`}).join('')
   :'<div class="vazio"><span class="icone">📋</span><p>Nenhum pedido ainda.</p></div>'}
 function materialTelas(){if(!Cap.user)return;const na=mtNaObra('').length,pend=mtLista().filter(r=>r.status==='pendente').length;
  const sel=(id,n)=>{const e=$(id);if(e){e.hidden=!n;e.textContent=n}};sel('#naObraConta',na);sel('#pedidosConta',pend);
  if($('#telaPedir').classList.contains('ativa'))pedirRender();if($('#telaNaObra').classList.contains('ativa'))naObraRender();if($('#telaPedidos').classList.contains('ativa'))pedidosRender()}
 
-$('#pedirMaterial').addEventListener('click',()=>{mtObraAtual();pedirRender();mostrar('telaPedir')});
+$('#pedirMaterial').addEventListener('click',()=>{mtObraAtual();Mt.passo=1;pedirRender();mostrar('telaPedir')});
 $('#naObra').addEventListener('click',()=>{mtObraAtual();if(!mtNaObra(Mt.obra).length){const c=mtNaObra('')[0];if(c)Mt.obra=c.pid}naObraRender();mostrar('telaNaObra')});
 $('#meusPedidos').addEventListener('click',()=>{pedidosRender();mostrar('telaPedidos')});
-['#pedirVoltar','#naObraVoltar','#pedidosVoltar'].forEach(s=>$(s).addEventListener('click',()=>mostrar('telaFoto')));
+['#naObraVoltar','#pedidosVoltar'].forEach(s=>$(s).addEventListener('click',()=>mostrar('telaFoto')));
+// Voltar: da revisão volta à tabela (as quantidades ficam); da tabela, à tela inicial
+$('#pedirVoltar').addEventListener('click',()=>{if(Mt.passo===2){Mt.passo=1;pedirRender();window.scrollTo(0,0);return}if(Mt.qtd.size&&!confirm('Sair sem enviar o pedido? As quantidades digitadas serão apagadas.'))return;pedirLimpar();mostrar('telaFoto')});
+$('#pedirRevisar').addEventListener('click',()=>{document.activeElement?.blur?.();document.querySelectorAll('[data-mt-qtd]').forEach(mtQtdLer);if(!mtNoPedido().length)return;Mt.passo=2;pedirRender();window.scrollTo(0,0)});
 $('#pedirBusca').addEventListener('input',e=>{Mt.busca=e.target.value;pedirRender()});
 $('#pedirEnviar').addEventListener('click',pedirEnviar);
-document.addEventListener('click',async e=>{const b=e.target.closest('[data-mt-obra],[data-mt-add],[data-mt-menos],[data-mt-mais],[data-mt-tirar],[data-mt-g-menos],[data-mt-g-mais],[data-mt-usei],[data-mt-devolver],[data-mt-cancelar]');if(!b)return;const d=b.dataset;
- if(d.mtObra){Mt.obra=d.mtObra;if($('#telaPedir').classList.contains('ativa'))pedirRender();else naObraRender();return}
- if(d.mtAdd){const m=Mt.materiais.find(x=>x.id===d.mtAdd);if(!m)return;const ja=Mt.carrinho.find(c=>c.materialId===m.id);if(ja)ja.qtd=r4c(ja.qtd+1);else Mt.carrinho.push({materialId:m.id,nome:m.nome,unidade:m.unidade,qtd:1});Mt.busca='';$('#pedirBusca').value='';navigator.vibrate?.(30);pedirRender();return}
- if(d.mtMenos!=null){const c=Mt.carrinho[+d.mtMenos];c.qtd=r4c(Math.max(0,c.qtd-1));pedirRender();return}
- if(d.mtMais!=null){const c=Mt.carrinho[+d.mtMais];c.qtd=r4c(c.qtd+1);pedirRender();return}
- if(d.mtTirar!=null){Mt.carrinho.splice(+d.mtTirar,1);pedirRender();return}
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-mt-obra],[data-mt-g-menos],[data-mt-g-mais],[data-mt-usei],[data-mt-devolver],[data-mt-cancelar]');if(!b)return;const d=b.dataset;
+ if(d.mtObra){if($('#telaPedir').classList.contains('ativa')){if(Mt.passo===2||d.mtObra===Mt.obra)return;if(Mt.qtd.size&&!confirm('Trocar de obra? As quantidades digitadas serão apagadas.'))return;Mt.qtd.clear();Mt.destino.clear();Mt.obra=d.mtObra;pedirRender()}else{Mt.obra=d.mtObra;naObraRender()}return}
  const card=b.closest('[data-mt-grupo]');
  if(card&&(d.mtGMenos!==undefined||d.mtGMais!==undefined)){const g=mtNaObra(Mt.obra).find(x=>x.chave===card.dataset.mtGrupo);const i=card.querySelector('[data-mt-g-qtd]');let v=mtQtdGrupo(card)+(d.mtGMais!==undefined?1:-1);v=Math.min(g?.total||0,Math.max(0,r4c(v)));i.value=numc(v);return}
  if(card&&(d.mtUsei!==undefined||d.mtDevolver!==undefined)){const g=mtNaObra(Mt.obra).find(x=>x.chave===card.dataset.mtGrupo);if(!g)return;const q=mtQtdGrupo(card);
@@ -262,7 +290,11 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-mt-o
   mtPronto(usei?'✅':'↩️',usei?'Uso confirmado!':'Devolução registrada!',(usei?`${numc(q)} ${g.unidade} de ${g.nome} lançados como gasto da obra.`:`Leve ${numc(q)} ${g.unidade} de ${g.nome} ao estoque. O escritório confirma quando receber.`)+(r==='fila'?' Sem internet agora: vai sozinho depois.':''));return}
  if(d.mtCancelar){const r=Mt.reqs.get(d.mtCancelar);if(!r||!confirm(`Cancelar ${r.tipo==='devolucao'?'a devolução':'o pedido'} ${r.codigo}?`))return;const agora=new Date().toISOString();
   await mtGravar([{op:'update',store:'requisicoes',id:r.id,data:{status:'cancelada',canceladoEm:agora,_atualizadoEm:agora,_atualizadoPor:Cap.user.email}},mtAtividade('obra_cancelamento',`Cancelou ${r.tipo==='devolucao'?'a devolução':'o pedido'} ${r.codigo}`,r.projectId,r.clientId,'requisicoes/'+r.id)]);pedidosRender()}});
-document.addEventListener('change',e=>{const i=e.target.closest?.('[data-mt-qtd]');if(!i)return;const c=Mt.carrinho[+i.dataset.mtQtd];if(c){c.qtd=r4c(Math.max(0,numDig(i.value)));pedirRender()}});
+document.addEventListener('change',e=>{const i=e.target.closest?.('[data-mt-qtd]');if(i){mtQtdLer(i);return}
+ const s=e.target.closest?.('[data-mt-dest]');if(s){const d={...(Mt.destino.get(s.dataset.mtDest)||{}),sel:s.value};Mt.destino.set(s.dataset.mtDest,d);pedirRender();if(d.sel===OUTRO)document.querySelector(`[data-mt-dest-outro="${CSS.escape(s.dataset.mtDest)}"]`)?.focus()}});
+// Enter no campo de quantidade passa para o próximo, como no teclado de uma planilha
+document.addEventListener('keydown',e=>{const i=e.target.closest?.('[data-mt-qtd]');if(!i||e.key!=='Enter')return;e.preventDefault();mtQtdLer(i);const l=[...document.querySelectorAll('[data-mt-qtd]')];const prox=l[l.indexOf(i)+1];prox?prox.focus():i.blur()});
+document.addEventListener('input',e=>{const o=e.target.closest?.('[data-mt-dest-outro]');if(!o)return;Mt.destino.set(o.dataset.mtDestOutro,{...(Mt.destino.get(o.dataset.mtDestOutro)||{}),sel:OUTRO,outro:o.value});const l=mtNoPedido();$('#pedirEnviar').disabled=!l.length||l.some(s=>mtDestinoTexto(s.materialId).length<2)});
 // Sessão: o Firebase guarda o login no celular; a pessoa entra uma vez só.
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(e=>console.warn('Service worker não registrado:',e.message));
 // ==== #JS-CAPTURA: END ====
