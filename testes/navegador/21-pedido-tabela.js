@@ -14,7 +14,7 @@ const P=window.PARTE;const CIM='Cimento CP II 50 kg',TUBO='Tubo PVC 100 mm';
 const restDoc=async(c,id)=>{const j=await (await fetch(`http://127.0.0.1:8089/v1/projects/demo-tcs/databases/(default)/documents/${c}/${id}`,{headers:{Authorization:'Bearer owner'}})).json();return j.fields};
 const saldoP1=async()=>{const f=await restDoc('saldos_obra','P1');return f&&{campos:Object.keys(f).sort(),itens:(f.itens.arrayValue.values||[]).map(v=>{const x=v.mapValue.fields;return `${x.nome.stringValue}: ${x.disponivel.integerValue??x.disponivel.doubleValue} ${x.unidade.stringValue}`})}};
 const texto=el=>el?.textContent.replace(/\s+/g,' ').trim();
-if(P==='prep'||P==='esc'){await espera(()=>window.__fb&&Nuvem.perfil&&Nuvem.estado==='online'&&Nuvem.reconciliado);await espera(()=>Req.ligada)}
+if(P==='prep'||P==='esc'){await espera(()=>window.__fb&&Nuvem.iniciada);if(!Nuvem.user)await window.__fb.loginTeste('marceloclr@gmail.com');await espera(()=>Nuvem.perfil&&Nuvem.estado==='online'&&Nuvem.reconciliado);await espera(()=>Req.ligada)}
 if(P==='prep'){
  const n={id:'23261033333333000133550010000000031000000033',number:'000031',series:'1',date:'2026-10-12',operation:'VENDA',issuer:'HIDRAULICA NORTE',issuerDoc:'33333333000133',recipient:'TCS',totalProducts:12*55,discount:0,total:12*55,source:'teste',format:'XML',tipo:'material',items:[{code:'T100',barcode:'',description:'TUBO PVC ESGOTO 100MM 6M',ncm:'39172300',cfop:'5102',unit:'BR',quantity:12,unitPrice:55,lineTotal:660,discount:0}],postedAt:new Date().toISOString()};n.key=n.id;
  const prod={id:'prod-T100',key:productKey(n.items[0]),code:'T100',barcode:'',name:n.items[0].description,unit:'BR',stock:12,createdAt:new Date().toISOString()};n.items[0].productId=prod.id;
