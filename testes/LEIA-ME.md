@@ -60,6 +60,8 @@ O app real, ligado aos emuladores (`?emulador=1`, só funciona em localhost), co
      - `esc2`: atendimento FIFO (estoque −5, requisitado +5, sem custo) e excesso recusado;
      - `obra2`: uso de 3 confirmado e devolução de 2;
      - `esc3`: devolução recebida (estoque 13, requisitado 0, consumido 3, apropriado 3 × custo), fechamento estoque + apropriado = pago e log de atividades.
+   - `21-pedido-tabela.js` (depois do `1-admin.js` e do `19`), pelo `INIT`: `prep` (8767: segundo material; `saldos_obra/P1` sem valores), `tabela`, `revisao` e `enviar` (8768, `captura.html`, largura 390: quantidade limitada ao estoque, destino obrigatório, Outro com texto) e `esc` (8767: destino no cartão e no CSV, estoque da obra atualizado depois de atender, lista de destinos);
+   - `22-pdf-desconto.js` em 8767 (sem emuladores): desconto do item no PDF só com a coluna V.DESC;
    - `20-materiais-planilha.js` em 8767 (depois do `1-admin.js`; entra sozinho como administrador): planilha .xlsx da tabela de materiais — painel na tela, modelo vazio baixado, prévia com novo, alterar (casado pelo nome + unidade, sem ID), sem mudança e erros (repetido, sem unidade), nada gravado antes de confirmar, gravação na nuvem com uma só linha no log, arquivo que não é .xlsx recusado e ida e volta da tabela atual sem mudança.
    - `node gerar-modelo-materiais.mjs` (dentro de `testes/`, sem emulador): regera `modelos/materiais-modelo.xlsx` com o código da tela e confere a leitura de volta.
    - `10-fila.js` em 8767 (depois do `7-captura.js`): fila do escritório, cartão e destaque de 48 h, conferir com o projeto indicado, lançar, fotos como comprovante, descartar com motivo e XML da mesma chave substituindo os dados da foto.

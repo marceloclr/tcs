@@ -42,22 +42,25 @@ if(P==='esc1'){
  r.porMaterial=resumo(grupoCim());r.produtosNoMaterial=produtosDoMaterial(m.id).map(p=>p.name);
  stockModo='material';openProjects.add('P1');go('stock');renderStock();r.linhaMaterialNaTela=!!document.querySelector('.lv-material')&&/Cimento CP II 50 kg/.test(document.querySelector('.lv-material').textContent);
  r.colunas=[...document.querySelectorAll('#stockTable thead th')].map(t=>t.textContent).filter(Boolean);
+ // o estoque da obra vai para o celular do mestre (saldos_obra/P1) antes de a página fechar
+ const t0=Date.now();while(Date.now()-t0<20000&&!(await window.__fb.get('saldos_obra','P1').catch(()=>null))?.itens?.length)await new Promise(x=>setTimeout(x,500));r.saldoObraP1=(await window.__fb.get('saldos_obra','P1'))?.itens?.map(i=>i.nome+' '+i.disponivel);
  go('materiais');Mat.abrir=m.id;renderMateriais();r.telaMateriais=document.querySelector('#materiaisBody tbody tr')?.textContent.replace(/\s+/g,' ').trim().slice(0,120);
 }
 if(P==='obra1'){
  await espera(()=>window.__fb);if(!Cap.user)await window.__fb.loginTeste('mestre@x.com');
- await espera(()=>Cap.perfil&&Cap.projetos.length&&Mt.materiais.some(m=>m.nome===MAT));
+ await espera(()=>Cap.perfil&&Cap.projetos.length);
  r.home={pedir:!!$('#pedirMaterial'),naObra:$('#naObraConta').hidden?0:$('#naObraConta').textContent};
  $('#pedirMaterial').click();await espera(()=>$('#telaPedir').classList.contains('ativa'));
- $('#pedirBusca').value='cimento';$('#pedirBusca').dispatchEvent(new Event('input',{bubbles:true}));
- r.busca=[...document.querySelectorAll('#pedirLista .mat-item')].map(b=>b.textContent.replace(/\s+/g,' ').trim());
- document.querySelector('#pedirLista .mat-item').click();const q=document.querySelector('[data-mt-qtd="0"]');q.value='5';q.dispatchEvent(new Event('change',{bubbles:true}));
- $('#pedirObs').value='laje do 2º pavimento';r.carrinho=Mt.carrinho.map(c=>c.nome+' '+c.qtd+' '+c.unidade);r.enviarAtivo=!$('#pedirEnviar').disabled;
+ // pedido pela tabela do estoque da obra: quantidade e, na revisão, o destino
+ await espera(()=>document.querySelector('#pedirTabela [data-mt-qtd]'));r.tabela=[...document.querySelectorAll('#pedirTabela tbody tr')].map(b=>b.textContent.replace(/\s+/g,' ').trim());
+ const q=document.querySelector('#pedirTabela [data-mt-qtd]');q.value='5';q.dispatchEvent(new Event('change',{bubbles:true}));$('#pedirRevisar').click();
+ const sd=document.querySelector('#pedirRevisao select');sd.value='Laje';sd.dispatchEvent(new Event('change',{bubbles:true}));
+ $('#pedirObs').value='2º pavimento';r.pedido=mtNoPedido().map(c=>c.nome+' '+c.qtd+' '+c.unidade+' → '+mtDestinoTexto(c.materialId));r.enviarAtivo=!$('#pedirEnviar').disabled;
  $('#pedirEnviar').click();await espera(()=>/Pedido enviado/.test($('#prontoTexto').innerText));r.pronto=$('#prontoTexto').innerText.replace(/\s+/g,' ');
  await espera(()=>mtLista().some(x=>x.status==='pendente'&&x.itens[0].pedida===5&&!x._pendente));
  // sem internet: o pedido fica guardado no celular e sobe sozinho; depois é cancelado
  console.log('__cdp_offline__');await new Promise(r=>setTimeout(r,800));
- Mt.carrinho=[{materialId:Mt.materiais.find(m=>m.nome===MAT).id,nome:MAT,unidade:'SC',qtd:1}];mostrar('telaPedir');pedirRender();await pedirEnviar();
+ const mid=Mt.saldo.itens.find(s=>s.nome===MAT).materialId;Mt.qtd.set(mid,1);Mt.destino.set(mid,{sel:'Outro',outro:'reboco'});Mt.passo=2;mostrar('telaPedir');pedirRender();await pedirEnviar();
  r.offline={pronto:$('#prontoTexto').innerText.replace(/\s+/g,' '),guardado:mtLista().some(x=>x.itens[0].pedida===1&&x._pendente)};
  console.log('__cdp_online__');await espera(()=>mtLista().some(x=>x.itens[0].pedida===1&&!x._pendente),40000);r.offline.subiu=true;
  const um=mtLista().find(x=>x.itens[0].pedida===1);$('#meusPedidos').click();pedidosRender();document.querySelector(`[data-mt-cancelar="${um.id}"]`).click();

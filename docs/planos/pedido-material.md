@@ -36,4 +36,4 @@ O mestre não lê rateios, movimentos nem produtos, porque eles trazem custos. O
 ### P4. Validação e entrega
 - Teste ponta a ponta: o escritório grava o saldo, o mestre monta o pedido pela tabela com destino e o escritório vê e atende.
 - Manuais do mestre e do escritório, carimbo de versão e push.
-- Pendência do usuário: publicar o novo `firestore.rules` no console.
+- Pendência: publicar o novo `firestore.rules` (saldos_obra) no Firebase.

@@ -142,3 +142,11 @@ A tela do mestre também existe como app Android (TWA): https://marceloclr.gitla
 - **Sem internet**, o pedido do mestre fica na fila do próprio Firestore no celular e sobe sozinho.
 - **Regras novas** (`materiais`, `requisicoes`, `REQUISICAO` e consumo da obra em `movements`): publicadas com `cd testes && npx firebase deploy --only firestore:rules --project thiago-17d18 --config ../firebase.json`.
 - **Testes:** 26 regras (`testes/regras.test.mjs`) e o ciclo completo no navegador (`testes/navegador/19-materiais-requisicao.js`).
+
+## Pedido pela tabela do estoque, com destino (23/10/2026)
+Plano: [`docs/planos/pedido-material.md`](docs/planos/pedido-material.md).
+- **Estoque da obra para o mestre** ([`js/saldo-obra.js`](js/saldo-obra.js)): `saldos_obra/{projetoId}` traz, por material, o disponível (saldo − requisitado), o nome e a unidade, **sem valores**. Quem grava é o escritório com escrita no projeto, depois da leitura completa da nuvem e só quando muda. Produto sem material não entra.
+- **Tela do mestre:** **Pedir material** → tabela Material · No estoque · Quantidade (até o disponível) → **Revisar pedido** (só os itens com quantidade, cada um com o **destino**: lista + Outro) → Enviar. O item da requisição grava `destino`; a baixa de uso leva o destino na observação.
+- **Destinos:** lista inicial em `TCS_DESTINOS_PADRAO` ([`js/config.js`](js/config.js)); o administrador troca em Usuários e acessos › Configurações (`config/geral.destinos`).
+- **Paleta:** as telas do mestre usam as cores do escritório (azul `#2563eb`, tons slate, topo `#0f172a`, fonte do sistema), com tema escuro em slate.
+- **Regras novas:** `saldos_obra` (27 testes de regras).
