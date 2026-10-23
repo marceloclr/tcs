@@ -136,8 +136,8 @@ A tela do mestre também existe como app Android (TWA): https://marceloclr.gitla
 - **Fluxo** ([`js/requisicoes.js`](js/requisicoes.js) no escritório; [`js/captura.js`](js/captura.js) no celular):
   1. o mestre pede (**📦 Pedir material**);
   2. o escritório atende: `REQUISICAO` +, por produto, em ordem de entrada (FIFO);
-  3. o mestre confirma o uso (**Na obra › ✔ Usei**): `SAIDA` com `requisicaoId`, gravada por ele;
-  4. o que sobrar ele devolve (**↩ Devolver**), e o escritório confirma o recebimento: `REQUISICAO` −.
+  3. o mestre presta contas em **Na obra** (desde 23/10, uma tabela só): para cada material, informa o que **usou** ou o que **devolve**, e o outro é a diferença (o material fecha). Linha em branco continua com a obra. Um **Registrar** grava num lote: o uso como `SAIDA` com `requisicaoId`, e **uma** devolução com todos os itens;
+  4. o escritório confirma o recebimento da devolução: `REQUISICAO` −.
 - **Coleção `requisicoes`:** guarda o que foi entregue de cada produto (`itens[i].partes`), o consumo (`consumo`, gravado pelo mestre) e o devolvido (`devolvido`, gravado pelo escritório). Requisição e movimentos vão à nuvem num só lote, e as regras conferem a ligação entre eles.
 - **Sem internet**, o pedido do mestre fica na fila do próprio Firestore no celular e sobe sozinho.
 - **Regras novas** (`materiais`, `requisicoes`, `REQUISICAO` e consumo da obra em `movements`): publicadas com `cd testes && npx firebase deploy --only firestore:rules --project thiago-17d18 --config ../firebase.json`.

@@ -167,10 +167,6 @@ main{flex:1;display:flex;flex-direction:column;width:100%;max-width:560px;margin
 .chip.ativo{border-color:var(--tinta);background:var(--tinta);color:var(--carta);font-weight:650}
 .busca{width:100%;min-height:56px;padding:10px 16px;border:2px solid var(--linha-forte);border-radius:var(--raio-p);background:var(--carta);color:var(--tinta);font:500 18px var(--fonte-corpo)}
 .busca:focus,.obs:focus{border-color:var(--acento);outline:none;box-shadow:0 0 0 3px var(--acento-tenue)}
-.passo{display:flex;align-items:center;border:2px solid var(--linha-forte);border-radius:99px;overflow:hidden;background:var(--carta)}
-.passo button{width:44px;height:44px;border:0;background:var(--carta-2);color:var(--acento);font:600 24px/1 var(--fonte-corpo);cursor:pointer}
-.passo input{width:64px;height:44px;border:0;background:transparent;color:var(--tinta);text-align:center;font:600 18px var(--fonte-mono);font-variant-numeric:tabular-nums}
-.passo.grande button{width:56px;height:56px}.passo.grande input{width:96px;height:56px;font-size:22px}.passo .un{padding:0 14px 0 4px;color:var(--tinta-2);font:500 15px var(--fonte-mono)}
 .obs-rotulo{display:block;margin:16px 0 4px;color:var(--tinta-2);font-size:15px}
 .obs{width:100%;padding:10px 12px;border:2px solid var(--linha-forte);border-radius:var(--raio-p);background:var(--carta);color:var(--tinta);font:400 16px/1.4 var(--fonte-corpo);resize:vertical}
 /* tabela do estoque da obra e revisão com o destino: o mesmo desenho das tabelas do escritório (cabeçalho cinza, linhas finas) */
@@ -194,12 +190,14 @@ main{flex:1;display:flex;flex-direction:column;width:100%;max-width:560px;margin
 .mat-tabela .destino-outro{margin-top:6px}
 .mat-atualizado{margin:0;padding:8px 10px;border-top:1px solid var(--linha);color:var(--tinta-3);font-size:12.5px}
 .obra-chips.travado{opacity:.55;pointer-events:none}
+/* Na obra: Informo (Usei/Devolvo) + quantidade; o resultado aparece abaixo do nome */
+.mat-tabela.contas td:nth-child(2){width:34%}.mat-tabela.contas .resultado{margin-top:2px;color:var(--acento);font-weight:600}
+.mat-tabela.contas tr:not(.com-qtd) .resultado{color:var(--tinta-3);font-weight:400}
+.resumo-bloco{padding:12px 14px;border-bottom:1px solid var(--linha)}.resumo-bloco:last-child{border-bottom:0}
+.resumo-bloco h3{margin:0 0 2px;font:700 18px/1.3 var(--fonte-titulo)}.resumo-bloco .dica-obras{font-size:14px;margin:0 0 6px}
+.resumo-bloco ul{list-style:none;margin:0;padding:0}.resumo-bloco li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px solid var(--linha);font-size:16px}
+.resumo-bloco li b{white-space:nowrap;font-variant-numeric:tabular-nums}
 .pedido-destino{display:inline-block;margin:2px 0;padding:1px 8px;border-radius:99px;background:var(--acento-tenue);color:var(--acento);font-size:12.5px;font-weight:600}
-.na-obra{display:grid;gap:12px}
-.na-obra-item{padding:14px;border:1px solid var(--linha);border-left:4px solid var(--ocre);border-radius:var(--raio);background:var(--carta);box-shadow:var(--sombra)}
-.na-obra-cab{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;margin-bottom:10px}.na-obra-cab strong{font:700 19px/1.25 var(--fonte-titulo)}.na-obra-cab span{color:var(--tinta-2)}.na-obra-cab b{color:var(--alerta);font-family:var(--fonte-mono)}
-.na-obra-item .passo{width:max-content;margin:0 auto 10px}
-.na-obra-botoes{display:grid;grid-template-columns:1fr 1fr;gap:10px}.na-obra-botoes .botao{margin:0;min-height:56px;font-size:17px}
 .vazio{text-align:center;padding:32px 8px;color:var(--tinta-2)}.vazio .icone{display:block;font-size:48px;margin-bottom:6px}.vazio p{margin:4px 0}
 .pedidos{display:grid;gap:10px}
 .pedido{padding:12px 14px;border:1px solid var(--linha);border-left:4px solid var(--linha-forte);border-radius:var(--raio);background:var(--carta)}

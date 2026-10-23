@@ -84,12 +84,12 @@ if(P==='esc2'){
 if(P==='obra2'){
  await espera(()=>window.__fb&&Cap.perfil);await espera(()=>mtNaObra('').length);
  r.home={naObra:$('#naObraConta').textContent};$('#naObra').click();await espera(()=>$('#telaNaObra').classList.contains('ativa'));
- const card=document.querySelector('[data-mt-grupo]');r.cartao=card.textContent.replace(/\s+/g,' ').trim();
- card.querySelector('[data-mt-g-qtd]').value='3';card.querySelector('[data-mt-usei]').click();
- await espera(()=>/Uso confirmado/.test($('#prontoTexto').innerText));await espera(()=>mtNaObra('')[0]?.total===2);
- r.depoisDeUsar={comAObra:mtNaObra('')[0].total};
- $('#naObra').click();const c2=document.querySelector('[data-mt-grupo]');c2.querySelector('[data-mt-g-qtd]').value='2';c2.querySelector('[data-mt-devolver]').click();
- await espera(()=>/Devolução registrada/.test($('#prontoTexto').innerText));await espera(()=>mtLista().some(x=>x.tipo==='devolucao'&&x.status==='pendente'&&!x._pendente));
+ // prestação de contas numa tabela só: informa "Usei 3" e os outros 2 viram devolução, num registro
+ const tr=document.querySelector('#naObraLista tr[data-mt-grupo]');r.linha=tr.textContent.replace(/\s+/g,' ').trim();
+ tr.querySelector('[data-mt-modo]').value='usei';const qi=tr.querySelector('[data-mt-conta]');qi.value='3';qi.dispatchEvent(new Event('change',{bubbles:true}));
+ r.resultado=tr.querySelector('[data-mt-res]').textContent;$('#naObraRegistrar').click();r.resumo=$('#naObraLista').innerText.replace(/\s+/g,' ').trim();
+ $('#naObraRegistrar').click();await espera(()=>/Registrado/.test($('#prontoTexto').innerText));r.pronto=$('#prontoTexto').innerText.replace(/\s+/g,' ');
+ await espera(()=>mtNaObra('').length===0);r.depoisDeUsar={comAObra:0};await espera(()=>mtLista().some(x=>x.tipo==='devolucao'&&x.status==='pendente'&&!x._pendente));
  r.depoisDeDevolver={comAObra:mtNaObra('').reduce((s,g)=>s+g.total,0),devolucaoPendente:mtLista().find(x=>x.tipo==='devolucao').itens[0].pedida};
  // nada mais com a obra: Usei/Devolver não aparecem
  $('#naObra').click();r.naObraVazio=!!document.querySelector('#naObraLista .vazio');

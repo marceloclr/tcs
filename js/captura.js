@@ -162,7 +162,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&Visor.stre
 // Três posições (escritório: js/requisicoes.js): ESTOQUE → REQUISITADO (o escritório atende o pedido e entrega) → CONSUMIDO
 // (o mestre confirma aqui o que usou). O que sobrar volta ao estoque pela devolução, confirmada pelo escritório.
 // Gravação direta no Firestore, com a cópia local dele: sem internet, o pedido fica guardado no celular e sobe sozinho.
-const Mt={materiais:[],reqs:new Map(),obra:'',qtd:new Map(),destino:new Map(),passo:1,busca:'',saldo:null,saldoUnsub:null,destinos:null,unsubs:[],guardados:new Set()};// guardados: pedidos ainda não confirmados pelo servidor
+const Mt={materiais:[],reqs:new Map(),obra:'',contas:new Map(),naPasso:1,qtd:new Map(),destino:new Map(),passo:1,busca:'',saldo:null,saldoUnsub:null,destinos:null,unsubs:[],guardados:new Set()};// guardados: pedidos ainda não confirmados pelo servidor
 const MT_KEY='tcs-captura-materiais',MT_SALDO_KEY='tcs-captura-saldo-',MT_DEST_KEY='tcs-captura-destinos';
 const r4c=n=>Math.round(Number(n||0)*1e4)/1e4;
 const numc=n=>Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:3});
@@ -237,24 +237,46 @@ function mtQtdLer(i){const s=(Mt.saldo?.itens||[]).find(x=>x.materialId===i.data
  if(v>s.disponivel+1e-9){v=r4c(s.disponivel);i.value=numc(v);tr.dataset.aviso=`Máximo ${numc(v)} ${s.unidade}`;setTimeout(()=>delete tr.dataset.aviso,2500)}
  v>0?Mt.qtd.set(s.materialId,v):Mt.qtd.delete(s.materialId);tr.classList.toggle('com-qtd',v>0);const n=mtNoPedido().length;$('#pedirRevisar').disabled=!n;$('#pedirRevisar').textContent=n?`Revisar pedido (${n} ${n===1?'material':'materiais'})`:'Revisar pedido'}
 
-// ---------- Na obra: usei / devolver ----------
-function naObraRender(){mtObraChips($('#naObraObra'));const l=mtNaObra(Mt.obra);
- $('#naObraLista').innerHTML=l.length?l.map(g=>`<div class="na-obra-item" data-mt-grupo="${esc(g.chave)}"><div class="na-obra-cab"><strong>${esc(g.nome)}</strong><span>Com a obra: <b>${numc(g.total)} ${esc(g.unidade)}</b></span></div>
-  <div class="passo grande"><button data-mt-g-menos aria-label="Menos">−</button><input inputmode="decimal" value="${numc(g.total)}" data-mt-g-qtd aria-label="Quantidade"><button data-mt-g-mais aria-label="Mais">+</button><span class="un">${esc(g.unidade)}</span></div>
-  <div class="na-obra-botoes"><button class="botao principal" data-mt-usei title="Confirma que esta quantidade foi usada na obra: vira gasto da obra">✔ Usei</button><button class="botao secundario" data-mt-devolver title="Devolve esta quantidade ao estoque; o escritório confirma quando receber">↩ Devolver</button></div></div>`).join('')
-  :'<div class="vazio"><span class="icone">🧱</span><p>Nenhum material com a obra agora.</p><p class="dica-obras">Quando o escritório entregar um pedido seu, ele aparece aqui para você confirmar o uso.</p></div>'}
-function mtQtdGrupo(card){return r4c(numDig(card.querySelector('[data-mt-g-qtd]').value))}
-async function mtUsar(g,q){const ops=[],consumo=new Map(),hoje=new Date().toISOString();let falta=q;
- for(const y of g.partes){if(falta<=1e-9)break;const t=r4c(Math.min(falta,y.emMaos));falta=r4c(falta-t);const k=mtChave(y.i,y.p),mapa=consumo.get(y.r.id)||{...(y.r.consumo||{})};mapa[k]=r4c((Number(mapa[k])||0)+t);consumo.set(y.r.id,mapa);
-  const mid='con-'+uid();ops.push({op:'set',store:'movements',id:mid,data:{id:mid,type:'SAIDA',requisicaoId:y.r.id,productId:y.x.productId,projectId:y.r.projectId,clientId:y.r.clientId,quantity:t,unitCost:Number(y.x.unitCost)||0,date:hoje.slice(0,10),note:`Uso confirmado pela obra · ${y.r.codigo}${y.r.itens?.[y.i]?.destino?' · Destino: '+y.r.itens[y.i].destino:''}`,description:g.nome,createdAt:hoje,criadoPor:Cap.user.email,criadoPorNome:Cap.user.nome||'',origem:'obra',_atualizadoEm:hoje,_atualizadoPor:Cap.user.email}})}
+// ---------- Na obra: prestação de contas do material entregue ----------
+// Uma tabela por obra com o que está com a obra. Em cada material o mestre informa UM dos dois: o que usou ou o que vai devolver;
+// o outro é a diferença, e o material fecha (com a obra = 0). Linha em branco: o material continua com a obra.
+// Um botão grava tudo num lote só: as baixas do que foi usado (gasto da obra) e UMA devolução com todos os itens,
+// que o escritório confirma quando receber. O uso sai das entregas mais antigas; a devolução, do que sobrar delas.
+function mtConta(g){const c=Mt.contas.get(g.chave);if(!c||c.qtd==null)return null;const q=Math.min(g.total,Math.max(0,c.qtd));
+ return c.modo==='devolvo'?{usou:r4c(g.total-q),devolve:r4c(q)}:{usou:r4c(q),devolve:r4c(g.total-q)}}
+const mtContasDaObra=()=>mtNaObra(Mt.obra).map(g=>({g,c:mtConta(g)})).filter(x=>x.c);
+function mtResultado(g){const c=mtConta(g);if(!c)return 'continua com a obra';
+ return [c.usou>0?`usou ${numc(c.usou)}`:'',c.devolve>0?`devolve ${numc(c.devolve)}`:''].filter(Boolean).join(' · ')+' '+g.unidade}
+function naObraRender(){mtObraChips($('#naObraObra'));const l=mtNaObra(Mt.obra),n=mtContasDaObra().length,resumo=Mt.naPasso===2&&n>0;if(!resumo)Mt.naPasso=1;
+ $('#naObraObra').classList.toggle('travado',resumo);
+ $('#naObraDica').innerHTML=!l.length?'':resumo?'Confira antes de gravar.':'Para cada material, escolha se vai informar o que <strong>usou</strong> ou o que vai <strong>devolver</strong>, e digite a quantidade. O resto é calculado. Deixe em branco o que ainda está em uso.';
+ const btn=$('#naObraRegistrar');btn.hidden=!l.length;btn.disabled=!n;btn.textContent=resumo?'Confirmar e registrar':n?`Registrar (${n} ${n===1?'material':'materiais'})`:'Registrar';
+ if(!l.length){$('#naObraLista').innerHTML='<div class="vazio"><span class="icone">🧱</span><p>Nenhum material com a obra agora.</p><p class="dica-obras">Quando o escritório entregar um pedido seu, ele aparece aqui para você prestar contas.</p></div>';return}
+ if(resumo){const xs=mtContasDaObra(),usos=xs.filter(x=>x.c.usou>0),devs=xs.filter(x=>x.c.devolve>0);
+  const bloco=(tit,dica,lista,k)=>lista.length?`<div class="resumo-bloco"><h3>${tit}</h3><p class="dica-obras">${dica}</p><ul>${lista.map(x=>`<li><span>${esc(x.g.nome)}</span><b>${numc(x.c[k])} ${esc(x.g.unidade)}</b></li>`).join('')}</ul></div>`:'';
+  $('#naObraLista').innerHTML=bloco('✔ Usado na obra','Vira gasto da obra.',usos,'usou')+bloco('↩ Devolver ao estoque','Uma devolução só. Leve o material ao estoque: o escritório confirma quando receber.',devs,'devolve');return}
+ $('#naObraLista').innerHTML=`<table class="mat-tabela contas"><thead><tr><th>Material</th><th>Informo</th><th class="num">Qtd</th></tr></thead><tbody>${l.map(g=>{const c=Mt.contas.get(g.chave)||{modo:'usei',qtd:null};
+  return `<tr data-mt-grupo="${esc(g.chave)}" class="${c.qtd!=null?'com-qtd':''}"><td><span class="mt-nome">${esc(g.nome)}</span><small>com a obra: <b>${numc(g.total)} ${esc(g.unidade)}</b></small><small class="resultado" data-mt-res>${esc(mtResultado(g))}</small></td>
+   <td><select class="destino" data-mt-modo aria-label="O que vai informar de ${esc(g.nome)}"><option value="usei"${c.modo==='usei'?' selected':''}>Usei</option><option value="devolvo"${c.modo==='devolvo'?' selected':''}>Devolvo</option></select></td>
+   <td class="num"><input class="qtd" inputmode="decimal" autocomplete="off" placeholder="—" value="${c.qtd!=null?numc(c.qtd):''}" data-mt-conta aria-label="Quantidade de ${esc(g.nome)} (com a obra ${numc(g.total)} ${esc(g.unidade)})"></td></tr>`}).join('')}</tbody></table>`}
+// lê a linha da tabela: quantidade de 0 até o que está com a obra; em branco, o material fica de fora
+function mtContaLer(tr){const g=mtNaObra(Mt.obra).find(x=>x.chave===tr.dataset.mtGrupo);if(!g)return;const modo=tr.querySelector('[data-mt-modo]').value,i=tr.querySelector('[data-mt-conta]');const txt=i.value.trim();
+ let qtd=txt===''?null:r4c(Math.max(0,numDig(txt)));if(qtd!=null&&qtd>g.total){qtd=g.total;i.value=numc(qtd);tr.dataset.aviso=`Máximo ${numc(g.total)} ${g.unidade}`;setTimeout(()=>delete tr.dataset.aviso,2500)}
+ Mt.contas.set(g.chave,{modo,qtd});tr.classList.toggle('com-qtd',qtd!=null);tr.querySelector('[data-mt-res]').textContent=mtResultado(g);
+ const n=mtContasDaObra().length,btn=$('#naObraRegistrar');btn.disabled=!n;btn.textContent=n?`Registrar (${n} ${n===1?'material':'materiais'})`:'Registrar'}
+async function naObraGravar(){const xs=mtContasDaObra();if(!xs.length)return;const p=Cap.projetos.find(x=>x.id===Mt.obra)||{id:Mt.obra,name:''};
+ const ops=[],consumo=new Map(),hoje=new Date().toISOString(),itensDev=[];let cid='';
+ for(const {g,c} of xs){let falta=c.usou;const resto=[];cid=cid||g.partes[0].r.clientId;
+  for(const y of g.partes){const t=r4c(Math.min(falta,y.emMaos));falta=r4c(falta-t);if(y.emMaos-t>1e-9)resto.push({y,q:r4c(y.emMaos-t)});if(t<=1e-9)continue;
+   const k=mtChave(y.i,y.p),mapa=consumo.get(y.r.id)||{...(y.r.consumo||{})};mapa[k]=r4c((Number(mapa[k])||0)+t);consumo.set(y.r.id,mapa);const dest=y.r.itens?.[y.i]?.destino;
+   const mid='con-'+uid();ops.push({op:'set',store:'movements',id:mid,data:{id:mid,type:'SAIDA',requisicaoId:y.r.id,productId:y.x.productId,projectId:y.r.projectId,clientId:y.r.clientId,quantity:t,unitCost:Number(y.x.unitCost)||0,date:hoje.slice(0,10),note:`Uso confirmado pela obra · ${y.r.codigo}${dest?' · Destino: '+dest:''}`,description:g.nome,createdAt:hoje,criadoPor:Cap.user.email,criadoPorNome:Cap.user.nome||'',origem:'obra',_atualizadoEm:hoje,_atualizadoPor:Cap.user.email}})}
+  let dev=c.devolve;const partes=[];for(const {y,q} of resto){if(dev<=1e-9)break;const t=r4c(Math.min(dev,q));dev=r4c(dev-t);partes.push({requisicaoId:y.r.id,i:y.i,p:y.p,productId:y.x.productId,qtd:t})}
+  if(partes.length)itensDev.push({materialId:g.materialId,nome:g.nome,unidade:g.unidade,pedida:c.devolve,partes})}
  for(const [rid,mapa] of consumo)ops.push({op:'update',store:'requisicoes',id:rid,data:{consumo:mapa,consumoEm:hoje,_atualizadoEm:hoje,_atualizadoPor:Cap.user.email}});
- const p=Cap.projetos.find(x=>x.id===g.pid);ops.push(mtAtividade('obra_consumo',`Confirmou o uso de ${numc(q)} ${g.unidade} de ${g.nome} em ${p?.name||'obra'}`,g.pid,p?.clientId,'requisicoes/'+g.partes[0].r.id));
- return mtGravar(ops)}
-async function mtDevolver(g,q){const id=uid(),codigo=mtCodigo('DEV'),partes=[];let falta=q;
- for(const y of [...g.partes].reverse()){if(falta<=1e-9)break;const t=r4c(Math.min(falta,y.emMaos));falta=r4c(falta-t);partes.push({requisicaoId:y.r.id,i:y.i,p:y.p,productId:y.x.productId,qtd:t})}
- const p=Cap.projetos.find(x=>x.id===g.pid)||{id:g.pid,name:'',clientId:g.partes[0].r.clientId};
- const doc={id,codigo,tipo:'devolucao',projectId:g.pid,clientId:g.partes[0].r.clientId,projetoNome:p.name,autor:Cap.user.email,autorNome:Cap.user.nome||'',criadoEm:new Date().toISOString(),status:'pendente',obs:'',itens:[{materialId:g.materialId,nome:g.nome,unidade:g.unidade,pedida:q,partes}]};
- return mtGravar([{op:'set',store:'requisicoes',id,data:doc},mtAtividade('obra_devolucao',`Devolveu ${numc(q)} ${g.unidade} de ${g.nome} de ${p.name} (${codigo})`,g.pid,doc.clientId,'requisicoes/'+id)])}
+ let codigo='',devId='';if(itensDev.length){const id=devId=uid();codigo=mtCodigo('DEV');ops.push({op:'set',store:'requisicoes',id,data:{id,codigo,tipo:'devolucao',projectId:p.id,clientId:p.clientId||cid,projetoNome:p.name,autor:Cap.user.email,autorNome:Cap.user.nome||'',criadoEm:hoje,status:'pendente',obs:'',itens:itensDev}})}
+ const usos=xs.filter(x=>x.c.usou>0),devs=xs.filter(x=>x.c.devolve>0);
+ ops.push(mtAtividade('obra_prestacao',`Prestou contas do material de ${p.name}: ${[usos.length?'usou '+usos.map(x=>numc(x.c.usou)+' '+x.g.unidade+' de '+x.g.nome).join(', '):'',devs.length?`devolve (${codigo}) `+devs.map(x=>numc(x.c.devolve)+' '+x.g.unidade+' de '+x.g.nome).join(', '):''].filter(Boolean).join('; ')}`,p.id,p.clientId||cid,devId?'requisicoes/'+devId:'movements'));
+ return {r:await mtGravar(ops),usos,devs,codigo}}
 
 // ---------- Meus pedidos ----------
 const MT_SIT={pendente:['Aguardando o escritório','espera'],atendida:['Entregue','ok'],recusada:['Recusado','risco'],cancelada:['Cancelado','neutro'],recebida:['Recebida no estoque','ok']};
@@ -270,27 +292,26 @@ function materialTelas(){if(!Cap.user)return;const na=mtNaObra('').length,pend=m
  if($('#telaPedir').classList.contains('ativa'))pedirRender();if($('#telaNaObra').classList.contains('ativa'))naObraRender();if($('#telaPedidos').classList.contains('ativa'))pedidosRender()}
 
 $('#pedirMaterial').addEventListener('click',()=>{mtObraAtual();Mt.passo=1;pedirRender();mostrar('telaPedir')});
-$('#naObra').addEventListener('click',()=>{mtObraAtual();if(!mtNaObra(Mt.obra).length){const c=mtNaObra('')[0];if(c)Mt.obra=c.pid}naObraRender();mostrar('telaNaObra')});
+$('#naObra').addEventListener('click',()=>{mtObraAtual();if(!mtNaObra(Mt.obra).length){const c=mtNaObra('')[0];if(c)Mt.obra=c.pid}Mt.contas.clear();Mt.naPasso=1;naObraRender();mostrar('telaNaObra')});
 $('#meusPedidos').addEventListener('click',()=>{pedidosRender();mostrar('telaPedidos')});
-['#naObraVoltar','#pedidosVoltar'].forEach(s=>$(s).addEventListener('click',()=>mostrar('telaFoto')));
+$('#pedidosVoltar').addEventListener('click',()=>mostrar('telaFoto'));
+// Na obra: do resumo volta à tabela (as quantidades ficam); da tabela, à tela inicial
+$('#naObraVoltar').addEventListener('click',()=>{if(Mt.naPasso===2){Mt.naPasso=1;naObraRender();return}if(mtContasDaObra().length&&!confirm('Sair sem registrar? As quantidades digitadas serão apagadas.'))return;Mt.contas.clear();mostrar('telaFoto')});
+$('#naObraRegistrar').addEventListener('click',async()=>{document.activeElement?.blur?.();document.querySelectorAll('#naObraLista tr[data-mt-grupo]').forEach(mtContaLer);if(!mtContasDaObra().length)return;
+ if(Mt.naPasso!==2){Mt.naPasso=2;naObraRender();window.scrollTo(0,0);return}
+ const b=$('#naObraRegistrar');b.disabled=true;const x=await naObraGravar();if(x.r==='erro'){b.disabled=false;return}navigator.vibrate?.(120);Mt.contas.clear();Mt.naPasso=1;
+ mtPronto(x.devs.length?'↩️':'✅','Registrado!',[x.usos.length?`${x.usos.length===1?'1 material lançado':x.usos.length+' materiais lançados'} como gasto da obra.`:'',x.devs.length?`Devolução ${x.codigo}: leve ${x.devs.map(y=>numc(y.c.devolve)+' '+y.g.unidade+' de '+y.g.nome).join(', ')} ao estoque. O escritório confirma quando receber.`:''].filter(Boolean).join(' ')+(x.r==='fila'?' Sem internet agora: vai sozinho depois.':''))});
 // Voltar: da revisão volta à tabela (as quantidades ficam); da tabela, à tela inicial
 $('#pedirVoltar').addEventListener('click',()=>{if(Mt.passo===2){Mt.passo=1;pedirRender();window.scrollTo(0,0);return}if(Mt.qtd.size&&!confirm('Sair sem enviar o pedido? As quantidades digitadas serão apagadas.'))return;pedirLimpar();mostrar('telaFoto')});
 $('#pedirRevisar').addEventListener('click',()=>{document.activeElement?.blur?.();document.querySelectorAll('[data-mt-qtd]').forEach(mtQtdLer);if(!mtNoPedido().length)return;Mt.passo=2;pedirRender();window.scrollTo(0,0)});
 $('#pedirBusca').addEventListener('input',e=>{Mt.busca=e.target.value;pedirRender()});
 $('#pedirEnviar').addEventListener('click',pedirEnviar);
-document.addEventListener('click',async e=>{const b=e.target.closest('[data-mt-obra],[data-mt-g-menos],[data-mt-g-mais],[data-mt-usei],[data-mt-devolver],[data-mt-cancelar]');if(!b)return;const d=b.dataset;
- if(d.mtObra){if($('#telaPedir').classList.contains('ativa')){if(Mt.passo===2||d.mtObra===Mt.obra)return;if(Mt.qtd.size&&!confirm('Trocar de obra? As quantidades digitadas serão apagadas.'))return;Mt.qtd.clear();Mt.destino.clear();Mt.obra=d.mtObra;pedirRender()}else{Mt.obra=d.mtObra;naObraRender()}return}
- const card=b.closest('[data-mt-grupo]');
- if(card&&(d.mtGMenos!==undefined||d.mtGMais!==undefined)){const g=mtNaObra(Mt.obra).find(x=>x.chave===card.dataset.mtGrupo);const i=card.querySelector('[data-mt-g-qtd]');let v=mtQtdGrupo(card)+(d.mtGMais!==undefined?1:-1);v=Math.min(g?.total||0,Math.max(0,r4c(v)));i.value=numc(v);return}
- if(card&&(d.mtUsei!==undefined||d.mtDevolver!==undefined)){const g=mtNaObra(Mt.obra).find(x=>x.chave===card.dataset.mtGrupo);if(!g)return;const q=mtQtdGrupo(card);
-  if(!(q>0)||q>g.total+1e-9){alert(`Informe de 0 a ${numc(g.total)} ${g.unidade}.`);return}
-  const usei=d.mtUsei!==undefined;if(!confirm(usei?`Confirmar que a obra USOU ${numc(q)} ${g.unidade} de ${g.nome}?\n\nIsso vira gasto da obra.`:`Devolver ${numc(q)} ${g.unidade} de ${g.nome} ao estoque?\n\nO escritório confirma quando receber.`))return;
-  card.querySelectorAll('button').forEach(x=>x.disabled=true);const r=usei?await mtUsar(g,q):await mtDevolver(g,q);
-  if(r==='erro'){card.querySelectorAll('button').forEach(x=>x.disabled=false);return}navigator.vibrate?.(120);
-  mtPronto(usei?'✅':'↩️',usei?'Uso confirmado!':'Devolução registrada!',(usei?`${numc(q)} ${g.unidade} de ${g.nome} lançados como gasto da obra.`:`Leve ${numc(q)} ${g.unidade} de ${g.nome} ao estoque. O escritório confirma quando receber.`)+(r==='fila'?' Sem internet agora: vai sozinho depois.':''));return}
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-mt-obra],[data-mt-cancelar]');if(!b)return;const d=b.dataset;
+ if(d.mtObra){if($('#telaPedir').classList.contains('ativa')){if(Mt.passo===2||d.mtObra===Mt.obra)return;if(Mt.qtd.size&&!confirm('Trocar de obra? As quantidades digitadas serão apagadas.'))return;Mt.qtd.clear();Mt.destino.clear();Mt.obra=d.mtObra;pedirRender()}else{if(Mt.naPasso===2||d.mtObra===Mt.obra)return;if(mtContasDaObra().length&&!confirm('Trocar de obra? As quantidades digitadas serão apagadas.'))return;Mt.contas.clear();Mt.obra=d.mtObra;naObraRender()}return}
  if(d.mtCancelar){const r=Mt.reqs.get(d.mtCancelar);if(!r||!confirm(`Cancelar ${r.tipo==='devolucao'?'a devolução':'o pedido'} ${r.codigo}?`))return;const agora=new Date().toISOString();
   await mtGravar([{op:'update',store:'requisicoes',id:r.id,data:{status:'cancelada',canceladoEm:agora,_atualizadoEm:agora,_atualizadoPor:Cap.user.email}},mtAtividade('obra_cancelamento',`Cancelou ${r.tipo==='devolucao'?'a devolução':'o pedido'} ${r.codigo}`,r.projectId,r.clientId,'requisicoes/'+r.id)]);pedidosRender()}});
 document.addEventListener('change',e=>{const i=e.target.closest?.('[data-mt-qtd]');if(i){mtQtdLer(i);return}
+ const tr=e.target.closest?.('#naObraLista tr[data-mt-grupo]');if(tr){mtContaLer(tr);return}
  const s=e.target.closest?.('[data-mt-dest]');if(s){const d={...(Mt.destino.get(s.dataset.mtDest)||{}),sel:s.value};Mt.destino.set(s.dataset.mtDest,d);pedirRender();if(d.sel===OUTRO)document.querySelector(`[data-mt-dest-outro="${CSS.escape(s.dataset.mtDest)}"]`)?.focus()}});
 // Enter no campo de quantidade passa para o próximo, como no teclado de uma planilha
 document.addEventListener('keydown',e=>{const i=e.target.closest?.('[data-mt-qtd]');if(!i||e.key!=='Enter')return;e.preventDefault();mtQtdLer(i);const l=[...document.querySelectorAll('[data-mt-qtd]')];const prox=l[l.indexOf(i)+1];prox?prox.focus():i.blur()});

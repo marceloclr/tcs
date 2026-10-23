@@ -5,7 +5,7 @@
 <!-- endereço curto /tcs/mestre (_redirects): com barra no fim, os caminhos relativos quebrariam; volta para o endereço sem a barra -->
 <script>if(/\/mestre\/$/.test(location.pathname))location.replace(location.pathname.replace(/\/$/,'')+location.search+location.hash)</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Notas TCS - V-23102026-1427</title>
+<title>Notas TCS - V-23102026-1500</title>
 <!-- tema escolhido no botão do topo (claro/escuro), aplicado antes de desenhar para não piscar -->
 <script>try{const t=localStorage.getItem('tcs-captura-tema');if(t==='claro'||t==='escuro')document.documentElement.dataset.tema=t}catch(e){}</script>
 <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: light)">
@@ -90,11 +90,14 @@
 
  <section id="telaNaObra" class="tela">
   <h2 class="tela-titulo">Material na obra</h2>
-  <p class="dica-obras">Material que o escritório entregou e que você ainda não confirmou o uso. Ele só vira gasto da obra quando você toca em <strong>Usei</strong>. O que sobrar, devolva.</p>
   <div id="naObraObra" class="obra-chips"></div>
-  <div id="naObraLista" class="na-obra"></div>
+  <p class="dica-obras" id="naObraDica"></p>
+  <div id="naObraLista" class="mat-tabela-caixa"></div>
   <div class="empurra"></div>
-  <div class="barra-acao"><button class="botao texto" id="naObraVoltar">Voltar</button></div>
+  <div class="barra-acao">
+   <button class="botao principal enorme" id="naObraRegistrar" disabled title="Mostra o resumo do que vira gasto e do que volta ao estoque, antes de gravar">Registrar</button>
+   <button class="botao texto" id="naObraVoltar" title="Volta sem registrar">Voltar</button>
+  </div>
  </section>
 
  <section id="telaPedidos" class="tela">
