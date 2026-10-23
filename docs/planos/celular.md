@@ -89,7 +89,7 @@ O usuário quer o sistema rodando no celular e quer saber se é viável, quanto 
 - No celular entram só cartões novos; nenhuma lógica é duplicada.
 - Uma tela inicial por papel: o mestre vai para `captura.html`, e o escritório e o administrador para o modo celular.
 
-**M4 — Notificações (depende da decisão do ponto 6)**
+**M4 — Notificações** (decidido em 23/10/2026: serviço gratuito, sem o plano Blaze: Cloudflare Workers chamando a API HTTP v1 do FCM com uma conta de serviço)
 - FCM Web Push: nova requisição ou devolução → escritório; pedido atendido ou recusado → mestre.
 - O token fica em `usuarios/{email}`, com regras novas e testes no emulador.
 
