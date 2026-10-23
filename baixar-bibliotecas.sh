@@ -9,4 +9,5 @@ for f in tesseract-core.wasm.js tesseract-core-simd.wasm.js tesseract-core-lstm.
 fetch https://tessdata.projectnaptha.com/4.0.0/por.traineddata.gz libs/tesseract/tessdata/por.traineddata.gz
 fetch https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js libs/zxing/index.min.js
 fetch https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js libs/heic2any/heic2any.min.js
+fetch https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js libs/exceljs/exceljs.min.js
 echo 'Concluído. Mantenha a estrutura libs/ ao publicar.'

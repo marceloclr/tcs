@@ -60,6 +60,8 @@ O app real, ligado aos emuladores (`?emulador=1`, só funciona em localhost), co
      - `esc2`: atendimento FIFO (estoque −5, requisitado +5, sem custo) e excesso recusado;
      - `obra2`: uso de 3 confirmado e devolução de 2;
      - `esc3`: devolução recebida (estoque 13, requisitado 0, consumido 3, apropriado 3 × custo), fechamento estoque + apropriado = pago e log de atividades.
+   - `20-materiais-planilha.js` em 8767 (depois do `1-admin.js`; entra sozinho como administrador): planilha .xlsx da tabela de materiais — painel na tela, modelo vazio baixado, prévia com novo, alterar (casado pelo nome + unidade, sem ID), sem mudança e erros (repetido, sem unidade), nada gravado antes de confirmar, gravação na nuvem com uma só linha no log, arquivo que não é .xlsx recusado e ida e volta da tabela atual sem mudança.
+   - `node gerar-modelo-materiais.mjs` (dentro de `testes/`, sem emulador): regera `modelos/materiais-modelo.xlsx` com o código da tela e confere a leitura de volta.
    - `10-fila.js` em 8767 (depois do `7-captura.js`): fila do escritório, cartão e destaque de 48 h, conferir com o projeto indicado, lançar, fotos como comprovante, descartar com motivo e XML da mesma chave substituindo os dados da foto.
 
 Variáveis do `cdp.mjs`: `CDP_PORTA` (9446), `ESPERA` (ms antes de rodar o script), `FIM` (ms antes de fechar), `INIT` (script injetado antes da página) e `TEMA=claro|escuro` força o tema; o script pode chamar `console.log('__cdp_offline__')` e `console.log('__cdp_online__')` para derrubar e religar a rede da página.

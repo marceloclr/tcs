@@ -143,7 +143,8 @@ function atvDeOps(ops, opts = {}){
    texto: p.materialId ? `Vinculou o produto ${p.name} ao material ${nomeMat(p.materialId)}${v?.materialId ? ' (antes: ' + nomeMat(v.materialId) + ')' : ''}` : `Desvinculou o produto ${p.name} do material ${nomeMat(v?.materialId)}`});
  }
  // tabela de materiais
- for(const o of porStore.materiais || []){
+ if(opts.importacao && porStore.materiais){const i = opts.importacao; lista.push({cat:'catalogo', acao:'materiais_importados', texto:`Importou a planilha de materiais ${i.arquivo || ''}: ${i.novos} novo(s) e ${i.alterados} alterado(s)`})}
+ else for(const o of porStore.materiais || []){
   const m = o.obj, v = antigo('materiais', o.id);
   if(o.op === 'delete') lista.push({cat:'catalogo', acao:'material_excluido', texto:`Excluiu o material ${v?.nome || o.id}`});
   else if(!v) lista.push({cat:'catalogo', acao:'material_criado', texto:`Cadastrou o material ${m.nome} (${m.unidade})${m.categoria ? ', categoria ' + m.categoria : ''}`});

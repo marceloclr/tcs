@@ -14,7 +14,7 @@ A versão aparece no canto inferior esquerdo, no formato `V-DDMMAAAA-HHMM`. Ela 
 | Projetos | Projetos de cada cliente, com uma cor, uma situação (ativo ou encerrado) e os mesmos totais. |
 | Fornecedores | Busca por fornecedor ou prestador, com notas e itens. |
 | Estoque › Saldo | Grid hierárquica cliente → projeto → **material** (ou produto do fornecedor), com as posições **Estoque**, **Requisitado** e **Consumido**. Só materiais. |
-| Estoque › Materiais | Tabela de materiais padronizados (nome, unidade, categoria), com os produtos de fornecedor vinculados e o saldo por obra; editar, juntar e desativar. |
+| Estoque › Materiais | Tabela de materiais padronizados (nome, unidade, categoria), com os produtos de fornecedor vinculados e o saldo por obra; editar, juntar e desativar. O administrador também importa a tabela por planilha .xlsx: modelo em `modelos/materiais-modelo.xlsx` (ou baixado pela tela, vazio ou com a tabela atual), prévia antes de gravar (`js/materiais-planilha.js`, biblioteca ExcelJS carregada sob demanda). |
 | Estoque › Vincular itens | Produtos das notas ainda sem material, com sugestão pelo nome; vínculo um a um, em lote ou criando o material. |
 | Estoque › Requisições da obra | Pedidos e devoluções do mestre: atender (estoque → requisitado), recusar, confirmar devolução (requisitado → estoque); abas Pendentes, Com a obra e Histórico; CSV. |
 | Estoque › Produtos e ajustes | Dados do produto (nome, EAN e unidade) e, por projeto, recebido, saldo, custo médio e valor em estoque. Administradores ajustam a quantidade (pela contagem) e o custo médio, com motivo; histórico dos ajustes. |
