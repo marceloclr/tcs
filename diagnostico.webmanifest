@@ -1,0 +1,17 @@
+{
+  "name": "Diagnóstico TCS",
+  "short_name": "Diagnóstico",
+  "description": "Testa no celular os recursos de que o Notas TCS precisa.",
+  "lang": "pt-BR",
+  "id": "diagnostico",
+  "start_url": "diagnostico.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    { "src": "icones/notas-tcs-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icones/notas-tcs-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

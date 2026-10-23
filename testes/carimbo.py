@@ -4,7 +4,7 @@
 import re, datetime, pathlib, sys
 raiz = pathlib.Path(__file__).resolve().parent.parent
 v = 'V-' + datetime.datetime.now().strftime('%d%m%Y-%H%M')
-for nome in ['index.html', 'captura.html', 'sw.js']:
+for nome in ['index.html', 'captura.html', 'diagnostico.html', 'sw.js']:
     p = raiz / nome
     texto = p.read_text(encoding='utf-8')
     novo, n = re.subn(r'V-\d{8}-\d{4}', v, texto)

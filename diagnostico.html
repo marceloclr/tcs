@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Diagnóstico do celular - V-23102026-1513</title>
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Diagnóstico TCS">
+<link rel="manifest" href="diagnostico.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icones/notas-tcs.svg">
+<link rel="apple-touch-icon" href="icones/notas-tcs-192.png">
+<link rel="stylesheet" href="css/captura.css">
+<style>
+ .diag{display:grid;gap:8px;margin:8px 0 12px}
+ .diag-item{display:grid;grid-template-columns:28px 1fr;gap:2px 10px;align-items:start;padding:10px 12px;border:1px solid var(--linha);border-radius:var(--raio-p);background:var(--carta)}
+ .diag-item b{font-size:16px}.diag-item small{grid-column:2;color:var(--tinta-2);font-size:13px;word-break:break-word}
+ .diag-item .st{font-size:20px;line-height:1.2}
+ .diag-acoes{display:grid;grid-template-columns:1fr 1fr;gap:8px}.diag-acoes .botao{margin:0;min-height:56px;font-size:16px}
+ .diag-visor{position:relative;border-radius:var(--raio-p);overflow:hidden;background:#000;margin:6px 0}.diag-visor video{display:block;width:100%;max-height:40vh}
+ h2.secao{font-size:18px;margin:18px 0 4px}
+</style>
+</head>
+<body>
+<!-- Diagnóstico do celular (plano docs/planos/celular.md, etapa M0): testa no aparelho cada recurso de que o app precisa
+     e manda o resultado para o escritório (coleção atividades, ação 'diagnostico') ou para o WhatsApp. Não grava nada além disso. -->
+<header class="topo"><img src="icones/notas-tcs.svg" alt="" class="topo-icone"><span>Diagnóstico</span><span class="topo-quem" id="quem"></span></header>
+<main>
+ <p class="dica-obras" id="intro">Toque nos botões abaixo, um de cada vez. No fim, toque em <b>Enviar ao escritório</b> (ou <b>Compartilhar</b>). Faça duas vezes: primeiro aqui no navegador e depois pelo ícone na tela de início.</p>
+ <div id="lista" class="diag"></div>
+
+ <h2 class="secao">1. Login</h2>
+ <div class="diag-acoes">
+  <button class="botao principal" id="tPopup">Entrar (janela)</button>
+  <button class="botao secundario" id="tRedirect">Entrar (redirecionar)</button>
+ </div>
+ <h2 class="secao">2. Câmera e código</h2>
+ <div class="diag-acoes">
+  <label class="botao secundario">📷 Foto pela câmera<input type="file" accept="image/*" capture="environment" id="tFoto" hidden></label>
+  <button class="botao secundario" id="tVideo">🔍 Ler código ao vivo</button>
+ </div>
+ <div class="diag-visor" id="visor" hidden><video id="video" playsinline muted></video></div>
+ <h2 class="secao">3. Avisos</h2>
+ <div class="diag-acoes"><button class="botao secundario" id="tNotif">🔔 Permitir notificações</button><button class="botao secundario" id="tPersist">💾 Guardar dados no celular</button></div>
+
+ <div class="barra-acao">
+  <button class="botao principal enorme" id="enviar">Enviar ao escritório</button>
+  <div class="diag-acoes"><button class="botao texto" id="compartilhar">Compartilhar</button><button class="botao texto" id="sair">Sair da conta</button></div>
+ </div>
+</main>
+<p class="versao" id="versao"></p>
+<script src="js/config.js"></script>
+<script src="js/base.js"></script>
+<script src="js/importacao.js"></script>
+<script src="js/imagens.js"></script>
+<script type="module">
+const R=new Map();// chave → {st:'ok'|'aviso'|'erro'|'…', titulo, det}
+const ICONE={ok:'✅',aviso:'⚠️',erro:'❌','…':'⏳'};
+const ORDEM=['aparelho','modo','sw','idb','armazenamento','persist','firebase','sessao','popup','redirect','firestore','foto','camera','zxing','barcode','notificacao'];
+function marca(k,st,titulo,det=''){R.set(k,{st,titulo,det:String(det).slice(0,300)});desenha()}
+function desenha(){$('#lista').innerHTML=[...R.entries()].sort((a,b)=>ORDEM.indexOf(a[0])-ORDEM.indexOf(b[0])).map(([,x])=>`<div class="diag-item"><span class="st">${ICONE[x.st]||'•'}</span><b>${esc(x.titulo)}</b>${x.det?`<small>${esc(x.det)}</small>`:''}</div>`).join('')}
+$('#versao').textContent=(document.title.match(/V-\d{8}-\d{4}/)||[''])[0];
+const ua=navigator.userAgent,ios=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
+const iosVer=(ua.match(/OS (\d+)_(\d+)/)||[]).slice(1).join('.');
+const instalado=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+marca('aparelho','ok',ios?`iPhone/iPad · iOS ${iosVer||'?'}`:/Android/.test(ua)?'Android':'Outro aparelho',ua);
+marca('modo',instalado?'ok':'aviso',instalado?'Aberto pelo ícone (instalado)':'Aberto no navegador',instalado?'':ios?'Para instalar: Compartilhar › Adicionar à Tela de Início, e abra pelo ícone.':'');
+// Service worker, IndexedDB e armazenamento
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').then(()=>marca('sw','ok','Funciona sem internet (service worker)')).catch(e=>marca('sw','erro','Service worker',e.message));else marca('sw','erro','Service worker não existe neste navegador');
+(async()=>{try{const d=await new Promise((res,rej)=>{const q=indexedDB.open('tcs-diagnostico',1);q.onupgradeneeded=()=>q.result.createObjectStore('t');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)});
+  await new Promise((res,rej)=>{const t=d.transaction('t','readwrite');t.objectStore('t').put(new Blob(['x'.repeat(200000)]),'blob');t.oncomplete=res;t.onerror=()=>rej(t.error)});
+  const b=await new Promise((res,rej)=>{const q=d.transaction('t').objectStore('t').get('blob');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)});
+  marca('idb',b?.size===200000?'ok':'erro','Banco do celular (IndexedDB) com fotos',b?`blob de ${b.size} bytes gravado e lido`:'não leu o blob')}catch(e){marca('idb','erro','Banco do celular (IndexedDB)',e.message)}
+ try{const e=await navigator.storage?.estimate?.();const p=await navigator.storage?.persisted?.();marca('armazenamento',e?'ok':'aviso','Espaço disponível',e?`cota ${Math.round(e.quota/1048576)} MB, usado ${Math.round(e.usage/1048576)} MB`:'sem estimativa');marca('persist',p?'ok':'aviso',p?'Dados protegidos contra limpeza':'Dados podem ser limpos pelo sistema',p?'':'Toque em "Guardar dados no celular".')}catch(e){marca('armazenamento','aviso','Espaço disponível',e.message)}})();
+$('#tPersist').onclick=async()=>{try{const ok=await navigator.storage?.persist?.();marca('persist',ok?'ok':'aviso',ok?'Dados protegidos contra limpeza':'O sistema não garantiu os dados',ok?'':'normal no iPhone fora do ícone')}catch(e){marca('persist','erro','Proteção dos dados',e.message)}};
+// BarcodeDetector e notificações
+marca('barcode','BarcodeDetector' in window?'ok':'aviso','BarcodeDetector' in window?'Leitor de código nativo':'Sem leitor de código nativo','BarcodeDetector' in window?'':'usa o leitor do sistema (ZXing), mais lento');
+const temPush='Notification' in window&&'PushManager' in window;
+marca('notificacao',temPush?(Notification.permission==='granted'?'ok':'aviso'):'erro',temPush?`Notificações: ${({granted:'permitidas',denied:'bloqueadas',default:'ainda não pedidas'})[Notification.permission]}`:'Sem notificações aqui',temPush?'':ios?'No iPhone só funcionam pelo ícone instalado (iOS 16.4 ou mais novo).':'');
+$('#tNotif').onclick=async()=>{if(!temPush){marca('notificacao','erro','Sem notificações aqui',ios&&!instalado?'Abra pelo ícone da tela de início.':'');return}const p=await Notification.requestPermission();marca('notificacao',p==='granted'?'ok':'aviso',`Notificações: ${({granted:'permitidas',denied:'bloqueadas',default:'sem resposta'})[p]}`)};
+// Foto pela câmera
+$('#tFoto').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;marca('foto','…','Foto pela câmera','abrindo…');
+ try{const t0=performance.now();const img=await imagemCarregar(f,3000);const cod=codigosResumo(await codigosLer(img.canvas));URL.revokeObjectURL(img.url);
+  marca('foto','ok','Foto pela câmera',`${f.type||'sem tipo'} · ${Math.round(f.size/1024)} KB · ${img.canvas.width}×${img.canvas.height} · aberta e lida em ${Math.round(performance.now()-t0)} ms · código: ${cod.chave?'chave lida':cod.lidos?'leu '+cod.lidos:'nenhum (normal se não fotografou nota)'}`)}catch(err){marca('foto','erro','Foto pela câmera',err.message)}};
+// Câmera ao vivo + leitura do código pelo leitor do sistema
+let stream=null;
+$('#tVideo').onclick=async()=>{if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;$('#visor').hidden=true;return}
+ marca('camera','…','Câmera ao vivo','pedindo a câmera…');
+ try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false});const v=$('#video');v.srcObject=stream;$('#visor').hidden=false;await v.play();
+  const s=stream.getVideoTracks()[0].getSettings();marca('camera','ok','Câmera ao vivo',`${s.width}×${s.height}`);
+  marca('zxing','…','Leitura do código ao vivo','aponte para o código de barras ou o QR de uma nota (15 s)');
+  const c=document.createElement('canvas'),t0=Date.now();let tentativas=0,ms=0,achou='';
+  while(stream&&Date.now()-t0<15000&&!achou){c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);const a=performance.now();const r=await codigosLer(c);ms+=performance.now()-a;tentativas++;if(r.length)achou=r.map(x=>x.formato).join(', ');await new Promise(x=>setTimeout(x,150))}
+  marca('zxing',achou?'ok':'aviso','Leitura do código ao vivo',`${achou?'leu ('+achou+')':'não leu em 15 s'} · ${tentativas} tentativa(s), ${tentativas?Math.round(ms/tentativas):0} ms cada`);
+  stream?.getTracks().forEach(t=>t.stop());stream=null;$('#visor').hidden=true}catch(e){marca('camera','erro','Câmera ao vivo',e.name+': '+e.message);stream=null}};
+
+// Firebase: login por janela e por redirecionamento, e leitura do próprio cadastro
+const EMULADOR=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&new URLSearchParams(location.search).has('emulador');
+const cfg=EMULADOR?{...window.TCS_FIREBASE_CONFIG,projectId:'demo-tcs',authDomain:location.host}:window.TCS_FIREBASE_CONFIG;
+let au,auth,fs,fdb,usuario=null;
+try{const V='https://www.gstatic.com/firebasejs/12.15.0/';let app;[{initializeApp:app},fs,au]=await Promise.all([import(V+'firebase-app.js'),import(V+'firebase-firestore.js'),import(V+'firebase-auth.js')]);
+ const a=app(cfg);auth=au.getAuth(a);
+ try{fdb=fs.initializeFirestore(a,{localCache:fs.persistentLocalCache()});marca('firestore','…','Base na nuvem com cópia no celular','aguardando o login')}catch(e){fdb=fs.getFirestore(a);marca('firestore','aviso','Base na nuvem sem cópia no celular',e.message)}
+ if(EMULADOR){fs.connectFirestoreEmulator(fdb,'127.0.0.1',8089);au.connectAuthEmulator(auth,'http://127.0.0.1:9099',{disableWarnings:true})}
+ marca('firebase','ok','Serviço de login carregou',cfg.authDomain);
+ const rd=sessionStorage.getItem('diag-redirect')||localStorage.getItem('diag-redirect');
+ if(rd){try{const r=await au.getRedirectResult(auth);marca('redirect',r?.user?'ok':'erro','Login por redirecionamento',r?.user?`voltou logado (${r.user.email})`:'voltou sem login: o navegador bloqueou a sessão entre sites')}catch(e){marca('redirect','erro','Login por redirecionamento',e.code||e.message)}sessionStorage.removeItem('diag-redirect');localStorage.removeItem('diag-redirect')}
+ au.onAuthStateChanged(auth,async u=>{usuario=u;$('#quem').textContent=u?.email||'';marca('sessao',u?'ok':'aviso',u?'Conectado':'Não conectado',u?u.email:'teste um dos botões de login');
+  if(!u)return;try{const d=await fs.getDoc(fs.doc(fdb,'usuarios',(u.email||'').toLowerCase()));marca('firestore','ok','Base na nuvem respondeu',d.exists()?`cadastro: ${d.data().papel}${d.data().ativo?'':' (desativado)'}`:'sem cadastro no sistema')}catch(e){marca('firestore','erro','Base na nuvem',e.code||e.message)}})}
+catch(e){marca('firebase','erro','Serviço de login não carregou',e.message)}
+$('#tPopup').onclick=async()=>{if(!auth)return;marca('popup','…','Login por janela','abrindo…');try{const r=await au.signInWithPopup(auth,new au.GoogleAuthProvider());marca('popup','ok','Login por janela',r.user.email)}catch(e){marca('popup','erro','Login por janela',e.code||e.message)}};
+$('#tRedirect').onclick=async()=>{if(!auth)return;sessionStorage.setItem('diag-redirect','1');localStorage.setItem('diag-redirect','1');marca('redirect','…','Login por redirecionamento','saindo para o Google…');try{await au.signInWithRedirect(auth,new au.GoogleAuthProvider())}catch(e){marca('redirect','erro','Login por redirecionamento',e.code||e.message)}};
+$('#sair').onclick=async()=>{if(auth)await au.signOut(auth)};
+// Resultado: texto curto, para a atividade (até 1.500 letras) e para compartilhar
+function resumo(){return `Diagnóstico ${$('#versao').textContent} · ${new Date().toLocaleString('pt-BR')}\n`+[...R.entries()].sort((a,b)=>ORDEM.indexOf(a[0])-ORDEM.indexOf(b[0])).filter(([k])=>k!=='aparelho').map(([,x])=>`${ICONE[x.st]} ${x.titulo}${x.det?': '+x.det:''}`).join('\n')+`\n${R.get('aparelho')?.titulo}`}
+$('#enviar').onclick=async()=>{if(!usuario){alert('Entre primeiro (seção 1). Se nenhum login funcionar, use Compartilhar e mande pelo WhatsApp.');return}
+ const id=uid();try{await fs.setDoc(fs.doc(fdb,'atividades',id),{id,em:new Date().toISOString(),emServidor:fs.serverTimestamp(),por:usuario.email.toLowerCase(),nome:usuario.displayName||usuario.email,papel:'',cat:'sessao',acao:'diagnostico',texto:resumo().slice(0,1500),projetoId:'',clienteId:'',ref:'',valor:null,aparelho:(ios?'iPhone iOS '+iosVer:/Android/.test(ua)?'Android':'outro')+(instalado?' · instalado':' · navegador'),offline:!navigator.onLine});alert('Enviado ao escritório. Obrigado!')}
+ catch(e){alert('Não deu para enviar ('+(e.code||e.message)+'). Use Compartilhar.')}};
+$('#compartilhar').onclick=async()=>{const t=resumo();try{if(navigator.share)await navigator.share({title:'Diagnóstico TCS',text:t});else{await navigator.clipboard.writeText(t);alert('Copiado. Cole no WhatsApp.')}}catch(e){}};
+</script>
+</body>
+</html>
