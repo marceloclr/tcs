@@ -216,6 +216,20 @@ test('pedidos de orçamento: consulta por cliente e pedido sem projeto', async (
   await assertFails(getDoc(doc(ctx(ESC), 'quotes/q2')));
   await assertFails(getDocs(query(collection(ctx(LEI), 'quotes'), where('clientId', 'in', ['A']))));
 });
+test('saldo por obra: o escritório grava, o mestre lê só as obras concedidas', async () => {
+  const saldo = (p, c) => ({ id: p, projectId: p, clientId: c, projetoNome: p, itens: [{ materialId: 'M1', nome: 'Cimento', unidade: 'SC', disponivel: 10 }] });
+  await assertSucceeds(setDoc(doc(ctx(ESC), 'saldos_obra/A1'), saldo('A1', 'A')));
+  await assertFails(setDoc(doc(ctx(ESC), 'saldos_obra/A2'), saldo('A2', 'A')));
+  await assertFails(setDoc(doc(ctx(ESC), 'saldos_obra/A1'), saldo('A1', 'B')));
+  await assertFails(setDoc(doc(ctx(ESC), 'saldos_obra/A1'), { ...saldo('A1', 'A'), projectId: 'A2' }));
+  await assertFails(setDoc(doc(ctx(LEI), 'saldos_obra/A1'), saldo('A1', 'A')));
+  await assertFails(setDoc(doc(ctx(OBRA), 'saldos_obra/A1'), saldo('A1', 'A')));
+  await assertSucceeds(setDoc(doc(ctx(CLI), 'saldos_obra/A2'), saldo('A2', 'A')));
+  await assertSucceeds(getDoc(doc(ctx(OBRA), 'saldos_obra/A1')));
+  await assertFails(getDoc(doc(ctx(OBRA), 'saldos_obra/A2')));
+  await assertSucceeds(getDoc(doc(ctx(LEI), 'saldos_obra/A1')));
+  await assertFails(getDoc(doc(ctx(LEI), 'saldos_obra/A2')));
+});
 test('validade vencida corta o acesso', async () => {
   await env.withSecurityRulesDisabled(c => updateDoc(doc(c.firestore(), 'usuarios/' + LEI), { 'acessos.p:A1': { n: 'L', ate: new Date(Date.now() - 1000) } }));
   await assertFails(getDoc(doc(ctx(LEI), 'allocations/a1')));

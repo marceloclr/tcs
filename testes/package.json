@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Testes das regras do Firestore no emulador (npm test) e utilitários de verificação.",
   "scripts": {
-    "test": "firebase emulators:exec --config ../firebase.json --only firestore --project demo-tcs \"node --test testes/regras.test.mjs\"",
+    "test": "firebase emulators:exec --config ../firebase.json --only firestore --project demo-tcs \"node --test regras.test.mjs\"",
     "emuladores": "firebase emulators:start --config ../firebase.json --only firestore,auth --project demo-tcs"
   },
   "devDependencies": {

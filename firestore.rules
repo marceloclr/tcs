@@ -324,5 +324,16 @@ service cloud.firestore {
       allow delete: if admin();
     }
     // ==== #REGRAS-CAPTURAS: END ====
+
+    // ==== #REGRAS-SALDO-OBRA: START ====
+    // Estoque disponível por obra e material, sem valores (js/saldo-obra.js): o mestre lê o das obras concedidas para montar
+    // o pedido de material; o escritório com escrita no projeto regrava a cada mudança de rateio, baixa ou requisição.
+    match /saldos_obra/{pid} {
+      allow read: if le(pid, resource.data.clientId) || (obra() && concedido(pid, resource.data.clientId));
+      allow create, update: if grava(pid, request.resource.data.clientId) && request.resource.data.projectId == pid
+        && clienteDoProjeto(pid, request.resource.data.clientId);
+      allow delete: if admin();
+    }
+    // ==== #REGRAS-SALDO-OBRA: END ====
   }
 }

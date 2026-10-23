@@ -47,7 +47,7 @@ async function escopoRecalcular(){let n=0;await txWrite([...STORES_DIST,'chaves'
    if(!state.chaves.some(c=>c.id===inv.key)){os.chaves.put({id:inv.key,notaId:inv.id,criadoEm:inv.postedAt||new Date().toISOString()});n++}}
   state.notas_projeto.filter(p=>!comNota.has(p.invoiceId)).forEach(p=>{os.notas_projeto.delete(p.id);n++});
   state.quotes.forEach(q=>{const cid=q.projectId?projectById(q.projectId)?.clientId||'':'';if((q.clientId||'')!==cid||!q.criadoPor){os.quotes.put({...q,clientId:cid,criadoPor:q.criadoPor||Nuvem.user?.email||''});n++}})});
- await refresh();return n}
+ SaldoObra.enviado.clear();await refresh();return n}
 // Prepara um conjunto completo de registros (backup a restaurar ou nota de exemplo) antes de gravar: escopo das notas,
 // dos rateios e das entradas, projeções, índice de chaves e cliente dos pedidos. Assim o lote já chega à nuvem como as regras exigem.
 function escopoNormalizar(b){const projCli=new Map((b.projects||[]).concat(state.projects).map(p=>[p.id,p.clientId]));
